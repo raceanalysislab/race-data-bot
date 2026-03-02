@@ -3,7 +3,7 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *" # 10分おき
+    - cron: "*/10 * * * *"  # 10分おき
 
 permissions:
   contents: write
@@ -15,8 +15,7 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    env:
-      TZ: Asia/Tokyo
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repo
@@ -39,22 +38,25 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
 
-      # push競合を減らす（実行開始直後に同期）
       - name: Sync with origin/main
         run: |
           git pull --rebase --autostash origin main
 
       - name: Fetch source page and build json
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
           python scripts/fetch_mbrace.py
 
-      # 失敗原因調査用：debug/ があれば保存（スクリプト側で出しておく）
-      - name: Upload debug artifacts (if any)
-        if: always()
+      # 失敗したらログ類を保存（あとで原因追える）
+      - name: Upload debug artifacts (on failure)
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: debug
-          path: debug/**
+          path: |
+            data/**
+            **/*.log
           if-no-files-found: ignore
 
       - name: Commit fetched data
@@ -63,7 +65,6 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
 
           git add data/* 2>/dev/null || true
-          git add debug/* 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No changes"
@@ -71,7 +72,4 @@ jobs:
           fi
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
-
-          # push直前にもう一回同期（競合の最後の芽を潰す）
-          git pull --rebase --autostash origin main
           git push origin HEAD:main
