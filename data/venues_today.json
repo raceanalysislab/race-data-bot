@@ -1,102 +1,152 @@
 {
   "date": "2026-03-03",
-  "held_places": [],
+  "checked_at": "2026-03-03T02:21:35+09:00",
+  "held_places": [
+    "桐生",
+    "戸田",
+    "江戸川",
+    "平和島",
+    "多摩川",
+    "浜名湖",
+    "蒲郡",
+    "常滑",
+    "津",
+    "三国",
+    "びわこ",
+    "住之江",
+    "尼崎",
+    "鳴門",
+    "丸亀",
+    "児島",
+    "宮島",
+    "徳山",
+    "下関",
+    "若松",
+    "芦屋",
+    "福岡",
+    "唐津",
+    "大村"
+  ],
   "venues": [
     {
       "name": "桐生",
-      "held": false
+      "jcd": "01",
+      "held": true
     },
     {
       "name": "戸田",
-      "held": false
+      "jcd": "02",
+      "held": true
     },
     {
       "name": "江戸川",
-      "held": false
+      "jcd": "03",
+      "held": true
     },
     {
       "name": "平和島",
-      "held": false
+      "jcd": "04",
+      "held": true
     },
     {
       "name": "多摩川",
-      "held": false
+      "jcd": "05",
+      "held": true
     },
     {
       "name": "浜名湖",
-      "held": false
+      "jcd": "06",
+      "held": true
     },
     {
       "name": "蒲郡",
-      "held": false
+      "jcd": "07",
+      "held": true
     },
     {
       "name": "常滑",
-      "held": false
+      "jcd": "08",
+      "held": true
     },
     {
       "name": "津",
-      "held": false
+      "jcd": "09",
+      "held": true
     },
     {
       "name": "三国",
-      "held": false
+      "jcd": "10",
+      "held": true
     },
     {
       "name": "びわこ",
-      "held": false
+      "jcd": "11",
+      "held": true
     },
     {
       "name": "住之江",
-      "held": false
+      "jcd": "12",
+      "held": true
     },
     {
       "name": "尼崎",
-      "held": false
+      "jcd": "13",
+      "held": true
     },
     {
       "name": "鳴門",
-      "held": false
+      "jcd": "14",
+      "held": true
     },
     {
       "name": "丸亀",
-      "held": false
+      "jcd": "15",
+      "held": true
     },
     {
       "name": "児島",
-      "held": false
+      "jcd": "16",
+      "held": true
     },
     {
       "name": "宮島",
-      "held": false
+      "jcd": "17",
+      "held": true
     },
     {
       "name": "徳山",
-      "held": false
+      "jcd": "18",
+      "held": true
     },
     {
       "name": "下関",
-      "held": false
+      "jcd": "19",
+      "held": true
     },
     {
       "name": "若松",
-      "held": false
+      "jcd": "20",
+      "held": true
     },
     {
       "name": "芦屋",
-      "held": false
+      "jcd": "21",
+      "held": true
     },
     {
       "name": "福岡",
-      "held": false
+      "jcd": "22",
+      "held": true
     },
     {
       "name": "唐津",
-      "held": false
+      "jcd": "23",
+      "held": true
     },
     {
       "name": "大村",
-      "held": false
+      "jcd": "24",
+      "held": true
     }
   ]
 }
