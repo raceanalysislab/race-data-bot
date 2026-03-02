@@ -16,11 +16,8 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
-    defaults:
-      run:
-        env:
-          TZ: Asia/Tokyo
+    env:
+      TZ: Asia/Tokyo
 
     steps:
       - name: Checkout repo
@@ -55,7 +52,6 @@ jobs:
         run: |
           python scripts/fetch_mbrace.py
 
-      # 失敗したらログ類を保存（あとで原因追える）
       - name: Upload debug artifacts (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
