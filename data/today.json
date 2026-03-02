@@ -1,8 +1,9 @@
 {
   "date": "2026-03-03",
-  "updated_at": "00:46",
+  "updated_at": "01:02",
   "yyyymm": "202603",
   "dd_used": "03",
+  "source_file": "b260303.txt",
   "venues": [
     {
       "jcd": "01",
@@ -154,7 +155,7 @@
     {
       "jcd": "22",
       "name": "福岡",
-      "held": false,
+      "held": true,
       "bytes": 123669,
       "score_file": "b260303.txt"
     },
