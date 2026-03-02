@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import shutil
 import subprocess
 from datetime import datetime, timedelta, timezone
 import requests
@@ -28,7 +29,7 @@ MONTH_RE = re.compile(r'<OPTION\s+VALUE="(20\d{4})"\s*>', re.IGNORECASE)
 DIR_RE   = re.compile(r'var\s+dir\s*=\s*"([^"]+)"', re.IGNORECASE)
 DAY_RE   = re.compile(r'NAME="MDAY"\s+VALUE="(\d{2})"', re.IGNORECASE)
 
-# ✅ 開催判定：会場名の直後ブロックに「1R」があるかを見る
+# 開催判定：会場名の近くに 1R/01R があれば開催
 R1_RE = re.compile(r'(?<!\d)0?1R(?!\d)')
 
 def now():
@@ -48,18 +49,10 @@ def safe_decode(b: bytes) -> str:
     return b.decode("latin1", errors="ignore")
 
 def is_held_by_block(text: str, venue_name: str) -> bool:
-    """
-    会場名が出てくる位置から後ろの一定範囲を「その会場ブロック」とみなし、
-    そこに 1R があれば開催と判定する。
-    """
     idx = text.find(venue_name)
     if idx < 0:
         return False
-
-    # 会場名の後ろを少し広めに見る（足りないと取りこぼす）
-    block = text[idx: idx + 4000]
-
-    # 1R / 01R があれば開催
+    block = text[idx: idx + 6000]  # 少し広め
     return bool(R1_RE.search(block))
 
 def main():
@@ -114,8 +107,10 @@ def main():
     with open(lzh_path, "wb") as f:
         f.write(r.content)
 
-    # 6) 解凍（cwd=outdir で解凍先指定）
+    # 6) 解凍（✅ Overwriteで止まらないように extract を毎回作り直す）
     outdir = "data/extract"
+    if os.path.isdir(outdir):
+        shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
 
     archive_abs = os.path.abspath(lzh_path)
@@ -154,7 +149,6 @@ def main():
     with open("data/source_venues_path.txt", "w", encoding="utf-8") as f:
         f.write(best_path)
 
-    # ✅ ここが修正点：開催判定を「会場名 in text」から「会場ブロックに1R」に変更
     venues = []
     for v in VENUES:
         held = is_held_by_block(best_text, v["name"])
