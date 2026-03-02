@@ -1,10 +1,21 @@
 {
   "date": "2026-03-03",
-  "checked_at": "2026-03-03T06:32:38.173389+09:00",
+  "checked_at": "2026-03-03T06:49:54.171414+09:00",
   "blocked": false,
   "held_places": [
+    "江戸川",
+    "平和島",
+    "浜名湖",
+    "蒲郡",
     "びわこ",
-    "児島"
+    "尼崎",
+    "丸亀",
+    "児島",
+    "徳山",
+    "若松",
+    "芦屋",
+    "福岡",
+    "大村"
   ],
   "venues": [
     {
@@ -26,7 +37,7 @@
     {
       "name": "江戸川",
       "jcd": "03",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -34,7 +45,7 @@
     {
       "name": "平和島",
       "jcd": "04",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -50,7 +61,7 @@
     {
       "name": "浜名湖",
       "jcd": "06",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -58,7 +69,7 @@
     {
       "name": "蒲郡",
       "jcd": "07",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -91,9 +102,9 @@
       "name": "びわこ",
       "jcd": "11",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-03T10:32:00+09:00",
-      "next_display": "1R 10:32"
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null
     },
     {
       "name": "住之江",
@@ -106,7 +117,7 @@
     {
       "name": "尼崎",
       "jcd": "13",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -122,7 +133,7 @@
     {
       "name": "丸亀",
       "jcd": "15",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -131,9 +142,9 @@
       "name": "児島",
       "jcd": "16",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-03T10:42:00+09:00",
-      "next_display": "1R 10:42"
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null
     },
     {
       "name": "宮島",
@@ -146,7 +157,7 @@
     {
       "name": "徳山",
       "jcd": "18",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -162,7 +173,7 @@
     {
       "name": "若松",
       "jcd": "20",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -170,7 +181,7 @@
     {
       "name": "芦屋",
       "jcd": "21",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -178,7 +189,7 @@
     {
       "name": "福岡",
       "jcd": "22",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
@@ -194,7 +205,7 @@
     {
       "name": "大村",
       "jcd": "24",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null
