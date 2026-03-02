@@ -20,17 +20,16 @@ ALL_VENUES = [
     ("尼崎", "13"), ("鳴門", "14"), ("丸亀", "15"), ("児島", "16"), ("宮島", "17"), ("徳山", "18"),
     ("下関", "19"), ("若松", "20"), ("芦屋", "21"), ("福岡", "22"), ("唐津", "23"), ("大村", "24"),
 ]
-JCD_TO_NAME = {j: n for n, j in ALL_VENUES}
+VENUE_NAMES = [n for n, _ in ALL_VENUES]
 
 TIME_RE = re.compile(r"\b(\d{1,2}):(\d{2})\b")
-JCD_IN_HREF_RE = re.compile(r"[?&]jcd=(\d{2})\b")
 
 
 def _session() -> requests.Session:
     s = requests.Session()
     s.headers.update({
         "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/123.0.0.0 Safari/537.36"
         ),
@@ -54,32 +53,24 @@ def _session() -> requests.Session:
 
 
 def _is_blocked(html: str) -> bool:
-    # 代表的なブロック文言/画面をざっくり検出
-    return ("不正なURLへのリクエストです" in html) or ("アクセスが集中" in html and "お待ち" in html)
+    return ("不正なURLへのリクエストです" in html) or ("ログインページ" in html and "不正" in html)
 
 
-def _extract_held_jcds_from_today(html: str) -> List[str]:
-    """
-    todayページから「raceindex?jcd=xx」リンクを拾って開催場(JCD)を確定する。
-    これが一番誤検出が少ない。
-    """
+def _extract_held_places_from_today(html: str) -> List[str]:
     soup = BeautifulSoup(html, "html.parser")
-    jcds: List[str] = []
 
-    for a in soup.select("a[href]"):
-        href = a.get("href") or ""
-        if "raceindex" not in href:
-            continue
-        m = JCD_IN_HREF_RE.search(href)
-        if m:
-            jcd = m.group(1)
-            if jcd in JCD_TO_NAME:
-                jcds.append(jcd)
+    held = []
+    for tr in soup.select("table tr"):
+        txt = tr.get_text(" ", strip=True)
+        for name in VENUE_NAMES:
+            if name in txt:
+                if ("R" in txt) or ("締切" in txt) or ("発売開始" in txt) or ("日目" in txt) or ("最終日" in txt):
+                    held.append(name)
+                break
 
-    # 重複除去（順序保持）
     seen = set()
     out = []
-    for x in jcds:
+    for x in held:
         if x not in seen:
             seen.add(x)
             out.append(x)
@@ -87,9 +78,6 @@ def _extract_held_jcds_from_today(html: str) -> List[str]:
 
 
 def _parse_times_from_raceindex(html: str) -> List[Tuple[int, str]]:
-    """
-    raceindex HTMLから (レース番号, "HH:MM") を可能な限り汎用に抽出
-    """
     soup = BeautifulSoup(html, "html.parser")
     pairs: List[Tuple[int, str]] = []
 
@@ -99,13 +87,14 @@ def _parse_times_from_raceindex(html: str) -> List[Tuple[int, str]]:
         m_t = TIME_RE.search(t)
         if not m_r or not m_t:
             continue
+
         rno = int(m_r.group(1))
         hh = int(m_t.group(1))
         mm = int(m_t.group(2))
-        if 1 <= rno <= 12 and 0 <= hh <= 23 and 0 <= mm <= 59:
+
+        if 0 <= hh <= 23 and 0 <= mm <= 59 and 1 <= rno <= 12:
             pairs.append((rno, f"{hh:02d}:{mm:02d}"))
 
-    # レース番号ごとに最初の時刻だけ採用
     dedup: Dict[int, str] = {}
     for rno, tm in pairs:
         dedup.setdefault(rno, tm)
@@ -113,90 +102,74 @@ def _parse_times_from_raceindex(html: str) -> List[Tuple[int, str]]:
     return sorted(dedup.items(), key=lambda x: x[0])
 
 
-def _fetch_raceindex_html(session: requests.Session, jcd: str, day: datetime) -> Optional[str]:
+def _format_display(rno: int, dt: datetime) -> str:
+    # 例: 1R 8:00（時はゼロ埋めしない）
+    return f"{rno}R {dt.hour}:{dt.minute:02d}"
+
+
+def _next_race_for_venue(
+    session: requests.Session,
+    jcd: str,
+    day: datetime,
+    now: datetime
+) -> Tuple[Optional[int], Optional[str], Optional[str]]:
+    """
+    次の締切(推定)を返す:
+      (next_race_no, next_cutoff_iso, next_display)
+    """
     hd = day.strftime("%Y%m%d")
     url = RACEINDEX_URL.format(jcd=jcd, hd=hd)
+
     r = session.get(url, timeout=25)
     r.encoding = "utf-8"
     html = r.text
+
     if _is_blocked(html):
-        return None
-    return html
-
-
-def _is_held_by_raceindex(session: requests.Session, jcd: str, day: datetime) -> bool:
-    """
-    保険：raceindexを見て、時刻テーブルが取れるなら開催扱いにする
-    """
-    html = _fetch_raceindex_html(session, jcd, day)
-    if not html:
-        return False
-    pairs = _parse_times_from_raceindex(html)
-    return len(pairs) > 0
-
-
-def _next_race_for_venue(session: requests.Session, jcd: str, day: datetime, now: datetime) -> Tuple[Optional[int], Optional[str]]:
-    """
-    次の締切(推定)を返す: (next_race_no, next_cutoff_iso)
-    """
-    html = _fetch_raceindex_html(session, jcd, day)
-    if not html:
-        return None, None
+        return None, None, None
 
     pairs = _parse_times_from_raceindex(html)
     if not pairs:
-        return None, None
+        return None, None, None
 
+    # 「1R締切を過ぎたら次は2R」＝ now より未来の最初を返す
     for rno, hhmm in pairs:
         hh, mm = map(int, hhmm.split(":"))
         dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=JST)
         if dt > now:
-            return rno, dt.isoformat()
+            return rno, dt.isoformat(), _format_display(rno, dt)
 
-    # 全部終わってたら None
-    return None, None
+    return None, None, None
 
 
 def main():
     now = datetime.now(JST)
-    day = now  # 今日扱い
+    day = now
 
     session = _session()
 
-    # 1) todayページ取得
     r = session.get(TODAY_URL, timeout=25)
     r.encoding = "utf-8"
-    today_html = r.text
+    html = r.text
 
-    blocked = _is_blocked(today_html)
-
-    held_jcds: List[str] = []
     held_places: List[str] = []
+    blocked = False
 
-    if not blocked:
-        # 2) まずは today から開催JCDを確定（最優先）
-        held_jcds = _extract_held_jcds_from_today(today_html)
+    if _is_blocked(html):
+        blocked = True
+    else:
+        held_places = _extract_held_places_from_today(html)
 
-        # 3) もし取れない場合は保険で24場プローブ（確実性優先）
-        if not held_jcds:
-            for _, jcd in ALL_VENUES:
-                if _is_held_by_raceindex(session, jcd, day):
-                    held_jcds.append(jcd)
-                time.sleep(0.25)
-
-        held_places = [JCD_TO_NAME[j] for j in held_jcds if j in JCD_TO_NAME]
-
-    # 4) 開催場だけ next_race/next_cutoff を取得
     venues = []
     for name, jcd in ALL_VENUES:
-        held = (jcd in held_jcds) and (not blocked)
-
+        held = name in held_places
         next_race = None
         next_cutoff = None
-        if held:
-            nr, nc = _next_race_for_venue(session, jcd, day, now)
-            next_race, next_cutoff = nr, nc
-            time.sleep(0.25)
+        next_display = None
+
+        if held and not blocked:
+            nr, nc, nd = _next_race_for_venue(session, jcd, day, now)
+            next_race, next_cutoff, next_display = nr, nc, nd
+            time.sleep(0.3)
 
         venues.append({
             "name": name,
@@ -204,6 +177,7 @@ def main():
             "held": held,
             "next_race": next_race,
             "next_cutoff": next_cutoff,
+            "next_display": next_display,  # ★追加: "1R 8:00" 形式
         })
 
     payload = {
