@@ -1,108 +1,84 @@
 import json
-import os
 import time
-from datetime import datetime, timedelta, timezone
-
 import requests
-from bs4 import BeautifulSoup
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from datetime import datetime, timedelta, timezone
 
 JST = timezone(timedelta(hours=9))
 
-URL = "https://www.boatrace.jp/owpc/pc/race/index"
-
-ALL_VENUES = [
-    "桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑",
-    "津","三国","びわこ","住之江","尼崎","鳴門","丸亀","児島",
-    "宮島","徳山","下関","若松","芦屋","福岡","唐津","大村"
+# 場コード（jcd）対応
+VENUE_JCD = [
+  ("桐生","01"),("戸田","02"),("江戸川","03"),("平和島","04"),("多摩川","05"),("浜名湖","06"),
+  ("蒲郡","07"),("常滑","08"),("津","09"),("三国","10"),("びわこ","11"),("住之江","12"),
+  ("尼崎","13"),("鳴門","14"),("丸亀","15"),("児島","16"),("宮島","17"),("徳山","18"),
+  ("下関","19"),("若松","20"),("芦屋","21"),("福岡","22"),("唐津","23"),("大村","24"),
 ]
 
-OUT_PATH = "data/venues_today.json"
+BASE = "https://www.boatrace.jp/owpc/pc/race/raceindex"
 
+# 「開催してない」判定に使う文言（見つかったら held=False）
+NOT_HELD_PHRASES = [
+    "本日のレースはありません",
+    "本日のレースは開催されません",
+    "開催はありません",
+    "レース情報がありません",
+]
 
-def build_session() -> requests.Session:
+def get_session() -> requests.Session:
     s = requests.Session()
-    retry = Retry(
-        total=5,
-        connect=5,
-        read=5,
-        backoff_factor=1.5,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=frozenset(["GET"]),
-        raise_on_status=False,
-    )
-    adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
-    s.mount("https://", adapter)
-    s.mount("http://", adapter)
+    s.headers.update({
+        "User-Agent": "Mozilla/5.0 (compatible; race-data-bot/1.0)",
+        "Accept-Language": "ja,en;q=0.8",
+    })
     return s
 
-
-def fetch_html(session: requests.Session) -> str:
-    headers = {
-        # これがないと弾かれたり遅くなったりしがち
-        "User-Agent": "Mozilla/5.0 (GitHubActions; race-data-bot)",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-        "Connection": "close",
-    }
-
-    # timeout を (接続, 読み取り) で長めに
-    r = session.get(URL, headers=headers, timeout=(10, 60))
-    # 429/5xx は Retry が面倒見てくれるが、最終的にダメならここで落とす
-    r.raise_for_status()
-
-    # 文字化け対策（サイト側が厳密にcharset返さないことがある）
-    r.encoding = r.apparent_encoding or "utf-8"
-    return r.text
-
-
-def write_json_atomic(path: str, payload: dict) -> None:
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-        f.write("\n")
-    os.replace(tmp, path)
-
+def is_held_today(session: requests.Session, jcd: str, yyyymmdd: str) -> bool:
+    url = f"{BASE}?jcd={jcd}&hd={yyyymmdd}"
+    # 軽いリトライ（タイムアウト/一時エラー対策）
+    last_err = None
+    for _ in range(3):
+        try:
+            r = session.get(url, timeout=20)
+            r.encoding = "utf-8"
+            html = r.text
+            # 否定文言があれば未開催
+            for p in NOT_HELD_PHRASES:
+                if p in html:
+                    return False
+            # 否定が見つからなければ開催扱い（※ここが一番強い）
+            return True
+        except Exception as e:
+            last_err = e
+            time.sleep(1.0)
+    # 3回失敗したら「不明」ではなく安全側で False
+    return False
 
 def main():
     now = datetime.now(JST)
+    yyyymmdd = now.strftime("%Y%m%d")
 
-    session = build_session()
+    session = get_session()
 
-    # 念のため「ワンチャン詰まる」ケースも拾う（Retryに加えて最終保険）
-    last_err = None
-    for attempt in range(1, 4):
-        try:
-            html = fetch_html(session)
-            last_err = None
-            break
-        except Exception as e:
-            last_err = e
-            # 1回目→2回目→3回目で待ち時間を増やす
-            time.sleep(2 * attempt)
+    held_places = []
+    venues = []
+    for name, jcd in VENUE_JCD:
+        held = is_held_today(session, jcd, yyyymmdd)
+        if held:
+            held_places.append(name)
+        venues.append({"name": name, "jcd": jcd, "held": held})
 
-    if last_err is not None:
-        # ここで落ちる＝Actionsのログに原因が出る
-        raise last_err
-
-    soup = BeautifulSoup(html, "html.parser")
-
-    # 開催してる場だけこのclassに出る（サイト側の構造が変わると空になる）
-    held_nodes = soup.select(".is-place")
-    held_today = [n.get_text(strip=True) for n in held_nodes if n.get_text(strip=True)]
-
-    venues = [{"name": v, "held": (v in held_today)} for v in ALL_VENUES]
-
-    payload = {
+    out = {
         "date": now.strftime("%Y-%m-%d"),
-        "held_places": held_today,
+        "checked_at": now.isoformat(timespec="seconds"),
+        "held_places": held_places,
         "venues": venues,
     }
 
-    write_json_atomic(OUT_PATH, payload)
+    # data/ が無い場合でも落ちないように（Actionsで確実に動く）
+    import os
+    os.makedirs("data", exist_ok=True)
 
+    with open("data/venues_today.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
     main()
