@@ -1,0 +1,194 @@
+{
+  "date": "2026-03-03",
+  "checked_at": "2026-03-03T06:18:40.208541+09:00",
+  "blocked": false,
+  "held_places": [
+    "江戸川",
+    "平和島",
+    "浜名湖",
+    "蒲郡",
+    "びわこ",
+    "尼崎",
+    "丸亀",
+    "児島",
+    "徳山",
+    "若松",
+    "芦屋",
+    "福岡",
+    "大村"
+  ],
+  "venues": [
+    {
+      "name": "桐生",
+      "jcd": "01",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "戸田",
+      "jcd": "02",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "江戸川",
+      "jcd": "03",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T11:14:00+09:00"
+    },
+    {
+      "name": "平和島",
+      "jcd": "04",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:57:00+09:00"
+    },
+    {
+      "name": "多摩川",
+      "jcd": "05",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "浜名湖",
+      "jcd": "06",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T11:27:00+09:00"
+    },
+    {
+      "name": "蒲郡",
+      "jcd": "07",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T15:25:00+09:00"
+    },
+    {
+      "name": "常滑",
+      "jcd": "08",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "津",
+      "jcd": "09",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "三国",
+      "jcd": "10",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "びわこ",
+      "jcd": "11",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:32:00+09:00"
+    },
+    {
+      "name": "住之江",
+      "jcd": "12",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "尼崎",
+      "jcd": "13",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:34:00+09:00"
+    },
+    {
+      "name": "鳴門",
+      "jcd": "14",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "丸亀",
+      "jcd": "15",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T15:19:00+09:00"
+    },
+    {
+      "name": "児島",
+      "jcd": "16",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:42:00+09:00"
+    },
+    {
+      "name": "宮島",
+      "jcd": "17",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "徳山",
+      "jcd": "18",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T08:35:00+09:00"
+    },
+    {
+      "name": "下関",
+      "jcd": "19",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "若松",
+      "jcd": "20",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T17:22:00+09:00"
+    },
+    {
+      "name": "芦屋",
+      "jcd": "21",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T08:47:00+09:00"
+    },
+    {
+      "name": "福岡",
+      "jcd": "22",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T11:03:00+09:00"
+    },
+    {
+      "name": "唐津",
+      "jcd": "23",
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
+    },
+    {
+      "name": "大村",
+      "jcd": "24",
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T15:20:00+09:00"
+    }
+  ],
+  "source": {
+    "today_url": "https://www.boatrace.jp/owpc/pc/race/index",
+    "raceindex_url_template": "https://www.boatrace.jp/owpc/pc/race/raceindex?jcd={jcd}&hd={hd}"
+  }
+}
