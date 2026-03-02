@@ -41,8 +41,8 @@ jobs:
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          # 生成物（menuも追加）
-          git add data/source.html data/source_menu.html data/today.json data/venues_today.json data/picks_today.json data/pro_key.json 2>/dev/null || true
+          # 生成物（final_url も追加）
+          git add data/source.html data/source_menu.html data/source_final_url.txt data/today.json data/venues_today.json data/picks_today.json data/pro_key.json 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No changes"
@@ -51,6 +51,6 @@ jobs:
 
           git commit -m "Update race data" || true
 
-          # push直前に最新へ追従してズレ防止（これが重要）
+          # push直前に最新へ追従してズレ防止
           git pull --rebase --autostash origin main
           git push origin HEAD:main
