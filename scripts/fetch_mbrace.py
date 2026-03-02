@@ -1,3 +1,4 @@
+print("NEW VERSION RUNNING")
 import os
 import re
 import json
