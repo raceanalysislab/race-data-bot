@@ -1,7 +1,4 @@
-print("NEW VERSION RUNNING")
-import os
-import re
-import json
+import os, json, re
 from datetime import datetime, timedelta, timezone
 import requests
 from urllib.parse import urljoin
@@ -18,13 +15,11 @@ VENUES = [
 ]
 
 BASE_URL = "https://www1.mbrace.or.jp/od2/B/"
-START_URL = urljoin(BASE_URL, "dindex.html")
+DMENU_URL = urljoin(BASE_URL, "dmenu.html")
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "User-Agent": "Mozilla/5.0",
     "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
 }
 
 def now():
@@ -35,91 +30,33 @@ def fetch_text(url: str) -> tuple[int, str]:
     r.encoding = r.apparent_encoding
     return r.status_code, r.text
 
-FRAME_RE = re.compile(r'<frame[^>]+src="([^"]+)"', re.IGNORECASE)
-
-def follow_frameset_until_content(start_url: str, max_hops: int = 6) -> tuple[str, int, str]:
-    """
-    framesetだけのHTMLなら、FRAME SRCを辿って「menu系」を優先して取得。
-    最後に到達したURL, status_code, html を返す。
-    """
-    url = start_url
-    last_status, html = fetch_text(url)
-
-    for _ in range(max_hops):
-        lower = html.lower()
-        # framesetじゃなければそこで止める
-        if "<frameset" not in lower and "<frame" not in lower:
-            return url, last_status, html
-
-        srcs = FRAME_RE.findall(html)
-        if not srcs:
-            return url, last_status, html
-
-        # menu/dmenu 優先
-        cand = None
-        for s in srcs:
-            s_low = s.lower()
-            if "dmenu" in s_low or "menu" in s_low:
-                cand = s
-                break
-        if cand is None:
-            cand = srcs[0]
-
-        url = urljoin(url, cand)
-        last_status, html = fetch_text(url)
-
-    return url, last_status, html
-
-def held_by_jcd(html: str, jcd: str) -> bool:
-    """
-    メニューHTML内に jcd=01 / jcd=1 / JCD=01 などが出てくるケースに対応。
-    """
-    # 01 -> 1 の両方を許容
-    j_int = str(int(jcd))
-    patterns = [
-        rf"jcd\s*=\s*0?{re.escape(j_int)}\b",
-        rf"jcd0?{re.escape(j_int)}\b",      # 例: jcd01 的な表記
-        rf"\b0?{re.escape(j_int)}\b.*?開催", # 文字が混ざる系の保険（あれば）
-    ]
-    low = html.lower()
-    for p in patterns:
-        if re.search(p, low, flags=re.IGNORECASE):
-            return True
-    return False
-
-def is_frameset_only(html: str) -> bool:
-    low = html.lower()
-    return ("<frameset" in low or "<frame" in low) and (len(re.sub(r"\s+", "", low)) < 3000)
-
 def main():
     os.makedirs("data", exist_ok=True)
 
-    final_url, sc, html = follow_frameset_until_content(START_URL, max_hops=6)
+    t = now()
+    yyyymm = t.strftime("%Y%m")
 
-    # デバッグ保存（これ見れば原因特定できる）
-    with open("data/source_final_url.txt", "w", encoding="utf-8") as f:
-        f.write(final_url)
+    # ① dmenu.html（入口）※デバッグ用に保存
+    sc_menu, menu_html = fetch_text(DMENU_URL)
+    with open("data/source_menu.html", "w", encoding="utf-8") as f:
+        f.write(menu_html)
 
+    # ② 本体：YYYYMM/mday.html を取りに行く
+    mday_url = urljoin(BASE_URL, f"{yyyymm}/mday.html")
+    sc, html = fetch_text(mday_url)
+
+    # 保存（これが開催一覧の元データ）
     with open("data/source.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    # もしまだframesetっぽい/短すぎるなら、強制で dmenu を取りに行く
-    if is_frameset_only(html) or len(html) < 2000:
-        menu_url = urljoin(BASE_URL, "dmenu.html")
-        sc2, menu_html = fetch_text(menu_url)
-        sc, html = sc2, menu_html
-        with open("data/source_menu.html", "w", encoding="utf-8") as f:
-            f.write(menu_html)
+    # どこを見ているか残す
+    with open("data/source_final_url.txt", "w", encoding="utf-8") as f:
+        f.write(mday_url)
 
+    # ③ 判定（とりあえず venue 名が出るか）
     venues = []
     for v in VENUES:
-        # ① 会場名で判定（効く時は効く）
-        by_name = (v["name"] in html)
-        # ② jcd で判定（こっちが本命）
-        by_jcd = held_by_jcd(html, v["jcd"])
-
-        held = bool(by_name or by_jcd)
-
+        held = (v["name"] in html)
         venues.append({
             "jcd": v["jcd"],
             "name": v["name"],
@@ -127,8 +64,6 @@ def main():
             "status_code": sc,
             "bytes": len(html)
         })
-
-    t = now()
 
     with open("data/today.json","w",encoding="utf-8") as f:
         json.dump({
