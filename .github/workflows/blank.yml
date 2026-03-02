@@ -1,0 +1,49 @@
+name: Fetch Race Data
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # 2時間ごと
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch data
+        run: |
+          mkdir -p data
+          python <<EOF
+import requests, json, datetime
+
+url = "https://www1.mbrace.or.jp/od2/B/dindex.html"
+
+res = requests.get(url)
+data = {
+    "fetched_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "status_code": res.status_code,
+    "length": len(res.text)
+}
+
+with open("data/raw_check.json","w") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+EOF
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add data/
+          git commit -m "auto update" || echo "No changes"
+          git push
