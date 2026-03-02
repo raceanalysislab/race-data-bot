@@ -29,8 +29,8 @@ MONTH_RE = re.compile(r'<OPTION\s+VALUE="(20\d{4})"\s*>', re.IGNORECASE)
 DIR_RE   = re.compile(r'var\s+dir\s*=\s*"([^"]+)"', re.IGNORECASE)
 DAY_RE   = re.compile(r'NAME="MDAY"\s+VALUE="(\d{2})"', re.IGNORECASE)
 
-# ✅ 開催判定：会場ブロックに「第◯日」があるか
-HELD_RE = re.compile(r'第.{1,3}日')
+# ✅ Kファイル（開催一覧）を優先して拾う
+KFILE_RE = re.compile(r'^[Kk].*\.txt$')
 
 def now():
     return datetime.now(JST)
@@ -47,18 +47,6 @@ def safe_decode(b: bytes) -> str:
         except Exception:
             pass
     return b.decode("latin1", errors="ignore")
-
-def is_held_by_block(text: str, venue_name: str) -> bool:
-    """
-    会場名が出てくる位置から後ろの一定範囲を「その会場ブロック」とみなし、
-    そこに「第◯日」があれば開催と判定する。
-    """
-    idx = text.find(venue_name)
-    if idx < 0:
-        return False
-
-    block = text[idx: idx + 6000]  # 少し広め
-    return bool(HELD_RE.search(block))
 
 def main():
     os.makedirs("data", exist_ok=True)
@@ -112,7 +100,7 @@ def main():
     with open(lzh_path, "wb") as f:
         f.write(r.content)
 
-    # 6) 解凍（✅ Overwriteで止まらないように extract を毎回作り直す）
+    # 6) 解凍（overwriteで止まらないように extract を毎回作り直す）
     outdir = "data/extract"
     if os.path.isdir(outdir):
         shutil.rmtree(outdir)
@@ -121,48 +109,65 @@ def main():
     archive_abs = os.path.abspath(lzh_path)
     subprocess.run(["lhasa", "-x", archive_abs], cwd=outdir, check=True)
 
-    # 7) 解凍された中から「会場名が一番たくさん出るファイル」を選ぶ
+    # 7) ✅ Kファイル（開催一覧）を探す（最優先）
+    k_path = None
+    for root, _, files in os.walk(outdir):
+        for fn in files:
+            if KFILE_RE.match(fn):
+                k_path = os.path.join(root, fn)
+                break
+        if k_path:
+            break
+
+    # Kが無い場合のみ、保険で「会場名が多いファイル」を使う
     best_path = None
     best_score = -1
     venue_names = [v["name"] for v in VENUES]
 
-    for root, _, files in os.walk(outdir):
-        for fn in files:
-            p = os.path.join(root, fn)
-            try:
-                b = open(p, "rb").read()
-            except Exception:
-                continue
-            text = safe_decode(b)
-            score = sum(1 for name in venue_names if name in text)
-            if score > best_score:
-                best_score = score
-                best_path = p
+    if not k_path:
+        for root, _, files in os.walk(outdir):
+            for fn in files:
+                p = os.path.join(root, fn)
+                try:
+                    b = open(p, "rb").read()
+                except Exception:
+                    continue
+                text = safe_decode(b)
+                score = sum(1 for name in venue_names if name in text)
+                if score > best_score:
+                    best_score = score
+                    best_path = p
 
-    if not best_path or best_score <= 0:
-        with open("data/extract_list.txt", "w", encoding="utf-8") as f:
-            for root, _, files in os.walk(outdir):
-                for fn in files:
-                    f.write(os.path.join(root, fn) + "\n")
-        raise RuntimeError("解凍後、会場名が見つからない（best_score=0）")
+        if not best_path or best_score <= 0:
+            with open("data/extract_list.txt", "w", encoding="utf-8") as f:
+                for root, _, files in os.walk(outdir):
+                    for fn in files:
+                        f.write(os.path.join(root, fn) + "\n")
+            raise RuntimeError("解凍後、Kファイルも候補ファイルも見つからない")
 
-    best_text = safe_decode(open(best_path, "rb").read())
+        src_path = best_path
+    else:
+        src_path = k_path
+
+    raw = open(src_path, "rb").read()
+    text = safe_decode(raw)
 
     # デバッグ保存
-    with open("data/source_venues.html", "w", encoding="utf-8") as f:
-        f.write(best_text)
+    with open("data/source_venues.txt", "w", encoding="utf-8") as f:
+        f.write(text)
     with open("data/source_venues_path.txt", "w", encoding="utf-8") as f:
-        f.write(best_path)
+        f.write(src_path)
 
+    # ✅ 開催判定：Kファイルは「開催場だけ」が載る前提なので「名前があるか」だけでOK
     venues = []
     for v in VENUES:
-        held = is_held_by_block(best_text, v["name"])
+        held = (v["name"] in text)
         venues.append({
             "jcd": v["jcd"],
             "name": v["name"],
             "held": held,
-            "bytes": len(best_text),
-            "score_file": os.path.basename(best_path),
+            "bytes": len(text),
+            "score_file": os.path.basename(src_path),
         })
 
     with open("data/today.json", "w", encoding="utf-8") as f:
@@ -171,6 +176,7 @@ def main():
             "updated_at": t.strftime("%H:%M"),
             "yyyymm": yyyymm,
             "dd_used": dd,
+            "source_file": os.path.basename(src_path),
             "venues": venues
         }, f, ensure_ascii=False, indent=2)
 
