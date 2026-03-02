@@ -30,6 +30,9 @@ MONTH_RE = re.compile(r'<OPTION\s+VALUE="(20\d{4})"\s*>', re.IGNORECASE)
 # mday.html の中の dir="/od2/B/202603/b2603" を拾う
 DIR_RE = re.compile(r'var\s+dir\s*=\s*"([^"]+)"', re.IGNORECASE)
 
+# mday.html の VALUE="01" みたいな日付一覧
+DAY_RE = re.compile(r'NAME="MDAY"\s+VALUE="(\d{2})"', re.IGNORECASE)
+
 def now():
     return datetime.now(JST)
 
@@ -51,14 +54,14 @@ def main():
 
     t = now()
     yyyymm = t.strftime("%Y%m")
-    dd = t.strftime("%d")  # 01-31
+    today_dd = t.strftime("%d")  # 01-31
 
-    # 1) dmenu.html を保存（デバッグ用）
+    # 1) dmenu.html 保存（デバッグ用）
     dmenu_html = fetch_text(DMENU)
     with open("data/source_dmenu.html", "w", encoding="utf-8") as f:
         f.write(dmenu_html)
 
-    # 2) 念のため dmenu から月を拾う（取れたらそっち優先）
+    # 2) dmenu から最新月を拾う（あれば優先）
     m = MONTH_RE.search(dmenu_html)
     if m:
         yyyymm = m.group(1)
@@ -74,7 +77,19 @@ def main():
         raise RuntimeError("mday.html から dir が取れない（DIR_RE がヒットしない）")
 
     dir_path = d.group(1)  # /od2/B/202603/b2603
-    # 4) 当日の lzh を 1個だけ取る
+
+    # 4) mday.htmlに存在する日付を拾って、今日がなければ最後の開催日に寄せる（404回避）
+    days = DAY_RE.findall(mday_html)
+    if not days:
+        raise RuntimeError("mday.html から日付が取れない（DAY_RE がヒットしない）")
+
+    if today_dd in days:
+        dd = today_dd
+    else:
+        # 例：月初で今日が03なのに mdayに01-02しか無い → 02に寄せる
+        dd = sorted(days)[-1]
+
+    # 5) 当日の lzh を取る
     lzh_url = "https://www1.mbrace.or.jp" + dir_path + dd + ".lzh"
     with open("data/source_final_url.txt", "w", encoding="utf-8") as f:
         f.write(lzh_url)
@@ -87,13 +102,14 @@ def main():
     with open(lzh_path, "wb") as f:
         f.write(r.content)
 
-    # 5) 解凍（lhasa が必要）
+    # 6) 解凍（✅ -f は使わない）
     outdir = "data/extract"
     os.makedirs(outdir, exist_ok=True)
-    # -x: extract, -f: file, -o: output dir
-    subprocess.run(["lhasa", "-x", "-f", lzh_path, "-o", outdir], check=True)
 
-    # 6) 解凍された中から「会場名が一番たくさん出るファイル」を選ぶ（汎用で強い）
+    # lhasa の正しい呼び方： lhasa -x -o <dir> <archive>
+    subprocess.run(["lhasa", "-x", "-o", outdir, lzh_path], check=True)
+
+    # 7) 解凍された中から「会場名が一番たくさん出るファイル」を選ぶ
     best_path = None
     best_score = -1
     venue_names = [v["name"] for v in VENUES]
@@ -112,7 +128,6 @@ def main():
                 best_path = p
 
     if not best_path or best_score <= 0:
-        # 何も見つからない時のデバッグ用：ファイル一覧を書き出す
         with open("data/extract_list.txt", "w", encoding="utf-8") as f:
             for root, _, files in os.walk(outdir):
                 for fn in files:
@@ -120,6 +135,8 @@ def main():
         raise RuntimeError("解凍後、会場名が見つからない（best_score=0）")
 
     best_text = safe_decode(open(best_path, "rb").read())
+
+    # デバッグ保存
     with open("data/source_venues.html", "w", encoding="utf-8") as f:
         f.write(best_text)
     with open("data/source_venues_path.txt", "w", encoding="utf-8") as f:
@@ -140,6 +157,8 @@ def main():
         json.dump({
             "date": t.strftime("%Y-%m-%d"),
             "updated_at": t.strftime("%H:%M"),
+            "yyyymm": yyyymm,
+            "dd_used": dd,
             "venues": venues
         }, f, ensure_ascii=False, indent=2)
 
