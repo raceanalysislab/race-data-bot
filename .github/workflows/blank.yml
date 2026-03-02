@@ -1,26 +1,42 @@
 name: Fetch Race Data
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"   # 10分ごとに実行
   workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"   # 10分おき（最初は軽め推奨）
+
+permissions:
+  contents: write
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Fetch source page
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
         run: |
-          curl -L "https://www1.mbrace.or.jp/od2/B/dindex.html" -o data/source.html
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fetch source page and build json
+        run: |
+          python scripts/fetch_mbrace.py
 
       - name: Commit fetched data
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add data/source.html || true
-          git commit -m "auto: fetch race data" || echo "No changes"
+          git config user.name "race-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/source.html data/today.json data/venues_today.json data/picks_today.json || true
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "Update race data"
           git push
