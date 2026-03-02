@@ -1,0 +1,40 @@
+<HTML>
+<HEAD>
+   <TITLE> BOAT RACE Today's Race Information Index</TITLE>
+	<SCRIPT LANGUAGE="JavaScript">
+   <!-- 
+var dir="/od2/B/202603/b2603";
+ 	function download(t){
+		var i;
+		var m;
+                if( t.form.MDAY.length==null){
+			m = t.form.MDAY.value;
+                }else{
+			for(i = 0; i < t.form.MDAY.length; i++){
+				if(t.form.MDAY[i].checked){
+					m = t.form.MDAY[i].value;
+					break;
+				}
+			}
+                }
+		location= dir + m + ".lzh";
+	}
+		
+	//-->
+	</SCRIPT>
+</HEAD>
+<BODY TEXT="#FFFFFF" BGCOLOR="#000000" LINK="#3B6AF0" VLINK="#F2DF48" ALINK="#B8F549">
+
+<CENTER><FORM NAME="A">
+<TABLE BORDER=1 WIDTH=600><TR><TD>
+<center>ご覧になりたい日を選択してください。</center>
+</TD></TR><TR><TD>
+<INPUT TYPE="radio" NAME="MDAY" VALUE="01" > 1日
+<INPUT TYPE="radio" NAME="MDAY" VALUE="02" > 2日
+<INPUT TYPE="radio" NAME="MDAY" VALUE="03" > 3日
+</TD></TR></TABLE><br>
+
+<center><INPUT TYPE="BUTTON" VALUE="ダウンロード開始" onClick="download(this)" ></center>
+</FORM>
+</BODY>
+</HTML>
