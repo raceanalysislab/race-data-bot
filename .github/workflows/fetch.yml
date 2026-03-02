@@ -29,6 +29,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install lzh extractor
         run: |
@@ -38,7 +39,7 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       # 🔥 fetch前に最新へ同期（push競合防止・安定版）
       - name: Sync with origin/main
@@ -76,5 +77,9 @@ jobs:
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
 
-          # pushが競合したら1回だけ同期して再push
-          git push origin HEAD:main || (git fetch origin main && git rebase origin/main && git push origin HEAD:main)
+          # pushが競合したら1回だけ同期して再push（rebase失敗時はabortしてorigin/mainへ合わせる）
+          git push origin HEAD:main || (
+            git fetch origin main &&
+            git rebase origin/main || (git rebase --abort && git reset --hard origin/main) &&
+            git push origin HEAD:main
+          )
