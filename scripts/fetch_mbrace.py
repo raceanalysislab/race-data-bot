@@ -86,7 +86,6 @@ def main():
     if today_dd in days:
         dd = today_dd
     else:
-        # 例：月初で今日が03なのに mdayに01-02しか無い → 02に寄せる
         dd = sorted(days)[-1]
 
     # 5) 当日の lzh を取る
@@ -102,12 +101,12 @@ def main():
     with open(lzh_path, "wb") as f:
         f.write(r.content)
 
-    # 6) 解凍（✅ -f は使わない）
+    # 6) 解凍（✅ -o は使わない。cwdで解凍先を指定する）
     outdir = "data/extract"
     os.makedirs(outdir, exist_ok=True)
 
-    # lhasa の正しい呼び方： lhasa -x -o <dir> <archive>
-    subprocess.run(["lhasa", "-x", "-o", outdir, lzh_path], check=True)
+    archive_abs = os.path.abspath(lzh_path)
+    subprocess.run(["lhasa", "-x", archive_abs], cwd=outdir, check=True)
 
     # 7) 解凍された中から「会場名が一番たくさん出るファイル」を選ぶ
     best_path = None
