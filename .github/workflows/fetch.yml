@@ -42,9 +42,16 @@ jobs:
         run: |
           git pull --rebase --autostash origin main
 
+      # ✅ JSTで動かす（時間帯反映）
+      - name: Set timezone to JST
+        run: |
+          sudo timedatectl set-timezone Asia/Tokyo
+          date
+
       - name: Fetch source page and build json
         env:
           PYTHONUNBUFFERED: "1"
+          TZ: "Asia/Tokyo"     # ✅ Python側にも明示
         run: |
           python scripts/fetch_mbrace.py
 
@@ -60,6 +67,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Commit fetched data
+        env:
+          TZ: "Asia/Tokyo"     # ✅ commitメッセージの時刻もJSTに
         run: |
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
