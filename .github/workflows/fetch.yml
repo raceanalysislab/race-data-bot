@@ -27,35 +27,26 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 🔥 これが無いと今回100%失敗する（lzh解凍用）
-      - name: Install lzh extractor
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lhasa
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # 🔥 fetch前に最新へ同期（push競合防止）
       - name: Sync with origin/main
         run: |
           git pull --rebase --autostash origin main
 
-      - name: Fetch source page and build json
+      - name: Fetch official race data
         run: |
-          python scripts/fetch_mbrace.py
+          python scripts/fetch_today.py
 
       - name: Commit fetched data
         run: |
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          # 生成物まとめて追加（増えても自動対応）
           git add data/* 2>/dev/null || true
 
-          # 差分なければ終了
           if git diff --cached --quiet; then
             echo "No changes"
             exit 0
