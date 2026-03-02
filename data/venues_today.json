@@ -1,11 +1,8 @@
 {
   "date": "2026-03-03",
-  "checked_at": "2026-03-03T05:49:08.733898+09:00",
+  "checked_at": "2026-03-03T06:06:47.592884+09:00",
   "blocked": false,
-  "held_places": [
-    "びわこ",
-    "児島"
-  ],
+  "held_places": [],
   "venues": [
     {
       "name": "桐生",
@@ -80,9 +77,9 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-03T10:32:00+09:00"
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
     },
     {
       "name": "住之江",
@@ -115,9 +112,9 @@
     {
       "name": "児島",
       "jcd": "16",
-      "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-03T10:42:00+09:00"
+      "held": false,
+      "next_race": null,
+      "next_cutoff": null
     },
     {
       "name": "宮島",
