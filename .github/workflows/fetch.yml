@@ -3,7 +3,7 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"  # 10分おき
+    - cron: "*/10 * * * *" # 10分おき
 
 permissions:
   contents: write
@@ -16,8 +16,11 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      TZ: Asia/Tokyo
+
+    defaults:
+      run:
+        env:
+          TZ: Asia/Tokyo
 
     steps:
       - name: Checkout repo
@@ -40,9 +43,11 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
 
+      # 🔥 fetch前に最新へ同期（push競合防止・安定版）
       - name: Sync with origin/main
         run: |
-          git pull --rebase --autostash origin main
+          git fetch origin main
+          git rebase origin/main || (git rebase --abort && git reset --hard origin/main)
 
       - name: Fetch source page and build json
         env:
@@ -50,6 +55,7 @@ jobs:
         run: |
           python scripts/fetch_mbrace.py
 
+      # 失敗したらログ類を保存（あとで原因追える）
       - name: Upload debug artifacts (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
@@ -73,4 +79,6 @@ jobs:
           fi
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
-          git push origin HEAD:main
+
+          # pushが競合したら1回だけ同期して再push
+          git push origin HEAD:main || (git fetch origin main && git rebase origin/main && git push origin HEAD:main)
