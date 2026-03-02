@@ -3,7 +3,7 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"  # 10分おき
+    - cron: "*/10 * * * *" # 10分おき
 
 permissions:
   contents: write
@@ -15,6 +15,8 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Tokyo
 
     steps:
       - name: Checkout repo
@@ -27,18 +29,33 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install lzh extractor
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lhasa
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
 
+      # push競合を減らす（実行開始直後に同期）
       - name: Sync with origin/main
         run: |
           git pull --rebase --autostash origin main
 
-      - name: Fetch official race data
+      - name: Fetch source page and build json
         run: |
-          python scripts/fetch_today.py
+          python scripts/fetch_mbrace.py
+
+      # 失敗原因調査用：debug/ があれば保存（スクリプト側で出しておく）
+      - name: Upload debug artifacts (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug
+          path: debug/**
+          if-no-files-found: ignore
 
       - name: Commit fetched data
         run: |
@@ -46,6 +63,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
 
           git add data/* 2>/dev/null || true
+          git add debug/* 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No changes"
@@ -53,4 +71,7 @@ jobs:
           fi
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
+
+          # push直前にもう一回同期（競合の最後の芽を潰す）
+          git pull --rebase --autostash origin main
           git push origin HEAD:main
