@@ -1,7 +1,6 @@
 import json
 import re
 import time
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Tuple
 
@@ -62,19 +61,33 @@ def _is_blocked(html: str) -> bool:
 
 
 def _extract_held_places_from_today(html: str) -> List[str]:
+    """
+    TODAY_URL の「本日のレース」テーブルの “1列目（場名）” だけを拾う。
+    これが一番ブレない。
+    """
     soup = BeautifulSoup(html, "html.parser")
 
-    # 「本日のレース」の表から “行の先頭（場名）” を拾う（ここが一番確実）
-    held = []
-    for tr in soup.select("table tr"):
-        txt = tr.get_text(" ", strip=True)
-        # 行テキストに場名が含まれてる行だけ拾う（フッター等の誤検出を避ける）
-        for name in VENUE_NAMES:
-            if name in txt:
-                # 「本日のレース」表っぽい行だけ：締切/開催期間っぽい情報が同じ行にあることが多い
-                if ("R" in txt) or ("締切" in txt) or ("発売開始" in txt) or ("日目" in txt) or ("最終日" in txt):
-                    held.append(name)
-                break
+    # 「本日のレース」見出し（h2/h3等）を探す
+    heading = soup.find(lambda tag: tag.name in ["h1", "h2", "h3", "h4"] and "本日のレース" in tag.get_text(strip=True))
+    if not heading:
+        return []
+
+    # 見出し直後にある最初の table を対象にする
+    table = heading.find_next("table")
+    if not table:
+        return []
+
+    held: List[str] = []
+
+    # 行の1列目を場名として取得
+    for tr in table.select("tbody tr"):
+        tds = tr.find_all("td")
+        if not tds:
+            continue
+        name = tds[0].get_text(strip=True)
+
+        if name in VENUE_NAME_TO_JCD:
+            held.append(name)
 
     # 重複除去（順序保持）
     seen = set()
