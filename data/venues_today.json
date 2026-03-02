@@ -1,7 +1,11 @@
 {
   "date": "2026-03-03",
-  "checked_at": "2026-03-03T05:35:05.379614+09:00",
-  "held_places": [],
+  "checked_at": "2026-03-03T05:49:08.733898+09:00",
+  "blocked": false,
+  "held_places": [
+    "びわこ",
+    "児島"
+  ],
   "venues": [
     {
       "name": "桐生",
@@ -76,9 +80,9 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:32:00+09:00"
     },
     {
       "name": "住之江",
@@ -111,9 +115,9 @@
     {
       "name": "児島",
       "jcd": "16",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-03T10:42:00+09:00"
     },
     {
       "name": "宮島",
@@ -171,5 +175,9 @@
       "next_race": null,
       "next_cutoff": null
     }
-  ]
+  ],
+  "source": {
+    "today_url": "https://www.boatrace.jp/owpc/pc/race/index",
+    "raceindex_url_template": "https://www.boatrace.jp/owpc/pc/race/raceindex?jcd={jcd}&hd={hd}"
+  }
 }
