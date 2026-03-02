@@ -1,4 +1,4 @@
-　name: Fetch Race Data
+name: Fetch Race Data
 
 on:
   workflow_dispatch:
@@ -31,16 +31,19 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # ✅ 先に最新へ追従（ここが重要）
+      - name: Sync with origin/main
+        run: |
+          git config user.name "race-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash origin main
+
       - name: Fetch source page and build json
         run: |
           python scripts/fetch_mbrace.py
 
       - name: Commit fetched data
         run: |
-          git config user.name "race-data-bot"
-          git config user.email "actions@users.noreply.github.com"
-
-          # 生成物（必要なものだけ add）
           git add data/source.html data/today.json data/venues_today.json data/picks_today.json data/pro_key.json 2>/dev/null || true
 
           if git diff --cached --quiet; then
@@ -49,7 +52,4 @@ jobs:
           fi
 
           git commit -m "Update race data"
-
-          # ここが重要：他の更新があってもズレないように整列してからpush
-          git pull --rebase origin main
           git push origin HEAD:main
