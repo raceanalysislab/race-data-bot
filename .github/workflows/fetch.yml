@@ -15,6 +15,7 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -29,8 +30,12 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          # requirements.txt が空でもOK（エラーにしない）
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+
+      # 🔥 fetch前に最新へ同期（これ超重要）
+      - name: Sync with origin/main
+        run: |
+          git pull --rebase --autostash origin main
 
       - name: Fetch source page and build json
         run: |
@@ -41,16 +46,14 @@ jobs:
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          # 生成物（final_url も追加）
-          git add data/source.html data/source_menu.html data/source_final_url.txt data/today.json data/venues_today.json data/picks_today.json data/pro_key.json 2>/dev/null || true
+          # 生成物を全部add（存在しないものは無視）
+          git add data/*.json data/*.html data/*.txt 2>/dev/null || true
 
+          # 差分チェック（なければ終了）
           if git diff --cached --quiet; then
             echo "No changes"
             exit 0
           fi
 
-          git commit -m "Update race data" || true
-
-          # push直前に最新へ追従してズレ防止
-          git pull --rebase --autostash origin main
+          git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
           git push origin HEAD:main
