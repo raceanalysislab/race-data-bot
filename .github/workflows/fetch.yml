@@ -32,23 +32,17 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install lzh extractor
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lhasa
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # ここは「待機」じゃなく「念のため最新を取り込む」だけにする
       - name: Sync with origin/main
         run: |
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Fetch source page and build json
+      - name: Fetch boatrace index and build json
         run: |
           python scripts/fetch_mbrace.py
 
