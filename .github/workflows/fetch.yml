@@ -42,6 +42,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # ここは「待機」じゃなく「念のため最新を取り込む」だけにする
       - name: Sync with origin/main
         run: |
           git fetch origin main
