@@ -2,7 +2,7 @@ import json
 import re
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Dict, Tuple
+from typing import List, Tuple, Optional, Dict
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,7 +11,11 @@ from urllib3.util.retry import Retry
 
 JST = timezone(timedelta(hours=9))
 
+# ✅ 開催場一覧（todayページ）
 TODAY_URL = "https://www.boatrace.jp/owpc/pc/race/index"
+# ✅ 各場のトップ（grade/day を取る。racelist はブロックされることがある）
+INDEX_URL = "https://www.boatrace.jp/owpc/pc/race/index?jcd={jcd}"
+# ✅ 締切（cutoffs）取得は racelist
 RACELIST_URL = "https://www.boatrace.jp/owpc/pc/race/racelist?rno=1&jcd={jcd}&hd={hd}"
 
 ALL_VENUES = [
@@ -48,10 +52,27 @@ def _is_blocked(html: str) -> bool:
     return "不正なURLへのリクエストです" in html
 
 
+def _normalize_ascii(s: str) -> str:
+    """全角英数→半角、ローマ数字等も寄せて、比較しやすくする"""
+    if not s:
+        return ""
+    s = str(s)
+    s = s.replace("Ｇ", "G").replace("Ｓ", "S")
+    s = s.replace("Ⅰ", "I").replace("Ⅱ", "II").replace("Ⅲ", "III")
+    # 全角→半角
+    s = s.translate(str.maketrans({
+        "０":"0","１":"1","２":"2","３":"3","４":"4","５":"5","６":"6","７":"7","８":"8","９":"9",
+        "Ａ":"A","Ｂ":"B","Ｃ":"C","Ｄ":"D","Ｅ":"E","Ｆ":"F","Ｇ":"G","Ｈ":"H","Ｉ":"I","Ｊ":"J","Ｋ":"K","Ｌ":"L","Ｍ":"M",
+        "Ｎ":"N","Ｏ":"O","Ｐ":"P","Ｑ":"Q","Ｒ":"R","Ｓ":"S","Ｔ":"T","Ｕ":"U","Ｖ":"V","Ｗ":"W","Ｘ":"X","Ｙ":"Y","Ｚ":"Z",
+        "ａ":"a","ｂ":"b","ｃ":"c","ｄ":"d","ｅ":"e","ｆ":"f","ｇ":"g","ｈ":"h","ｉ":"i","ｊ":"j","ｋ":"k","ｌ":"l","ｍ":"m",
+        "ｎ":"n","ｏ":"o","ｐ":"p","ｑ":"q","ｒ":"r","ｓ":"s","ｔ":"t","ｕ":"u","ｖ":"v","ｗ":"w","ｘ":"x","ｙ":"y","ｚ":"z",
+    }))
+    return s
+
+
 def _extract_held_from_today(html: str) -> List[str]:
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text(" ", strip=True)
-
     held = []
     for name, _ in ALL_VENUES:
         if name in text:
@@ -72,21 +93,93 @@ def _parse_cutoffs(html: str) -> List[Tuple[int, str]]:
         return []
 
     times = TIME_RE.findall(cutoff_tr.get_text(" ", strip=True))
-    pairs = []
-
+    pairs: List[Tuple[int, str]] = []
     for idx, (hh, mm) in enumerate(times[:12], start=1):
         pairs.append((idx, f"{int(hh)}:{int(mm):02d}"))
-
     return pairs
 
 
-def _next_race(cutoffs, day, now):
+def _next_race(cutoffs: List[Tuple[int, str]], now: datetime) -> Tuple[Optional[int], Optional[str], Optional[str]]:
+    """cutoffsは (rno, 'H:MM')。now より未来の最初を次とする。"""
     for rno, hhmm in cutoffs:
         hh, mm = map(int, hhmm.split(":"))
-        dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=JST)
+        dt = datetime(now.year, now.month, now.day, hh, mm, tzinfo=JST)
         if dt > now:
             return rno, dt.isoformat(), f"{rno}R {hh}:{mm:02d}"
     return None, None, None
+
+
+def _pick_grade(text: str) -> str:
+    """
+    indexページから grade を雑にでも安定して拾う。
+    返り値は '', '一般', 'SG', 'G1', 'G2', 'G3'
+    """
+    t = _normalize_ascii(text).upper().replace(" ", "").replace("\u3000", "")
+    # よくある表記揺れを寄せる
+    t = t.replace("GI", "G1").replace("GII", "G2").replace("GIII", "G3")
+    t = t.replace("GⅠ", "G1").replace("GⅡ", "G2").replace("GⅢ", "G3")
+
+    if "SG" in t:
+        return "SG"
+    if "G1" in t:
+        return "G1"
+    if "G2" in t:
+        return "G2"
+    if "G3" in t:
+        return "G3"
+    if "一般" in text:
+        return "一般"
+    return ""
+
+
+def _pick_day_label(soup: BeautifulSoup) -> str:
+    """
+    indexページの「初日/2日目/…/最終日」を拾う。
+    - まず「アクティブっぽい要素」から探す
+    - ダメならページ内の出現を拾う
+    """
+    # 1) classに active/current/selected が入ってる要素から拾う（雑に複数パターン）
+    candidates = soup.select(
+        ".is-active, .is-current, .is-selected, .active, .current, .selected, "
+        ".tab1.is-active, .tab2.is-active, .tab3.is-active, "
+        ".tabs .is-active, .tab .is-active"
+    )
+    day_words = ["初日", "2日目", "3日目", "4日目", "5日目", "6日目", "最終日", "前検日"]
+
+    for el in candidates:
+        txt = el.get_text(" ", strip=True)
+        for w in day_words:
+            if w in txt:
+                return w
+
+    # 2) それっぽいタブ領域を広く見る（上部の日程並び）
+    # boatraceのindexは上部に日程ラベルが並ぶので、短いテキストから拾う
+    for el in soup.find_all(["li", "a", "span", "div"]):
+        txt = el.get_text(" ", strip=True)
+        if not txt or len(txt) > 8:
+            continue
+        for w in day_words:
+            if txt == w:
+                # ここで active 判定ができないので、見つかったら一旦保持候補にする
+                return w
+
+    # 3) 最後に本文テキスト全体から拾う（最後の保険）
+    full = soup.get_text("\n", strip=True)
+    for w in day_words:
+        if w in full:
+            return w
+
+    return ""
+
+
+def _parse_grade_and_day_from_index(html: str) -> Tuple[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text(" ", strip=True)
+
+    grade = _pick_grade(text)
+    day = _pick_day_label(soup)
+
+    return grade, day
 
 
 def main():
@@ -103,7 +196,6 @@ def main():
     held_today = [] if blocked else _extract_held_from_today(html_today)
 
     # --- 2) 安定化：todayが少なすぎる場合は補完 ---
-    # 通常は5場以上あることが多い。2場以下なら怪しい。
     if len(held_today) <= 2:
         print("[INFO] Fallback racelist check triggered.")
         held_today = []
@@ -120,7 +212,7 @@ def main():
 
             time.sleep(0.2)
 
-    # --- 3) 開催場だけ締切取得 ---
+    # --- 3) 開催場だけ：grade/day と 締切取得 ---
     venues = []
 
     for name, jcd in ALL_VENUES:
@@ -131,16 +223,29 @@ def main():
         next_display = None
         cutoffs_out = None
 
+        grade = ""
+        day = ""
+
         if held:
+            # ✅ grade/day は index?jcd=xx から取る（ブロック回避）
+            idx_url = INDEX_URL.format(jcd=jcd)
+            ir = session.get(idx_url, timeout=20)
+            idx_html = ir.text
+            if not _is_blocked(idx_html):
+                g, d = _parse_grade_and_day_from_index(idx_html)
+                grade = g
+                day = d
+            time.sleep(0.15)
+
+            # ✅ cutoffs は racelist
             url = RACELIST_URL.format(jcd=jcd, hd=hd)
             rr = session.get(url, timeout=20)
             html = rr.text
 
             cutoffs = _parse_cutoffs(html)
-
             if cutoffs:
-                cutoffs_out = [{"rno": r, "time": t} for r, t in cutoffs]
-                nr, nc, nd = _next_race(cutoffs, now, now)
+                cutoffs_out = [{"rno": rno, "time": t} for rno, t in cutoffs]
+                nr, nc, nd = _next_race(cutoffs, now)
                 next_race, next_cutoff, next_display = nr, nc, nd
 
             time.sleep(0.35)
@@ -149,6 +254,11 @@ def main():
             "name": name,
             "jcd": jcd,
             "held": held,
+
+            # ✅ 追加
+            "grade": grade,   # "一般" / "SG" / "G1" / "G2" / "G3" / ""
+            "day": day,       # "初日" / "2日目" / ... / "最終日" / ""
+
             "next_race": next_race,
             "next_cutoff": next_cutoff,
             "next_display": next_display,
