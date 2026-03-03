@@ -3,7 +3,7 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *" # 10分おき
+    - cron: "*/1 * * * *" # 1分おき
 
 permissions:
   contents: write
@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 10
     env:
       TZ: Asia/Tokyo
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout repo
@@ -41,28 +42,18 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # 🔥 fetch前に最新へ同期（push競合防止・安定版）
+      # ✅ push競合防止：先にmainへ同期
       - name: Sync with origin/main
         run: |
           git fetch origin main
           git rebase origin/main || (git rebase --abort && git reset --hard origin/main)
 
+      # ✅ 取得（失敗したら落とす）
       - name: Fetch source page and build json
-        env:
-          PYTHONUNBUFFERED: "1"
         run: |
           python scripts/fetch_mbrace.py
 
-      - name: Upload debug artifacts (on failure)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug
-          path: |
-            data/**
-            **/*.log
-          if-no-files-found: ignore
-
+      # ✅ 変更が無い時はコミットしない（毎分でも履歴が増えない）
       - name: Commit fetched data
         run: |
           git config user.name "race-data-bot"
@@ -77,9 +68,20 @@ jobs:
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
 
-          # pushが競合したら1回だけ同期して再push（rebase失敗時はabortしてorigin/mainへ合わせる）
+          # push競合したら1回だけ同期して再push
           git push origin HEAD:main || (
             git fetch origin main &&
             git rebase origin/main || (git rebase --abort && git reset --hard origin/main) &&
             git push origin HEAD:main
           )
+
+      # ✅ 失敗時だけデバッグ吐く（毎分でも容量を食わない）
+      - name: Upload debug artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug
+          path: |
+            data/**
+            **/*.log
+          if-no-files-found: ignore
