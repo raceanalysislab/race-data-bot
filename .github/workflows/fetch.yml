@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: fetch-race-data
-  cancel-in-progress: true
+  cancel-in-progress: false   # ← ここが重要（キャンセルしない）
 
 jobs:
   fetch:
