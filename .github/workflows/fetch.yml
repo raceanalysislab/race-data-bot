@@ -3,19 +3,19 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *" # 5分おき
+    - cron: "*/10 * * * *" # 10分おき（実行6分前後ならこれが安定）
 
 permissions:
   contents: write
 
 concurrency:
   group: fetch-race-data
-  cancel-in-progress: false  # キャンセルしない（キューに溜める）
+  cancel-in-progress: false
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       TZ: Asia/Tokyo
       PYTHONUNBUFFERED: "1"
@@ -42,18 +42,16 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # ✅ mainへ同期（ここは残す）
+      # ここは「待機」じゃなく「念のため最新を取り込む」だけにする
       - name: Sync with origin/main
         run: |
           git fetch origin main
-          git rebase origin/main || (git rebase --abort && git reset --hard origin/main)
+          git reset --hard origin/main
 
-      # ✅ 取得（失敗したら落とす）
       - name: Fetch source page and build json
         run: |
           python scripts/fetch_mbrace.py
 
-      # ✅ 変更が無い時はコミットしない
       - name: Commit fetched data
         run: |
           git config user.name "race-data-bot"
@@ -67,33 +65,8 @@ jobs:
           fi
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin HEAD:main
 
-      # ✅ push安定化：競合したら pull --rebase して数回リトライ（scheduleで止まりにくくする）
-      - name: Push to main (retry)
-        run: |
-          set -e
-
-          # すでに「No changes」でexitしてたらここには来ない
-          for i in 1 2 3; do
-            echo "Push attempt $i..."
-
-            # 最新に追従してからpush
-            git fetch origin main
-            git pull --rebase origin main || (git rebase --abort && git reset --hard origin/main)
-
-            if git push origin HEAD:main; then
-              echo "Push success"
-              exit 0
-            fi
-
-            echo "Push failed. retrying..."
-            sleep 2
-          done
-
-          echo "Push failed after retries"
-          exit 1
-
-      # ✅ 失敗時だけデバッグ吐く
       - name: Upload debug artifacts (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
