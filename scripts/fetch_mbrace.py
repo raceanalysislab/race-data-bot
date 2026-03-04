@@ -18,11 +18,9 @@ JST = timezone(timedelta(hours=9))
 DATA_DIR = "data"
 LZH_PATH = os.path.join(DATA_DIR, "today.lzh")
 EXTRACT_DIR = os.path.join(DATA_DIR, "extract")
-
 SOURCE_FINAL_URL_TXT = os.path.join(DATA_DIR, "source_final_url.txt")
 
-# mbraceの例:
-# https://www1.mbrace.or.jp/od2/B/202603/b260303.lzh
+# 例: https://www1.mbrace.or.jp/od2/B/202603/b260303.lzh
 DEFAULT_BASE = "https://www1.mbrace.or.jp/od2/B"
 
 
@@ -86,7 +84,7 @@ def download(url: str, out_path: str) -> int:
     r = s.get(url, timeout=30)
     r.raise_for_status()
 
-    # 0バイト/HTML混入ガード（たまにエラーページが返る）
+    # HTMLが返ってきたら落とす（エラーページ対策）
     content_type = (r.headers.get("Content-Type") or "").lower()
     if "text/html" in content_type:
         raise RuntimeError(f"Downloaded HTML instead of lzh: {url}")
@@ -96,23 +94,33 @@ def download(url: str, out_path: str) -> int:
     return len(r.content)
 
 
-def ensure_extract_dir() -> None:
+def ensure_clean_extract_dir() -> None:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    # -f を使わずに確実に上書きするため、extract配下だけ掃除する
     os.makedirs(EXTRACT_DIR, exist_ok=True)
+    for fn in os.listdir(EXTRACT_DIR):
+        p = os.path.join(EXTRACT_DIR, fn)
+        try:
+            if os.path.isdir(p):
+                shutil.rmtree(p)
+            else:
+                os.remove(p)
+        except Exception:
+            pass
 
 
 def extract_lzh(lzh_path: str) -> None:
     """
     lhasaで解凍。解凍先は data/extract/
+    ※ lhasa は「-x」オプション形式。 'lhasa x -f' はNG。
     """
-    ensure_extract_dir()
+    ensure_clean_extract_dir()
 
-    # 念のため古いゴミを残しつつ上書きOK（必要ならここで掃除してもいい）
-    # ここは「今のやり方は変えず」なので削除はしない。
-
-    # lhasa は作業ディレクトリに解凍するので cwd を extract にする
-    # -f: 強制上書き / x: extract
-    cmd = ["lhasa", "x", "-f", os.path.abspath(lzh_path)]
+    # lhasaは作業ディレクトリ(cwd)に解凍するので cwd=EXTRACT_DIR
+    # -x: extract
+    cmd = ["lhasa", "-x", os.path.abspath(lzh_path)]
     p = subprocess.run(cmd, cwd=EXTRACT_DIR, capture_output=True, text=True)
+
     if p.returncode != 0:
         raise RuntimeError(
             "lhasa failed\n"
@@ -124,18 +132,12 @@ def extract_lzh(lzh_path: str) -> None:
 
 def find_extracted_txt() -> Optional[str]:
     """
-    data/extract 配下から bYYMMDD.txt に相当するtxtを探す
+    data/extract 配下から txt を探す（b******.txt優先）
     """
     if not os.path.isdir(EXTRACT_DIR):
         return None
 
-    # txt候補を広めに拾う
-    cands = []
-    for fn in os.listdir(EXTRACT_DIR):
-        if fn.lower().endswith(".txt"):
-            cands.append(fn)
-
-    # b******.txt を優先
+    cands = [fn for fn in os.listdir(EXTRACT_DIR) if fn.lower().endswith(".txt")]
     cands.sort(key=lambda x: (0 if re.match(r"^b\d{6}\.txt$", x, re.IGNORECASE) else 1, x))
     if not cands:
         return None
@@ -153,11 +155,9 @@ def align_today_txt(now: datetime) -> Optional[str]:
     target_name = f"b{yymmdd(now)}.txt"
     dst = os.path.join(EXTRACT_DIR, target_name)
 
-    # 既に同名なら何もしない
     if os.path.abspath(src) == os.path.abspath(dst):
         return dst
 
-    # 同名が既にある場合は上書き
     shutil.copyfile(src, dst)
     return dst
 
@@ -165,11 +165,10 @@ def align_today_txt(now: datetime) -> Optional[str]:
 def main():
     now = jst_now()
 
-    # 1) URL決定（既存のsource_final_url.txtを最優先）
+    # 1) URL決定（source_final_url.txt優先）
     url = read_source_final_url()
     if not url:
         url = build_guess_url(now)
-        # 推測URLも保存しておく（次回以降の安定化）
         write_source_final_url(url)
 
     print("[mbrace] url:", url)
@@ -178,20 +177,16 @@ def main():
     size = download(url, LZH_PATH)
     print("[mbrace] downloaded:", LZH_PATH, "bytes=", size)
 
-    # 3) 解凍（data/extract を必ず作る）
+    # 3) 解凍
     extract_lzh(LZH_PATH)
     print("[mbrace] extracted into:", EXTRACT_DIR)
 
-    # 4) txt名を揃える（parse側が参照しやすいように）
+    # 4) txt名を揃える
     aligned = align_today_txt(now)
     print("[mbrace] aligned txt:", aligned if aligned else "(not found)")
 
-    # extractが無い問題を潰すため、ここで最終チェック
-    if not os.path.isdir(EXTRACT_DIR):
-        raise RuntimeError("extract dir not created")
     if aligned is None:
-        # 解凍できてるのにtxtが無い場合は、解凍されたファイル一覧を出す
-        files = os.listdir(EXTRACT_DIR)
+        files = os.listdir(EXTRACT_DIR) if os.path.isdir(EXTRACT_DIR) else []
         raise RuntimeError(f"no txt found under {EXTRACT_DIR}. files={files}")
 
 
