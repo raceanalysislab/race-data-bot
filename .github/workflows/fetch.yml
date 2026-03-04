@@ -3,7 +3,7 @@ name: Fetch Race Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *" # 10分おき（実行6分前後ならこれが安定）
+    - cron: "*/10 * * * *" # 10分おき
 
 permissions:
   contents: write
@@ -42,15 +42,19 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # ここは「待機」じゃなく「念のため最新を取り込む」だけにする
+      # 念のため最新を取り込む
       - name: Sync with origin/main
         run: |
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Fetch source page and build json
+      - name: Fetch mbrace (download/extract)
         run: |
           python scripts/fetch_mbrace.py
+
+      - name: Parse mbrace txt -> json
+        run: |
+          python scripts/parse_mbrace_txt.py
 
       - name: Commit fetched data
         run: |
