@@ -1,8 +1,8 @@
 import json
 import re
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Dict, Tuple
+from datetime import datetime, timedelta, timezone, date
+from typing import List, Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -45,10 +45,19 @@ def _session() -> requests.Session:
 
 
 def _is_blocked(html: str) -> bool:
-    return "不正なURLへのリクエストです" in html
+    s = html or ""
+    needles = [
+        "不正なURLへのリクエストです",
+        "アクセスが集中",
+        "/login",
+        "ログイン",
+        "エラー",
+    ]
+    return any(n in s for n in needles)
 
 
 def _extract_held_from_today(html: str) -> List[str]:
+    # todayページは崩れることがあるので「場名が出てるか」だけの粗い判定
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text(" ", strip=True)
 
@@ -72,7 +81,7 @@ def _parse_cutoffs(html: str) -> List[Tuple[int, str]]:
         return []
 
     times = TIME_RE.findall(cutoff_tr.get_text(" ", strip=True))
-    pairs = []
+    pairs: List[Tuple[int, str]] = []
 
     for idx, (hh, mm) in enumerate(times[:12], start=1):
         pairs.append((idx, f"{int(hh)}:{int(mm):02d}"))
@@ -80,7 +89,7 @@ def _parse_cutoffs(html: str) -> List[Tuple[int, str]]:
     return pairs
 
 
-def _next_race(cutoffs, day, now):
+def _next_race(cutoffs: List[Tuple[int, str]], day: date, now: datetime):
     for rno, hhmm in cutoffs:
         hh, mm = map(int, hhmm.split(":"))
         dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=JST)
@@ -92,6 +101,7 @@ def _next_race(cutoffs, day, now):
 def main():
     now = datetime.now(JST)
     hd = now.strftime("%Y%m%d")
+    today_date = now.date()
 
     session = _session()
 
@@ -139,8 +149,8 @@ def main():
             cutoffs = _parse_cutoffs(html)
 
             if cutoffs:
-                cutoffs_out = [{"rno": r, "time": t} for r, t in cutoffs]
-                nr, nc, nd = _next_race(cutoffs, now, now)
+                cutoffs_out = [{"rno": rno, "time": t} for rno, t in cutoffs]
+                nr, nc, nd = _next_race(cutoffs, today_date, now)
                 next_race, next_cutoff, next_display = nr, nc, nd
 
             time.sleep(0.35)
