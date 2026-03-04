@@ -42,6 +42,11 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # ✅ 追加：開催場/締切（boatrace.jp）を更新
+      - name: Fetch today venues (boatrace)
+        run: |
+          python scripts/fetch_today.py
+
       - name: Fetch mbrace (download/extract)
         run: |
           python scripts/fetch_mbrace.py
@@ -54,6 +59,7 @@ jobs:
         run: |
           ls -la data || true
           ls -la data/extract || true
+          head -n 40 data/venues_today.json || true
           head -n 40 data/mbrace_races_today.json || true
 
       - name: Commit fetched data
