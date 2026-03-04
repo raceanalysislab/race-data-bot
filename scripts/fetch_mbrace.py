@@ -1,37 +1,74 @@
-import json
+# scripts/fetch_mbrace.py
+# mbrace: 番組表(lzh)をダウンロード → data/today.lzh に保存 → data/extract/ に解凍
+# 依存: GitHub Actionsで `sudo apt-get install -y lhasa` 済み想定
+
+import os
 import re
-import time
-from datetime import datetime, timedelta, timezone, date
-from typing import List, Tuple
+import shutil
+import subprocess
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import requests
-from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 JST = timezone(timedelta(hours=9))
 
-TODAY_URL = "https://www.boatrace.jp/owpc/pc/race/index"
-RACELIST_URL = "https://www.boatrace.jp/owpc/pc/race/racelist?rno=1&jcd={jcd}&hd={hd}"
+DATA_DIR = "data"
+LZH_PATH = os.path.join(DATA_DIR, "today.lzh")
+EXTRACT_DIR = os.path.join(DATA_DIR, "extract")
 
-ALL_VENUES = [
-    ("桐生", "01"), ("戸田", "02"), ("江戸川", "03"), ("平和島", "04"), ("多摩川", "05"), ("浜名湖", "06"),
-    ("蒲郡", "07"), ("常滑", "08"), ("津", "09"), ("三国", "10"), ("びわこ", "11"), ("住之江", "12"),
-    ("尼崎", "13"), ("鳴門", "14"), ("丸亀", "15"), ("児島", "16"), ("宮島", "17"), ("徳山", "18"),
-    ("下関", "19"), ("若松", "20"), ("芦屋", "21"), ("福岡", "22"), ("唐津", "23"), ("大村", "24"),
-]
+SOURCE_FINAL_URL_TXT = os.path.join(DATA_DIR, "source_final_url.txt")
 
-TIME_RE = re.compile(r"\b(\d{1,2}):(\d{2})\b")
+# mbraceの例:
+# https://www1.mbrace.or.jp/od2/B/202603/b260303.lzh
+DEFAULT_BASE = "https://www1.mbrace.or.jp/od2/B"
 
 
-def _session() -> requests.Session:
+def jst_now() -> datetime:
+    return datetime.now(JST)
+
+
+def yymmdd(now: datetime) -> str:
+    return now.strftime("%y%m%d")
+
+
+def yyyymm(now: datetime) -> str:
+    return now.strftime("%Y%m")
+
+
+def build_guess_url(now: datetime) -> str:
+    return f"{DEFAULT_BASE}/{yyyymm(now)}/b{yymmdd(now)}.lzh"
+
+
+def read_source_final_url() -> Optional[str]:
+    if not os.path.exists(SOURCE_FINAL_URL_TXT):
+        return None
+    try:
+        with open(SOURCE_FINAL_URL_TXT, "r", encoding="utf-8") as f:
+            for line in f:
+                s = line.strip()
+                if s.startswith("http"):
+                    return s
+    except Exception:
+        return None
+    return None
+
+
+def write_source_final_url(url: str) -> None:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(SOURCE_FINAL_URL_TXT, "w", encoding="utf-8") as f:
+        f.write(url.strip() + "\n")
+
+
+def make_session() -> requests.Session:
     s = requests.Session()
     s.headers.update({
         "User-Agent": "Mozilla/5.0",
         "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-        "Referer": "https://www.boatrace.jp/",
+        "Referer": "https://www1.mbrace.or.jp/",
     })
-
     retry = Retry(
         total=3,
         backoff_factor=0.6,
@@ -39,142 +76,123 @@ def _session() -> requests.Session:
         allowed_methods=("GET",),
         raise_on_status=False,
     )
-    adapter = HTTPAdapter(max_retries=retry)
-    s.mount("https://", adapter)
+    s.mount("https://", HTTPAdapter(max_retries=retry))
     return s
 
 
-def _is_blocked(html: str) -> bool:
-    s = html or ""
-    needles = [
-        "不正なURLへのリクエストです",
-        "アクセスが集中",
-        "/login",
-        "ログイン",
-        "エラー",
-    ]
-    return any(n in s for n in needles)
+def download(url: str, out_path: str) -> int:
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    s = make_session()
+    r = s.get(url, timeout=30)
+    r.raise_for_status()
+
+    # 0バイト/HTML混入ガード（たまにエラーページが返る）
+    content_type = (r.headers.get("Content-Type") or "").lower()
+    if "text/html" in content_type:
+        raise RuntimeError(f"Downloaded HTML instead of lzh: {url}")
+
+    with open(out_path, "wb") as f:
+        f.write(r.content)
+    return len(r.content)
 
 
-def _extract_held_from_today(html: str) -> List[str]:
-    # todayページは崩れることがあるので「場名が出てるか」だけの粗い判定
-    soup = BeautifulSoup(html, "html.parser")
-    text = soup.get_text(" ", strip=True)
-
-    held = []
-    for name, _ in ALL_VENUES:
-        if name in text:
-            held.append(name)
-    return held
+def ensure_extract_dir() -> None:
+    os.makedirs(EXTRACT_DIR, exist_ok=True)
 
 
-def _parse_cutoffs(html: str) -> List[Tuple[int, str]]:
-    soup = BeautifulSoup(html, "html.parser")
+def extract_lzh(lzh_path: str) -> None:
+    """
+    lhasaで解凍。解凍先は data/extract/
+    """
+    ensure_extract_dir()
 
-    cutoff_tr = None
-    for tr in soup.select("tr"):
-        if "締切予定時刻" in tr.get_text(" ", strip=True):
-            cutoff_tr = tr
-            break
+    # 念のため古いゴミを残しつつ上書きOK（必要ならここで掃除してもいい）
+    # ここは「今のやり方は変えず」なので削除はしない。
 
-    if not cutoff_tr:
-        return []
-
-    times = TIME_RE.findall(cutoff_tr.get_text(" ", strip=True))
-    pairs: List[Tuple[int, str]] = []
-
-    for idx, (hh, mm) in enumerate(times[:12], start=1):
-        pairs.append((idx, f"{int(hh)}:{int(mm):02d}"))
-
-    return pairs
+    # lhasa は作業ディレクトリに解凍するので cwd を extract にする
+    # -f: 強制上書き / x: extract
+    cmd = ["lhasa", "x", "-f", os.path.abspath(lzh_path)]
+    p = subprocess.run(cmd, cwd=EXTRACT_DIR, capture_output=True, text=True)
+    if p.returncode != 0:
+        raise RuntimeError(
+            "lhasa failed\n"
+            f"cmd: {' '.join(cmd)}\n"
+            f"stdout:\n{p.stdout}\n"
+            f"stderr:\n{p.stderr}\n"
+        )
 
 
-def _next_race(cutoffs: List[Tuple[int, str]], day: date, now: datetime):
-    for rno, hhmm in cutoffs:
-        hh, mm = map(int, hhmm.split(":"))
-        dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=JST)
-        if dt > now:
-            return rno, dt.isoformat(), f"{rno}R {hh}:{mm:02d}"
-    return None, None, None
+def find_extracted_txt() -> Optional[str]:
+    """
+    data/extract 配下から bYYMMDD.txt に相当するtxtを探す
+    """
+    if not os.path.isdir(EXTRACT_DIR):
+        return None
+
+    # txt候補を広めに拾う
+    cands = []
+    for fn in os.listdir(EXTRACT_DIR):
+        if fn.lower().endswith(".txt"):
+            cands.append(fn)
+
+    # b******.txt を優先
+    cands.sort(key=lambda x: (0 if re.match(r"^b\d{6}\.txt$", x, re.IGNORECASE) else 1, x))
+    if not cands:
+        return None
+    return os.path.join(EXTRACT_DIR, cands[0])
+
+
+def align_today_txt(now: datetime) -> Optional[str]:
+    """
+    解凍された txt を data/extract/bYYMMDD.txt に揃える
+    """
+    src = find_extracted_txt()
+    if not src:
+        return None
+
+    target_name = f"b{yymmdd(now)}.txt"
+    dst = os.path.join(EXTRACT_DIR, target_name)
+
+    # 既に同名なら何もしない
+    if os.path.abspath(src) == os.path.abspath(dst):
+        return dst
+
+    # 同名が既にある場合は上書き
+    shutil.copyfile(src, dst)
+    return dst
 
 
 def main():
-    now = datetime.now(JST)
-    hd = now.strftime("%Y%m%d")
-    today_date = now.date()
+    now = jst_now()
 
-    session = _session()
+    # 1) URL決定（既存のsource_final_url.txtを最優先）
+    url = read_source_final_url()
+    if not url:
+        url = build_guess_url(now)
+        # 推測URLも保存しておく（次回以降の安定化）
+        write_source_final_url(url)
 
-    # --- 1) today取得 ---
-    r = session.get(TODAY_URL, timeout=20)
-    html_today = r.text
+    print("[mbrace] url:", url)
 
-    blocked = _is_blocked(html_today)
-    held_today = [] if blocked else _extract_held_from_today(html_today)
+    # 2) ダウンロード
+    size = download(url, LZH_PATH)
+    print("[mbrace] downloaded:", LZH_PATH, "bytes=", size)
 
-    # --- 2) 安定化：todayが少なすぎる場合は補完 ---
-    # 通常は5場以上あることが多い。2場以下なら怪しい。
-    if len(held_today) <= 2:
-        print("[INFO] Fallback racelist check triggered.")
-        held_today = []
+    # 3) 解凍（data/extract を必ず作る）
+    extract_lzh(LZH_PATH)
+    print("[mbrace] extracted into:", EXTRACT_DIR)
 
-        for name, jcd in ALL_VENUES:
-            url = RACELIST_URL.format(jcd=jcd, hd=hd)
-            rr = session.get(url, timeout=20)
-            html = rr.text
+    # 4) txt名を揃える（parse側が参照しやすいように）
+    aligned = align_today_txt(now)
+    print("[mbrace] aligned txt:", aligned if aligned else "(not found)")
 
-            if not _is_blocked(html):
-                cutoffs = _parse_cutoffs(html)
-                if cutoffs:
-                    held_today.append(name)
-
-            time.sleep(0.2)
-
-    # --- 3) 開催場だけ締切取得 ---
-    venues = []
-
-    for name, jcd in ALL_VENUES:
-        held = name in held_today
-
-        next_race = None
-        next_cutoff = None
-        next_display = None
-        cutoffs_out = None
-
-        if held:
-            url = RACELIST_URL.format(jcd=jcd, hd=hd)
-            rr = session.get(url, timeout=20)
-            html = rr.text
-
-            cutoffs = _parse_cutoffs(html)
-
-            if cutoffs:
-                cutoffs_out = [{"rno": rno, "time": t} for rno, t in cutoffs]
-                nr, nc, nd = _next_race(cutoffs, today_date, now)
-                next_race, next_cutoff, next_display = nr, nc, nd
-
-            time.sleep(0.35)
-
-        venues.append({
-            "name": name,
-            "jcd": jcd,
-            "held": held,
-            "next_race": next_race,
-            "next_cutoff": next_cutoff,
-            "next_display": next_display,
-            "cutoffs": cutoffs_out,
-        })
-
-    payload = {
-        "date": now.strftime("%Y-%m-%d"),
-        "checked_at": now.isoformat(),
-        "blocked": blocked,
-        "held_places": held_today,
-        "venues": venues,
-    }
-
-    with open("data/venues_today.json", "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    # extractが無い問題を潰すため、ここで最終チェック
+    if not os.path.isdir(EXTRACT_DIR):
+        raise RuntimeError("extract dir not created")
+    if aligned is None:
+        # 解凍できてるのにtxtが無い場合は、解凍されたファイル一覧を出す
+        files = os.listdir(EXTRACT_DIR)
+        raise RuntimeError(f"no txt found under {EXTRACT_DIR}. files={files}")
 
 
 if __name__ == "__main__":
