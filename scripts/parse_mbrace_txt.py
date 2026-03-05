@@ -32,21 +32,24 @@ RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 
-# ✅ 重要：登録番号の直後にスペースが無くてもOK
-# 例: "1 5285若林 麗26東京53B1 3.74 ..."
+# ✅ 艇行の先頭（登録番号の直後はスペース無しでもOK）
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
-# ✅ 「年齢 支部 体重 級別」を“スペース無し”でも拾う
-# 例: "... 麗26東京53B1 3.74 ..." / "... 麗 26 東京 53 B1 3.74 ..."
-RE_META = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*(A1|A2|B1|B2)\s+")
-
-# ✅ その後ろの数値列（勝率等）。ここが確定できれば1艇として成立。
+# ✅ 行末の数値列は比較的安定（ここを後ろから確定する）
+# nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 （+残りnote）
 RE_TAIL = re.compile(
-    r"^\s*([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
-    r"([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
-    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s+"
-    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s*(.*)$"
+    r"([0-9]+\.[0-9]{2}%?)\s+([0-9]+\.[0-9]{2}%?)\s+"
+    r"([0-9]+\.[0-9]{2}%?)\s+([0-9]+\.[0-9]{2}%?)\s+"
+    r"(\d{1,2})\s+([0-9]+\.[0-9]{2}%?)\s+"
+    r"(\d{1,2})\s+([0-9]+\.[0-9]{2}%?)\s*(.*)$"
 )
+
+# ✅ grade の直前（スペース無しでもOK）
+RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
+
+# ✅ 「年齢 支部 体重」を“後ろから”確定（スペース無しでもOK）
+# 例: "26東京53" / "26 東京 53"
+RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -88,7 +91,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
 
     for raw in lines_raw:
         l = raw.rstrip("\n")
-
         if RE_BBGN.search(l):
             if cur:
                 blocks.append(cur)
@@ -141,73 +143,102 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
+def _to_float(x: str) -> Optional[float]:
+    try:
+        return float((x or "").replace("%", ""))
+    except Exception:
+        return None
+
+def _to_int(x: str) -> Optional[int]:
+    try:
+        return int(x)
+    except Exception:
+        return None
+
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
-    1艇行を落とさず取る（強化版）
-    - 登録番号の直後にスペース無しOK（5285若林）
-    - 名前+年齢がくっつくOK（麗26）
-    - 末尾の数値列(RE_TAIL)で確定させる
+    ✅ 3段構えの核：後ろ（数値列）から確定して、詰め文字列でも落としにくくする
+    1) prefix: waku/regno
+    2) tail: nat_win..boat_2 (+note) を後ろから確定
+    3) tail手前: grade を後ろから確定
+    4) grade手前: age/branch/weight を後ろから確定
+    5) 残り = name
     """
     line = norm(line)
     mp = RE_BOAT_PREFIX.match(line)
     if not mp:
         return None
 
-    waku = int(mp.group(1))
-    regno = int(mp.group(2))
-    rest = (mp.group(3) or "").strip()
-
-    mm = RE_META.search(rest)
-    if not mm:
+    waku = _to_int(mp.group(1))
+    regno = _to_int(mp.group(2))
+    rest_all = (mp.group(3) or "").strip()
+    if not waku or not regno or not rest_all:
         return None
 
-    age = int(mm.group(1))
-    branch = mm.group(2)
-    weight = int(mm.group(3))
-    grade = mm.group(4)
-
-    name_raw = rest[:mm.start()].strip()
-    name = (name_raw or "").replace(" ", "")
-
-    tail = rest[mm.end():]
-    mt = RE_TAIL.match(tail)
+    # ① まず末尾の数値列を確定
+    mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
 
-    nat_win = float(mt.group(1))
-    nat_2   = float(mt.group(2))
-    loc_win = float(mt.group(3))
-    loc_2   = float(mt.group(4))
-    motor_no = int(mt.group(5))
-    motor_2  = float(mt.group(6))
-    boat_no  = int(mt.group(7))
-    boat_2   = float(mt.group(8))
+    nat_win = _to_float(mt.group(1))
+    nat_2   = _to_float(mt.group(2))
+    loc_win = _to_float(mt.group(3))
+    loc_2   = _to_float(mt.group(4))
+    motor_no = _to_int(mt.group(5))
+    motor_2  = _to_float(mt.group(6))
+    boat_no  = _to_int(mt.group(7))
+    boat_2   = _to_float(mt.group(8))
     note = (mt.group(9) or "").strip()
 
+    # 数値列が取れないなら成立しない（ここがアンカー）
+    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+        return None
+
+    head = rest_all[:mt.start()].strip()  # name+meta があるはず
+
+    # ② grade を後ろから確定
+    mg = RE_GRADE.search(head)
+    if not mg:
+        return None
+    grade = mg.group(1)
+    head2 = head[:mg.start()].strip()  # name + age/branch/weight
+
+    # ③ age/branch/weight を後ろから確定（スペース無しOK）
+    mm = RE_AGE_BRANCH_WEIGHT.search(head2)
+    if not mm:
+        return None
+
+    age = _to_int(mm.group(1))
+    branch = mm.group(2)
+    weight = _to_int(mm.group(3))
+    if age is None or weight is None:
+        return None
+
+    name_raw = head2[:mm.start()].strip()
+    name = (name_raw or "").replace(" ", "")
+    if not name:
+        return None
+
     return {
-        "waku": waku,
-        "regno": regno,
+        "waku": int(waku),
+        "regno": int(regno),
         "name": name,
-        "age": age,
+        "age": int(age),
         "branch": branch,
-        "weight": weight,
+        "weight": int(weight),
         "grade": grade,
-        "nat_win": nat_win,
-        "nat_2": nat_2,
-        "loc_win": loc_win,
-        "loc_2": loc_2,
-        "motor_no": motor_no,
-        "motor_2": motor_2,
-        "boat_no": boat_no,
-        "boat_2": boat_2,
+        "nat_win": float(nat_win),
+        "nat_2": float(nat_2),
+        "loc_win": float(loc_win),
+        "loc_2": float(loc_2),
+        "motor_no": int(motor_no),
+        "motor_2": float(motor_2),
+        "boat_no": int(boat_no),
+        "boat_2": float(boat_2),
         "note": note,
     }
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    UIで 1〜6 を必ず並べる。
-    欠けてる枠は placeholder を入れて埋める（欠場扱いではなく「取得失敗」表示用）
-    """
     m = {int(b.get("waku")): b for b in boats if b.get("waku") is not None}
     out: List[Dict[str, Any]] = []
     for w in range(1, 7):
@@ -263,17 +294,15 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
             i += 1
             continue
 
-        # ✅ 第1段：通常1行
         boat = _parse_boat_line(l)
 
         # ✅ 第2段：行折り返し対策（次行と結合して再トライ）
         if not boat and i + 1 < len(block):
             nxt = block[i + 1]
-            # 次行がレース見出し or 別艇の先頭なら結合しない
             if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(nxt)):
                 boat = _parse_boat_line(l + " " + nxt)
                 if boat:
-                    i += 1  # 次行を消費
+                    i += 1
 
         if boat:
             cur["boats"].append(boat)
@@ -334,6 +363,7 @@ def main():
 
         for r in races:
             r["tags"] = classify_race(r)
+
             boats = r.get("boats") or []
             missing = sum(1 for bb in boats if bb.get("_missing"))
             if missing:
