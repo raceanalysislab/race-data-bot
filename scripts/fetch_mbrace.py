@@ -91,43 +91,77 @@ def download(url: str, out_path: str) -> int:
 
     with open(out_path, "wb") as f:
         f.write(r.content)
-    return len(r.content)
+
+    # 0バイト対策
+    size = os.path.getsize(out_path)
+    if size <= 0:
+        raise RuntimeError(f"Downloaded file is empty: {out_path}")
+
+    return size
 
 
-def ensure_clean_extract_dir() -> None:
-    os.makedirs(DATA_DIR, exist_ok=True)
-    # -f を使わずに確実に上書きするため、extract配下だけ掃除する
+def ensure_extract_dir(clean: bool = False) -> None:
     os.makedirs(EXTRACT_DIR, exist_ok=True)
-    for fn in os.listdir(EXTRACT_DIR):
-        p = os.path.join(EXTRACT_DIR, fn)
-        try:
-            if os.path.isdir(p):
-                shutil.rmtree(p)
-            else:
-                os.remove(p)
-        except Exception:
-            pass
+    if clean:
+        for fn in os.listdir(EXTRACT_DIR):
+            p = os.path.join(EXTRACT_DIR, fn)
+            try:
+                if os.path.isdir(p):
+                    shutil.rmtree(p)
+                else:
+                    os.remove(p)
+            except Exception:
+                pass
+
+
+def _run_extract(cmd: list[str]) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, cwd=EXTRACT_DIR, capture_output=True, text=True)
 
 
 def extract_lzh(lzh_path: str) -> None:
     """
-    lhasaで解凍。解凍先は data/extract/
-    ※ lhasa は「-x」オプション形式。 'lhasa x -f' はNG。
+    lhasa系のコマンドは環境差があるので、複数パターンを順に試す
     """
-    ensure_clean_extract_dir()
+    if not os.path.exists(lzh_path):
+        raise RuntimeError(f"lzh not found: {lzh_path}")
 
-    # lhasaは作業ディレクトリ(cwd)に解凍するので cwd=EXTRACT_DIR
-    # -x: extract
-    cmd = ["lhasa", "-x", os.path.abspath(lzh_path)]
-    p = subprocess.run(cmd, cwd=EXTRACT_DIR, capture_output=True, text=True)
+    # extractフォルダは必ず作る（これが無いと落ちる）
+    ensure_extract_dir(clean=True)
 
-    if p.returncode != 0:
-        raise RuntimeError(
-            "lhasa failed\n"
-            f"cmd: {' '.join(cmd)}\n"
-            f"stdout:\n{p.stdout}\n"
-            f"stderr:\n{p.stderr}\n"
-        )
+    abs_lzh = os.path.abspath(lzh_path)
+
+    # 1) lhasa x -f archive   (古い/一般的)
+    candidates = [
+        ["lhasa", "x", "-f", abs_lzh],
+        # 2) lhasa -x -f archive (オプション形式違い)
+        ["lhasa", "-x", "-f", abs_lzh],
+        # 3) lhasa -x archive
+        ["lhasa", "-x", abs_lzh],
+        # 4) lha x -w=DIR archive（lha コマンドがある場合）
+        ["lha", "x", abs_lzh],
+    ]
+
+    last = None
+    for cmd in candidates:
+        try:
+            p = _run_extract(cmd)
+            last = p
+            if p.returncode == 0:
+                return
+        except FileNotFoundError:
+            # lhasa/ lha が無い
+            continue
+
+    # ここまで全部失敗
+    if last is None:
+        raise RuntimeError("No extractor command found (lhasa/lha missing).")
+
+    raise RuntimeError(
+        "extract failed\n"
+        f"tried last cmd: {' '.join(candidates[-1])}\n"
+        f"stdout:\n{last.stdout}\n"
+        f"stderr:\n{last.stderr}\n"
+    )
 
 
 def find_extracted_txt() -> Optional[str]:
@@ -181,7 +215,7 @@ def main():
     extract_lzh(LZH_PATH)
     print("[mbrace] extracted into:", EXTRACT_DIR)
 
-    # 4) txt名を揃える
+    # 4) txt名を揃える（parse側が参照しやすいように）
     aligned = align_today_txt(now)
     print("[mbrace] aligned txt:", aligned if aligned else "(not found)")
 
