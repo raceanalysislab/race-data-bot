@@ -1,19 +1,20 @@
 # scripts/parse_mbrace_txt.py
-# mbrace番組表txt → JSON
+# mbrace番組表txt（STARTB...ENDB想定）→ 会場ごとにパースしてJSON化
 # 出力: data/mbrace_races_today.json
 
 import json
 import os
 import re
-from datetime import datetime, timedelta, timezone, date
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 
 JST = timezone(timedelta(hours=9))
 
 # 全角 → 半角変換（必要最低限）
 TRANS = str.maketrans({
-    "０":"0","１":"1","２":"2","３":"3","４":"4","５":"5","６":"6","７":"7","８":"8","９":"9",
-    "Ｒ":"R","Ｈ":"H","ｍ":"m","：":":","　":" "
+    "０": "0", "１": "1", "２": "2", "３": "3", "４": "4",
+    "５": "5", "６": "6", "７": "7", "８": "8", "９": "9",
+    "Ｒ": "R", "Ｈ": "H", "ｍ": "m", "：": ":", "　": " "
 })
 
 def norm(s: str) -> str:
@@ -21,12 +22,12 @@ def norm(s: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
-# レースヘッダ
+# レースヘッダ（例: "1R 一般 進入固定 H1800m ... 締切予定15:20"）
 RE_RACE_HEAD = re.compile(
     r"^\s*([0-9]{1,2})R\s+(.+?)\s+(進入固定|進入自由)?\s*H?([0-9]{3,4})m.*?締切予定\s*([0-9]{1,2}:[0-9]{2})"
 )
 
-# 選手行
+# 選手行（現状の形に合わせる）
 RE_BOAT_LINE = re.compile(
     r"^\s*([1-6])\s+(\d{4})\s*(\S+?)\s*([0-9]{1,2})\s*([^\d\s]{2,6})\s*([0-9]{2})\s*(A1|A2|B1|B2)\s+"
     r"([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
@@ -35,6 +36,9 @@ RE_BOAT_LINE = re.compile(
     r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s+"
     r"(.*)$"
 )
+
+RE_YMD = re.compile(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日")
+RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 
 def read_text_auto(path: str) -> List[str]:
     # mbrace txt は cp932 のことが多い
@@ -50,75 +54,110 @@ def read_text_auto(path: str) -> List[str]:
 def infer_txt_path() -> str:
     """
     data/source_final_url.txt にある .lzh URL から日付(YYMMDD)を抽出し、
-    data/extract/bYYMMDD.txt を読みに行く。
-    例: .../202603/b260303.lzh -> b260303.txt
+    data/extract/bYYMMDD.txt を読む
     """
     p = os.path.join("data", "source_final_url.txt")
-    if not os.path.exists(p):
-        # 最低限のフォールバック（従来）
-        return os.path.join("data", "extract", "b260303.txt")
+    if os.path.exists(p):
+        try:
+            url = (open(p, "r", encoding="utf-8", errors="ignore").read() or "").strip()
+            m = re.search(r"/b(\d{6})\.lzh", url)
+            if m:
+                yymmdd = m.group(1)
+                guess = os.path.join("data", "extract", f"b{yymmdd}.txt")
+                if os.path.exists(guess):
+                    return guess
+        except Exception:
+            pass
 
-    url = ""
-    with open(p, "r", encoding="utf-8", errors="ignore") as f:
-        url = (f.read() or "").strip()
+    # フォールバック：extract内のb******.txtを探す
+    exdir = os.path.join("data", "extract")
+    if os.path.isdir(exdir):
+        cands = [fn for fn in os.listdir(exdir) if re.match(r"^b\d{6}\.txt$", fn, re.IGNORECASE)]
+        if cands:
+            cands.sort()
+            return os.path.join(exdir, cands[-1])
 
-    m = re.search(r"/b(\d{6})\.lzh", url)
-    if not m:
-        return os.path.join("data", "extract", "b260303.txt")
+    return os.path.join("data", "extract", "b260303.txt")
 
-    yymmdd = m.group(1)
-    return os.path.join("data", "extract", f"b{yymmdd}.txt")
-
-def parse_venue_from_line(l: str) -> str:
+def split_blocks(lines: List[str]) -> List[List[str]]:
     """
-    "ボートレース大 村 3月 3日 ..." みたいな行から場名だけ抜く
+    STARTB ... ENDB を1ブロックとして分割
     """
-    # 「ボートレース」以降の最初のトークンを取る（空白はnorm済み想定）
-    m = re.search(r"ボートレース\s*([^\s]+)", l)
-    if not m:
-        return ""
-    v = m.group(1)
-    v = v.replace(" ", "")
-    return v
+    blocks: List[List[str]] = []
+    cur: List[str] = []
+    in_block = False
 
-def parse_file(txt_path: str) -> Dict[str, Any]:
-    lines_raw = read_text_auto(txt_path)
-    lines = [norm(l) for l in lines_raw if l.strip()]
+    for raw in lines:
+        l = raw.rstrip("\n")
+        if "STARTB" in l:
+            if cur:
+                blocks.append(cur)
+            cur = [l]
+            in_block = True
+            continue
 
-    venue = ""
-    ymd = ""
+        if in_block:
+            cur.append(l)
+            if "ENDB" in l:
+                blocks.append(cur)
+                cur = []
+                in_block = False
 
-    # まずヘッダ付近から venue / date を拾う
-    for l in lines[:80]:
-        if (not venue) and ("ボートレース" in l):
-            v = parse_venue_from_line(l)
-            if v:
-                venue = v
+    if cur:
+        blocks.append(cur)
 
-        # 年月日（最優先）
-        m = re.search(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日", l)
+    # normして空行削除
+    out: List[List[str]] = []
+    for b in blocks:
+        bb = [norm(x) for x in b if x.strip()]
+        if bb:
+            out.append(bb)
+    return out
+
+def parse_venue(block: List[str]) -> str:
+    """
+    "ボートレース大 村 3月 3日 ..." のような行から venue を復元
+    "大 村" → "大村" になるようにする
+    """
+    for l in block[:80]:
+        if "ボートレース" not in l:
+            continue
+        s = l.replace("ボートレース", "").strip()
+
+        # 月が出る手前までを venue とする
+        m = re.search(r"\d{1,2}月", s)
+        head = s[:m.start()] if m else s
+
+        # 空白除去して venue 完成
+        v = head.replace(" ", "").strip()
+        if v:
+            return v
+    return ""
+
+def parse_date(block: List[str]) -> str:
+    """
+    年月日があればそれを優先。なければ月日+今年で補完。
+    """
+    for l in block[:120]:
+        m = RE_YMD.search(l)
         if m:
             y, mo, d = m.groups()
-            ymd = f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
-            break
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
 
-    # 年が取れない場合は、月日だけから補完（今年扱い）
-    if not ymd:
-        for l in lines[:120]:
-            m2 = re.search(r"([0-9]{1,2})月\s*([0-9]{1,2})日", l)
-            if m2:
-                mo, d = m2.groups()
-                y = datetime.now(JST).year
-                try:
-                    ymd = f"{y:04d}-{int(mo):02d}-{int(d):02d}"
-                    break
-                except Exception:
-                    pass
+    for l in block[:160]:
+        m2 = RE_MD.search(l)
+        if m2:
+            mo, d = m2.groups()
+            y = datetime.now(JST).year
+            return f"{y:04d}-{int(mo):02d}-{int(d):02d}"
 
+    return ""
+
+def parse_races(block: List[str]) -> List[Dict[str, Any]]:
     races: List[Dict[str, Any]] = []
     cur: Optional[Dict[str, Any]] = None
 
-    for l in lines:
+    for l in block:
         mh = RE_RACE_HEAD.search(l)
         if mh:
             if cur:
@@ -165,19 +204,12 @@ def parse_file(txt_path: str) -> Dict[str, Any]:
     if cur:
         races.append(cur)
 
-    return {
-        "source": os.path.basename(txt_path),
-        "venue": venue,
-        "date": ymd,
-        "parsed_at": datetime.now(JST).isoformat(),
-        "races": races,
-    }
+    return races
 
 def classify_race(race: Dict[str, Any]) -> List[str]:
     tags: List[str] = []
     nm = race.get("name", "") or ""
 
-    # 女子戦（安全：文字がある時だけ）
     if any(k in nm for k in ["女子", "レディース", "ヴィーナス", "クイーン", "オールレディース"]):
         tags.append("女子戦")
 
@@ -188,7 +220,6 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
 
         if b2 >= 2:
             tags.append("新人多め")
-
         if (b2 >= 2 and low >= 3) or (low >= 5):
             tags.append("荒れ注意")
 
@@ -202,21 +233,49 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
 
 def main():
     txt_path = infer_txt_path()
+    lines_raw = read_text_auto(txt_path)
 
-    data = parse_file(txt_path)
+    blocks = split_blocks(lines_raw)
 
-    for r in data["races"]:
-        r["tags"] = classify_race(r)
+    venues_out: List[Dict[str, Any]] = []
+    for b in blocks:
+        venue = parse_venue(b)
+        ymd = parse_date(b)
+        races = parse_races(b)
+
+        # レースが取れないブロックは捨てる（ゴミ/ヘッダだけ等）
+        if not venue or not races:
+            continue
+
+        for r in races:
+            r["tags"] = classify_race(r)
+
+        venues_out.append({
+            "venue": venue,
+            "date": ymd,
+            "races": races,
+        })
+
+    # 日付は先頭 venue の日付を代表として置く
+    top_date = venues_out[0]["date"] if venues_out else ""
+
+    payload: Dict[str, Any] = {
+        "source": os.path.basename(txt_path),
+        "date": top_date,
+        "parsed_at": datetime.now(JST).isoformat(),
+        "venue_count": len(venues_out),
+        "venues": venues_out,
+    }
 
     out_path = os.path.join("data", "mbrace_races_today.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print("txt:", txt_path)
-    print("venue:", data["venue"])
-    print("date:", data["date"])
-    print("races:", len(data["races"]))
+    print("venues:", len(venues_out))
+    if venues_out:
+        print("first_venue:", venues_out[0]["venue"], "races:", len(venues_out[0]["races"]))
 
 if __name__ == "__main__":
     main()
