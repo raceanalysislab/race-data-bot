@@ -14,7 +14,7 @@ TRANS = str.maketrans({
     "０": "0", "１": "1", "２": "2", "３": "3", "４": "4",
     "５": "5", "６": "6", "７": "7", "８": "8", "９": "9",
     "Ｒ": "R", "Ｈ": "H", "ｍ": "m", "：": ":", "　": " ",
-    "％": "%", "－": "-", "―": "-", "−": "-", "　": " ",
+    "％": "%", "－": "-", "―": "-", "−": "-",
 })
 
 def norm(s: str) -> str:
@@ -32,7 +32,21 @@ RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 
-RE_BOAT_START = re.compile(r"^\s*([1-6])\s+(\d{4})\s+")
+# ✅ 重要：登録番号の直後にスペースが無くてもOK
+# 例: "1 5285若林 麗26東京53B1 3.74 ..."
+RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
+
+# ✅ 「年齢 支部 体重 級別」を“スペース無し”でも拾う
+# 例: "... 麗26東京53B1 3.74 ..." / "... 麗 26 東京 53 B1 3.74 ..."
+RE_META = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*(A1|A2|B1|B2)\s+")
+
+# ✅ その後ろの数値列（勝率等）。ここが確定できれば1艇として成立。
+RE_TAIL = re.compile(
+    r"^\s*([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
+    r"([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
+    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s+"
+    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s*(.*)$"
+)
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -68,10 +82,6 @@ def infer_txt_path() -> str:
     return os.path.join("data", "extract", "b260303.txt")
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
-    """
-    STARTB...FINALB の中に、会場単位で xxBBGN ... xxBEND が複数入る想定。
-    xxBBGN...xxBEND でブロック分割。
-    """
     blocks: List[List[str]] = []
     cur: List[str] = []
     in_block = False
@@ -104,14 +114,10 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     return out
 
 def parse_venue(block: List[str]) -> str:
-    """
-    "ボートレース大 村 3月 3日 ..." → "大村"
-    """
     for l in block[:120]:
         if "ボートレース" not in l:
             continue
         s = l.replace("ボートレース", "").strip()
-
         m = re.search(r"\d{1,2}月", s)
         head = s[:m.start()] if m else s
         v = head.replace(" ", "").strip()
@@ -135,92 +141,57 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
-def _to_int(x: str) -> Optional[int]:
-    try:
-        return int(x)
-    except Exception:
-        return None
-
-def _to_float(x: str) -> Optional[float]:
-    try:
-        return float(x)
-    except Exception:
-        return None
-
-def _looks_age(tok: str) -> bool:
-    # 年齢は 10〜79 くらいで来る（保険で 8〜85）
-    if not tok.isdigit():
-        return False
-    v = int(tok)
-    return 8 <= v <= 85
-
-def _parse_boat_line_split(line: str) -> Optional[Dict[str, Any]]:
+def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
-    regex依存をやめて、split + 「年齢の位置」基準で切る。
-    想定： [waku, regno, name..., age, branch, weight, grade, nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, rest...]
-    途中に記号やS/Fなどが混ざっても「後ろは余りとしてnote」に落とすので落ちにくい。
+    1艇行を落とさず取る（強化版）
+    - 登録番号の直後にスペース無しOK（5285若林）
+    - 名前+年齢がくっつくOK（麗26）
+    - 末尾の数値列(RE_TAIL)で確定させる
     """
     line = norm(line)
-    m = RE_BOAT_START.match(line)
-    if not m:
+    mp = RE_BOAT_PREFIX.match(line)
+    if not mp:
         return None
 
-    tokens = line.split()
-    if len(tokens) < 8:
+    waku = int(mp.group(1))
+    regno = int(mp.group(2))
+    rest = (mp.group(3) or "").strip()
+
+    mm = RE_META.search(rest)
+    if not mm:
         return None
 
-    waku = _to_int(tokens[0])
-    regno = _to_int(tokens[1])
-    if not waku or not regno:
+    age = int(mm.group(1))
+    branch = mm.group(2)
+    weight = int(mm.group(3))
+    grade = mm.group(4)
+
+    name_raw = rest[:mm.start()].strip()
+    name = (name_raw or "").replace(" ", "")
+
+    tail = rest[mm.end():]
+    mt = RE_TAIL.match(tail)
+    if not mt:
         return None
 
-    # 年齢の位置を探す（名前に空白が入るのでここが肝）
-    age_index = None
-    for i in range(2, len(tokens)):
-        if _looks_age(tokens[i]):
-            age_index = i
-            break
-    if age_index is None:
-        return None
+    nat_win = float(mt.group(1))
+    nat_2   = float(mt.group(2))
+    loc_win = float(mt.group(3))
+    loc_2   = float(mt.group(4))
+    motor_no = int(mt.group(5))
+    motor_2  = float(mt.group(6))
+    boat_no  = int(mt.group(7))
+    boat_2   = float(mt.group(8))
+    note = (mt.group(9) or "").strip()
 
-    name = "".join(tokens[2:age_index]).replace(" ", "")
-    # 以降は足りなければnoteに落とす
-    tail = tokens[age_index:]
-
-    # 必須セット（足りなければ不成立）
-    # age branch weight grade nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2
-    if len(tail) < 12:
-        return None
-
-    age = _to_int(tail[0])
-    branch = tail[1]
-    weight = _to_int(tail[2])
-
-    grade = tail[3]  # A1/A2/B1/B2 以外が来てもそのまま（落とさない）
-    nat_win = _to_float(tail[4])
-    nat_2   = _to_float(tail[5])
-    loc_win = _to_float(tail[6])
-    loc_2   = _to_float(tail[7])
-    motor_no = _to_int(tail[8])
-    motor_2  = _to_float(tail[9])
-    boat_no  = _to_int(tail[10])
-    boat_2   = _to_float(tail[11])
-
-    rest = " ".join(tail[12:]).strip() if len(tail) > 12 else ""
-
-    # 数値が壊れてる場合も落とさず noteへ（ただし主要がNoneだらけなら無理）
-    if age is None or weight is None:
-        return None
-
-    # 小数が取れない場合は None のままでも出す（UIでは空になる）
     return {
-        "waku": int(waku),
-        "regno": int(regno),
+        "waku": waku,
+        "regno": regno,
         "name": name,
-        "age": int(age),
+        "age": age,
         "branch": branch,
-        "weight": int(weight),
-        "grade": str(grade),
+        "weight": weight,
+        "grade": grade,
         "nat_win": nat_win,
         "nat_2": nat_2,
         "loc_win": loc_win,
@@ -229,19 +200,13 @@ def _parse_boat_line_split(line: str) -> Optional[Dict[str, Any]]:
         "motor_2": motor_2,
         "boat_no": boat_no,
         "boat_2": boat_2,
-        "note": rest,
+        "note": note,
     }
-
-def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
-    """
-    今後の拡張のため入口を1つにする。
-    """
-    return _parse_boat_line_split(line)
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    UIで 1〜6 を必ず並べたい。
-    欠けてる枠は placeholder を入れて埋める（欠場扱いではないが、欠損が目視できる）。
+    UIで 1〜6 を必ず並べる。
+    欠けてる枠は placeholder を入れて埋める（欠場扱いではなく「取得失敗」表示用）
     """
     m = {int(b.get("waku")): b for b in boats if b.get("waku") is not None}
     out: List[Dict[str, Any]] = []
@@ -266,7 +231,7 @@ def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "boat_no": None,
                 "boat_2": None,
                 "note": "WARNING: missing row (parser could not extract this boat line)",
-                "_missing": True,
+                "_missing": True
             })
     return out
 
@@ -281,7 +246,6 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
         mh = RE_RACE_HEAD.search(l)
         if mh:
             if cur:
-                # 6枠に整形（UIで欠番が出ない）
                 cur["boats"] = _fill_missing_waku(cur.get("boats", []))
                 races.append(cur)
             cur = {
@@ -299,18 +263,17 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
             i += 1
             continue
 
-        # 第1段：通常1行パース（split）
+        # ✅ 第1段：通常1行
         boat = _parse_boat_line(l)
 
-        # 第2段：行折り返し対策（次行と結合して再トライ）
-        if not boat:
-            if RE_BOAT_START.match(l) and i + 1 < len(block):
-                nxt = block[i + 1]
-                # 次行が別艇 or レース見出しなら結合しない
-                if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_START.match(nxt)):
-                    boat = _parse_boat_line(l + " " + nxt)
-                    if boat:
-                        i += 1  # 次行を消費
+        # ✅ 第2段：行折り返し対策（次行と結合して再トライ）
+        if not boat and i + 1 < len(block):
+            nxt = block[i + 1]
+            # 次行がレース見出し or 別艇の先頭なら結合しない
+            if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(nxt)):
+                boat = _parse_boat_line(l + " " + nxt)
+                if boat:
+                    i += 1  # 次行を消費
 
         if boat:
             cur["boats"].append(boat)
@@ -348,7 +311,6 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
             if weak >= 4:
                 tags.append("鉄板寄り")
 
-    # 取りこぼし検知
     if any(b.get("_missing") for b in boats):
         tags.append("要確認")
 
@@ -357,7 +319,6 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
 def main():
     txt_path = infer_txt_path()
     lines_raw = read_text_auto(txt_path)
-
     blocks = split_blocks(lines_raw)
 
     venues_out: List[Dict[str, Any]] = []
@@ -373,7 +334,6 @@ def main():
 
         for r in races:
             r["tags"] = classify_race(r)
-
             boats = r.get("boats") or []
             missing = sum(1 for bb in boats if bb.get("_missing"))
             if missing:
