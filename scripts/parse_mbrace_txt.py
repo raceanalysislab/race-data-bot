@@ -6,7 +6,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 JST = timezone(timedelta(hours=9))
 
@@ -40,6 +40,7 @@ RE_BOAT_LINE = re.compile(
 RE_YMD = re.compile(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 
+
 def read_text_auto(path: str) -> List[str]:
     # mbrace txt は cp932 のことが多い
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -50,6 +51,7 @@ def read_text_auto(path: str) -> List[str]:
             pass
     with open(path, "r", encoding="cp932", errors="ignore") as f:
         return f.readlines()
+
 
 def infer_txt_path() -> str:
     """
@@ -69,7 +71,7 @@ def infer_txt_path() -> str:
         except Exception:
             pass
 
-    # フォールバック：extract内のb******.txtを探す
+    # フォールバック：extract内のb******.txtを探す（最新っぽいの）
     exdir = os.path.join("data", "extract")
     if os.path.isdir(exdir):
         cands = [fn for fn in os.listdir(exdir) if re.match(r"^b\d{6}\.txt$", fn, re.IGNORECASE)]
@@ -77,31 +79,41 @@ def infer_txt_path() -> str:
             cands.sort()
             return os.path.join(exdir, cands[-1])
 
+    # 最終フォールバック
     return os.path.join("data", "extract", "b260303.txt")
 
-def split_blocks(lines: List[str]) -> List[List[str]]:
+
+def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     """
-    STARTB ... ENDB を1ブロックとして分割
+    STARTB...ENDB を1ブロックとして分割（ENDBが無い/崩れても動く）
+    - STARTB が来たら新ブロック開始
+    - 次の STARTB が来たら前ブロック確定（ENDBが無くてもOK）
+    - ENDB が来たらそこでブロック確定
     """
     blocks: List[List[str]] = []
     cur: List[str] = []
     in_block = False
 
-    for raw in lines:
-        l = raw.rstrip("\n")
-        if "STARTB" in l:
+    for raw in lines_raw:
+        l0 = raw.rstrip("\n")
+
+        if "STARTB" in l0:
+            # 既存ブロックがあれば確定
             if cur:
                 blocks.append(cur)
-            cur = [l]
+            cur = [l0]
             in_block = True
             continue
 
-        if in_block:
-            cur.append(l)
-            if "ENDB" in l:
-                blocks.append(cur)
-                cur = []
-                in_block = False
+        if not in_block:
+            continue
+
+        cur.append(l0)
+
+        if "ENDB" in l0:
+            blocks.append(cur)
+            cur = []
+            in_block = False
 
     if cur:
         blocks.append(cur)
@@ -114,37 +126,40 @@ def split_blocks(lines: List[str]) -> List[List[str]]:
             out.append(bb)
     return out
 
+
 def parse_venue(block: List[str]) -> str:
     """
     "ボートレース大 村 3月 3日 ..." のような行から venue を復元
     "大 村" → "大村" になるようにする
     """
-    for l in block[:80]:
+    for l in block[:120]:
         if "ボートレース" not in l:
             continue
+
         s = l.replace("ボートレース", "").strip()
 
         # 月が出る手前までを venue とする
         m = re.search(r"\d{1,2}月", s)
         head = s[:m.start()] if m else s
 
-        # 空白除去して venue 完成
         v = head.replace(" ", "").strip()
         if v:
             return v
+
     return ""
+
 
 def parse_date(block: List[str]) -> str:
     """
     年月日があればそれを優先。なければ月日+今年で補完。
     """
-    for l in block[:120]:
+    for l in block[:200]:
         m = RE_YMD.search(l)
         if m:
             y, mo, d = m.groups()
             return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
 
-    for l in block[:160]:
+    for l in block[:260]:
         m2 = RE_MD.search(l)
         if m2:
             mo, d = m2.groups()
@@ -153,11 +168,16 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
+
 def parse_races(block: List[str]) -> List[Dict[str, Any]]:
     races: List[Dict[str, Any]] = []
     cur: Optional[Dict[str, Any]] = None
 
     for l in block:
+        # 余計な境界文字は無視（保険）
+        if "STARTB" in l or "ENDB" in l:
+            continue
+
         mh = RE_RACE_HEAD.search(l)
         if mh:
             if cur:
@@ -206,6 +226,7 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
 
     return races
 
+
 def classify_race(race: Dict[str, Any]) -> List[str]:
     tags: List[str] = []
     nm = race.get("name", "") or ""
@@ -230,6 +251,7 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
                 tags.append("鉄板寄り")
 
     return tags
+
 
 def main():
     txt_path = infer_txt_path()
@@ -256,7 +278,7 @@ def main():
             "races": races,
         })
 
-    # 日付は先頭 venue の日付を代表として置く
+    # 日付は先頭 venue の日付を代表として置く（無ければ空）
     top_date = venues_out[0]["date"] if venues_out else ""
 
     payload: Dict[str, Any] = {
@@ -276,6 +298,7 @@ def main():
     print("venues:", len(venues_out))
     if venues_out:
         print("first_venue:", venues_out[0]["venue"], "races:", len(venues_out[0]["races"]))
+
 
 if __name__ == "__main__":
     main()
