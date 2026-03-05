@@ -60,14 +60,21 @@ jobs:
       # ★ 追加：サイト用JSON生成
       - name: Build site json
         run: |
+          test -f data/venues_today.json
+          test -f data/mbrace_races_today.json
           python scripts/build_site_json.py
 
       - name: Show outputs (quick debug)
         run: |
+          echo "----- data -----"
           ls -la data || true
+          echo "----- data/extract -----"
           ls -la data/extract || true
+          echo "----- data/site -----"
           ls -la data/site || true
+          echo "----- venues_today.json (head) -----"
           head -n 40 data/venues_today.json || true
+          echo "----- mbrace_races_today.json (head) -----"
           head -n 40 data/mbrace_races_today.json || true
 
       - name: Commit fetched data
@@ -75,6 +82,7 @@ jobs:
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
 
+          # data/ 配下をまるごと確実に拾う（siteも含む）
           git add -A data || true
 
           if git diff --cached --quiet; then
