@@ -35,15 +35,15 @@ RE_BEND = re.compile(r"\b\d{2}BEND\b")
 # ✅ 艇行の先頭（登録番号の直後はスペース無しでもOK）
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
-# ✅ 小数は「1〜2桁」許容（47.1 / 48.0 / 0.0 を落とさない）
+# ✅ 小数は「1〜2桁」許容（47.1 / 48.0 / 0.0 / 30.00）
 FLOAT = r"[0-9]+\.[0-9]{1,2}"
 FLOATP = rf"{FLOAT}%?"
 
-# ✅ 行末の数値列（ここを後ろから確定する）
+# ✅ 行末の数値列（後ろから確定）
 # nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 （+残りnote）
 # ★重要：
 #  - boat_no は 1〜3桁（例: 156, 172）を許容
-#  - motor_2 と boat_no の間はスペース無しでもOK（例: 30.00156）
+#  - motor_2 と boat_no の間はスペース無しでもOK（例: 30.00156）→ 事前に分割もする
 RE_TAIL = re.compile(
     rf"({FLOATP})\s+({FLOATP})\s+"
     rf"({FLOATP})\s+({FLOATP})\s+"
@@ -54,9 +54,8 @@ RE_TAIL = re.compile(
 # ✅ grade の直前（スペース無しでもOK）
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 
-# ✅ 「年齢 支部 体重」を“後ろから”確定（スペース無しでもOK）
+# ✅ 「年齢 支部 体重」を後ろから確定（スペース無しでもOK）
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
-
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -92,29 +91,34 @@ def infer_txt_path() -> str:
     return os.path.join("data", "extract", "b260303.txt")
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
+    """
+    ✅重要：福岡みたいに BBGN が付かない“先頭会場”がある。
+    なので「BBGNで始まるブロック」だけでなく、BBGNより前の先頭部分も1ブロックとして拾う。
+    さらに BEND が無い/欠けても、次のBBGN or EOF で閉じるようにする。
+    """
     blocks: List[List[str]] = []
     cur: List[str] = []
-    in_block = False
 
     for raw in lines_raw:
         l = raw.rstrip("\n")
+
         if RE_BBGN.search(l):
+            # 新しい会場ブロックが始まる → それまでのcurも保存（先頭会場用）
             if cur:
                 blocks.append(cur)
             cur = [l]
-            in_block = True
             continue
 
-        if in_block:
-            cur.append(l)
-            if RE_BEND.search(l):
-                blocks.append(cur)
-                cur = []
-                in_block = False
+        cur.append(l)
+
+        if RE_BEND.search(l):
+            blocks.append(cur)
+            cur = []
 
     if cur:
         blocks.append(cur)
 
+    # norm + 空行除去
     out: List[List[str]] = []
     for b in blocks:
         bb = [norm(x) for x in b if x.strip()]
@@ -123,10 +127,12 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     return out
 
 def parse_venue(block: List[str]) -> str:
-    for l in block[:120]:
+    for l in block[:200]:
         if "ボートレース" not in l:
             continue
         s = l.replace("ボートレース", "").strip()
+
+        # 例: "福 岡 3月 5日 ..." / "福 岡 ３月 ５日 ..."
         m = re.search(r"\d{1,2}月", s)
         head = s[:m.start()] if m else s
         v = head.replace(" ", "").strip()
@@ -135,13 +141,13 @@ def parse_venue(block: List[str]) -> str:
     return ""
 
 def parse_date(block: List[str]) -> str:
-    for l in block[:200]:
+    for l in block[:300]:
         m = RE_YMD.search(l)
         if m:
             y, mo, d = m.groups()
             return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
 
-    for l in block[:260]:
+    for l in block[:340]:
         m2 = RE_MD.search(l)
         if m2:
             mo, d = m2.groups()
@@ -164,26 +170,25 @@ def _to_int(x: str) -> Optional[int]:
 
 def _deglue_numbers(s: str) -> str:
     """
-    福岡/芦屋で出る「30.00156」「0.00103」「33.33174」みたいな
-    [小数(2桁)] + [2〜3桁整数] の連結を、スペースで分割する。
-    例: "45 30.00156 0.00" -> "45 30.00 156 0.00"
+    ✅福岡/芦屋で出る “連結” を壊す
+      - motor_2 + boat_no: 30.00156 / 0.00103 / 33.33174 等
+    これを "30.00 156" のように分割する。
     """
     s = norm(s)
 
-    # 小数の直後に2〜3桁の整数が連結していて、その後ろがスペース or 小数で続くパターンを分割
-    # 末尾や次が小数/空白でも安全に効くように複数回回す
-    for _ in range(3):
+    # 「小数(1-2桁)」+「2-3桁整数」が連結していたら分割
+    # 例: 30.00156 -> 30.00 156
+    for _ in range(4):
         s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
         if s2 == s:
             break
         s = s2
-
     return s
 
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
-    後ろ（数値列）→ grade → 年齢/支部/体重 の順に確定するので、詰め行に強い。
-    さらに _deglue_numbers() で「30.00156」系を必ず分割してから解析する。
+    後ろ（数値列）→ grade → 年齢/支部/体重 の順で確定。
+    事前に _deglue_numbers() を通して、福岡/芦屋の詰め行でも落とさない。
     """
     line = _deglue_numbers(line)
     mp = RE_BOAT_PREFIX.match(line)
@@ -196,21 +201,22 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     if not waku or not regno or not rest_all:
         return None
 
-    # ① 行末の数値列を確定
     rest_all = _deglue_numbers(rest_all)
+
+    # ① 行末の数値列（8項目）を後ろから確定
     mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
 
-    nat_win = _to_float(mt.group(1))
-    nat_2   = _to_float(mt.group(2))
-    loc_win = _to_float(mt.group(3))
-    loc_2   = _to_float(mt.group(4))
+    nat_win  = _to_float(mt.group(1))
+    nat_2    = _to_float(mt.group(2))
+    loc_win  = _to_float(mt.group(3))
+    loc_2    = _to_float(mt.group(4))
     motor_no = _to_int(mt.group(5))
     motor_2  = _to_float(mt.group(6))
     boat_no  = _to_int(mt.group(7))
     boat_2   = _to_float(mt.group(8))
-    note = (mt.group(9) or "").strip()
+    note     = (mt.group(9) or "").strip()
 
     if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
         return None
@@ -320,7 +326,8 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
         # ✅ 行折り返し対策（次行と結合して再トライ）
         if not boat and i + 1 < len(block):
             nxt = block[i + 1]
-            if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(_deglue_numbers(nxt))):
+            nxt2 = _deglue_numbers(nxt)
+            if (not RE_RACE_HEAD.search(nxt2)) and (not RE_BOAT_PREFIX.match(nxt2)):
                 boat = _parse_boat_line(l + " " + nxt)
                 if boat:
                     i += 1
