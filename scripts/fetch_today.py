@@ -45,14 +45,12 @@ def _session() -> requests.Session:
 
 
 def _is_blocked(html: str) -> bool:
-    s = html or ""
-    needles = [
-        "不正なURLへのリクエストです",
-        "アクセスが集中",
-        "/login",
-        "ログイン",
-    ]
-    return any(n in s for n in needles)
+    """
+    boatrace の HTML には普通に「ログイン」「/login」が含まれることがあるため、
+    それを blocked 判定に入れると誤爆して開催場が全部 false になる。
+    ここは最小限（明確なブロック文言のみ）にする。
+    """
+    return "不正なURLへのリクエストです" in (html or "")
 
 
 def _extract_held_from_today(html: str) -> List[str]:
