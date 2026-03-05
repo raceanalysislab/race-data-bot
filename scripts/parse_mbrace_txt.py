@@ -57,6 +57,7 @@ RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 # ✅ 「年齢 支部 体重」を“後ろから”確定（スペース無しでもOK）
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
+
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
         try:
@@ -161,12 +162,30 @@ def _to_int(x: str) -> Optional[int]:
     except Exception:
         return None
 
+def _deglue_numbers(s: str) -> str:
+    """
+    福岡/芦屋で出る「30.00156」「0.00103」「33.33174」みたいな
+    [小数(2桁)] + [2〜3桁整数] の連結を、スペースで分割する。
+    例: "45 30.00156 0.00" -> "45 30.00 156 0.00"
+    """
+    s = norm(s)
+
+    # 小数の直後に2〜3桁の整数が連結していて、その後ろがスペース or 小数で続くパターンを分割
+    # 末尾や次が小数/空白でも安全に効くように複数回回す
+    for _ in range(3):
+        s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
+        if s2 == s:
+            break
+        s = s2
+
+    return s
+
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
     後ろ（数値列）→ grade → 年齢/支部/体重 の順に確定するので、詰め行に強い。
-    福岡/芦屋の「30.00156」(motor_2+boat_no 連結) と boat_no 3桁にも対応。
+    さらに _deglue_numbers() で「30.00156」系を必ず分割してから解析する。
     """
-    line = norm(line)
+    line = _deglue_numbers(line)
     mp = RE_BOAT_PREFIX.match(line)
     if not mp:
         return None
@@ -178,6 +197,7 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
         return None
 
     # ① 行末の数値列を確定
+    rest_all = _deglue_numbers(rest_all)
     mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
@@ -300,7 +320,7 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
         # ✅ 行折り返し対策（次行と結合して再トライ）
         if not boat and i + 1 < len(block):
             nxt = block[i + 1]
-            if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(nxt)):
+            if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(_deglue_numbers(nxt))):
                 boat = _parse_boat_line(l + " " + nxt)
                 if boat:
                     i += 1
