@@ -2,12 +2,14 @@ import json
 import os
 
 SRC = "data/mbrace_races_today.json"
-OUT_DIR = "data/site/races"
+OUT = "data/site/races"
 
-os.makedirs(OUT_DIR, exist_ok=True)
+os.makedirs(OUT, exist_ok=True)
 
 with open(SRC, encoding="utf-8") as f:
     data = json.load(f)
+
+count = 0
 
 for venue in data["venues"]:
 
@@ -24,9 +26,12 @@ for venue in data["venues"]:
         }
 
         fname = f"{venue_name}_{rno}R.json"
-        path = os.path.join(OUT_DIR, fname)
+
+        path = os.path.join(OUT, fname)
 
         with open(path, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, indent=2)
 
-print("race json created")
+        count += 1
+
+print("created:", count, "race json files")
