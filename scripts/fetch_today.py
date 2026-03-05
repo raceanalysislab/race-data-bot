@@ -51,7 +51,6 @@ def _is_blocked(html: str) -> bool:
         "アクセスが集中",
         "/login",
         "ログイン",
-        "エラー",
     ]
     return any(n in s for n in needles)
 
