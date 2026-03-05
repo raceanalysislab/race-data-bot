@@ -41,11 +41,14 @@ FLOATP = rf"{FLOAT}%?"
 
 # ✅ 行末の数値列（ここを後ろから確定する）
 # nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 （+残りnote）
+# ★重要：
+#  - boat_no は 1〜3桁（例: 156, 172）を許容
+#  - motor_2 と boat_no の間はスペース無しでもOK（例: 30.00156）
 RE_TAIL = re.compile(
     rf"({FLOATP})\s+({FLOATP})\s+"
     rf"({FLOATP})\s+({FLOATP})\s+"
-    rf"(\d{{1,2}})\s+({FLOATP})\s+"
-    rf"(\d{{1,2}})\s+({FLOATP})\s*(.*)$"
+    rf"(\d{{1,3}})\s+({FLOATP})\s*"
+    rf"(\d{{1,3}})\s+({FLOATP})\s*(.*)$"
 )
 
 # ✅ grade の直前（スペース無しでもOK）
@@ -161,6 +164,7 @@ def _to_int(x: str) -> Optional[int]:
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
     後ろ（数値列）→ grade → 年齢/支部/体重 の順に確定するので、詰め行に強い。
+    福岡/芦屋の「30.00156」(motor_2+boat_no 連結) と boat_no 3桁にも対応。
     """
     line = norm(line)
     mp = RE_BOAT_PREFIX.match(line)
@@ -360,7 +364,6 @@ def main():
 
         for r in races:
             r["tags"] = classify_race(r)
-
             boats = r.get("boats") or []
             missing = sum(1 for bb in boats if bb.get("_missing"))
             if missing:
