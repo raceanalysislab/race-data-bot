@@ -25,19 +25,19 @@ RE_RACE_HEAD = re.compile(
     r"^\s*([0-9]{1,2})R\s+(.+?)\s+(進入固定|進入自由)?\s*H?([0-9]{3,4})m.*?締切予定\s*([0-9]{1,2}:[0-9]{2})"
 )
 
-RE_BOAT_LINE = re.compile(
-    r"^\s*([1-6])\s+(\d{4})\s*(\S+?)\s*([0-9]{1,2})\s*([^\d\s]{2,6})\s*([0-9]{2})\s*(A1|A2|B1|B2)\s+"
+# ✅ 重要：名前は空白を含む可能性があるので「年齢（数字）」の直前までを非貪欲で取る
+RE_BOAT_LINE_V2 = re.compile(
+    r"^\s*([1-6])\s+(\d{4})\s+(.+?)\s+([0-9]{1,2})\s+([^\d\s]{2,6})\s+([0-9]{2})\s+(A1|A2|B1|B2)\s+"
     r"([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
     r"([0-9]+\.[0-9]{2})\s+([0-9]+\.[0-9]{2})\s+"
     r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s+"
-    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s+"
+    r"(\d{1,2})\s+([0-9]+\.[0-9]{2})\s*"
     r"(.*)$"
 )
 
 RE_YMD = re.compile(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 
-# xxBBGN / xxBEND（例: 24BBGN, 03BEND）
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 
@@ -72,14 +72,9 @@ def infer_txt_path() -> str:
             cands.sort()
             return os.path.join(exdir, cands[-1])
 
-    # 最後の保険
     return os.path.join("data", "extract", "b260303.txt")
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
-    """
-    実データは STARTB...FINALB の中に、会場単位で xxBBGN ... xxBEND が複数入る。
-    なので xxBBGN...xxBEND でブロック分割する。
-    """
     blocks: List[List[str]] = []
     cur: List[str] = []
     in_block = False
@@ -88,7 +83,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
         l = raw.rstrip("\n")
 
         if RE_BBGN.search(l):
-            # 新ブロック開始
             if cur:
                 blocks.append(cur)
             cur = [l]
@@ -105,7 +99,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     if cur:
         blocks.append(cur)
 
-    # norm + 空行除去
     out: List[List[str]] = []
     for b in blocks:
         bb = [norm(x) for x in b if x.strip()]
@@ -114,9 +107,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     return out
 
 def parse_venue(block: List[str]) -> str:
-    """
-    "ボートレース大 村 3月 3日 ..." → "大村"
-    """
     for l in block[:120]:
         if "ボートレース" not in l:
             continue
@@ -145,11 +135,46 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
+def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
+    """
+    1行の艇データをできるだけ落とさずに取る。
+    - 名前に空白があってもOK（V2）
+    """
+    mb = RE_BOAT_LINE_V2.match(line)
+    if not mb:
+        return None
+
+    (waku, regno, name, age, branch, weight, grade,
+     nat_win, nat_2, loc_win, loc_2,
+     motor_no, motor_2, boat_no, boat_2, rest) = mb.groups()
+
+    return {
+        "waku": int(waku),
+        "regno": int(regno),
+        "name": (name or "").replace(" ", ""),  # 表示は詰める
+        "age": int(age),
+        "branch": branch,
+        "weight": int(weight),
+        "grade": grade,
+        "nat_win": float(nat_win),
+        "nat_2": float(nat_2),
+        "loc_win": float(loc_win),
+        "loc_2": float(loc_2),
+        "motor_no": int(motor_no),
+        "motor_2": float(motor_2),
+        "boat_no": int(boat_no),
+        "boat_2": float(boat_2),
+        "note": (rest or "").strip(),
+    }
+
 def parse_races(block: List[str]) -> List[Dict[str, Any]]:
     races: List[Dict[str, Any]] = []
     cur: Optional[Dict[str, Any]] = None
 
-    for l in block:
+    i = 0
+    while i < len(block):
+        l = block[i]
+
         mh = RE_RACE_HEAD.search(l)
         if mh:
             if cur:
@@ -162,38 +187,37 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                 "cutoff": mh.group(5),
                 "boats": []
             }
+            i += 1
             continue
 
         if not cur:
+            i += 1
             continue
 
-        mb = RE_BOAT_LINE.match(l)
-        if mb:
-            (waku, regno, name, age, branch, weight, grade,
-             nat_win, nat_2, loc_win, loc_2,
-             motor_no, motor_2, boat_no, boat_2, rest) = mb.groups()
+        # ✅ 第1段：通常パース
+        boat = _parse_boat_line(l)
 
-            cur["boats"].append({
-                "waku": int(waku),
-                "regno": int(regno),
-                "name": name.replace(" ", ""),
-                "age": int(age),
-                "branch": branch,
-                "weight": int(weight),
-                "grade": grade,
-                "nat_win": float(nat_win),
-                "nat_2": float(nat_2),
-                "loc_win": float(loc_win),
-                "loc_2": float(loc_2),
-                "motor_no": int(motor_no),
-                "motor_2": float(motor_2),
-                "boat_no": int(boat_no),
-                "boat_2": float(boat_2),
-                "note": rest.strip(),
-            })
+        # ✅ 第2段：行折り返し対策（次行と結合して再トライ）
+        if not boat:
+            if re.match(r"^\s*[1-6]\s+\d{4}\s+", l) and i + 1 < len(block):
+                nxt = block[i + 1]
+                # 次行が別の艇/レース見出しなら結合しない
+                if (not RE_RACE_HEAD.search(nxt)) and (not re.match(r"^\s*[1-6]\s+\d{4}\s+", nxt)):
+                    boat = _parse_boat_line(l + " " + nxt)
+                    if boat:
+                        i += 1  # 次行を消費
+
+        if boat:
+            cur["boats"].append(boat)
+
+        i += 1
 
     if cur:
         races.append(cur)
+
+    # ✅ 第3段：取りこぼし検知（後でログで追える）
+    # ここでは削らず、そのまま出す（欠損に気づけるように）
+    # build側で 6人に満たないレースがあればアラートに使える
     return races
 
 def classify_race(race: Dict[str, Any]) -> List[str]:
@@ -228,6 +252,8 @@ def main():
     blocks = split_blocks(lines_raw)
 
     venues_out: List[Dict[str, Any]] = []
+    warnings: List[str] = []
+
     for b in blocks:
         venue = parse_venue(b)
         ymd = parse_date(b)
@@ -238,6 +264,11 @@ def main():
 
         for r in races:
             r["tags"] = classify_race(r)
+
+            # ✅ boats欠損ログ（ここで拾う）
+            boats = r.get("boats") or []
+            if len(boats) != 6:
+                warnings.append(f"{venue} {r.get('rno')}R boats={len(boats)}")
 
         venues_out.append({
             "venue": venue,
@@ -253,6 +284,7 @@ def main():
         "parsed_at": datetime.now(JST).isoformat(),
         "venue_count": len(venues_out),
         "venues": venues_out,
+        "warnings": warnings,  # ✅ 追加：欠損検知
     }
 
     out_path = os.path.join("data", "mbrace_races_today.json")
@@ -264,6 +296,12 @@ def main():
     print("venues:", len(venues_out))
     if venues_out:
         print("first_venue:", venues_out[0]["venue"], "races:", len(venues_out[0]["races"]))
+    if warnings:
+        print("WARNINGS:")
+        for w in warnings[:50]:
+            print(" -", w)
+        if len(warnings) > 50:
+            print(" - ...", len(warnings) - 50, "more")
 
 if __name__ == "__main__":
     main()
