@@ -35,20 +35,23 @@ RE_BEND = re.compile(r"\b\d{2}BEND\b")
 # ✅ 艇行の先頭（登録番号の直後はスペース無しでもOK）
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
-# ✅ 行末の数値列は比較的安定（ここを後ろから確定する）
+# ✅ 小数は「1〜2桁」許容（47.1 / 48.0 / 0.0 を落とさない）
+FLOAT = r"[0-9]+\.[0-9]{1,2}"
+FLOATP = rf"{FLOAT}%?"
+
+# ✅ 行末の数値列（ここを後ろから確定する）
 # nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 （+残りnote）
 RE_TAIL = re.compile(
-    r"([0-9]+\.[0-9]{2}%?)\s+([0-9]+\.[0-9]{2}%?)\s+"
-    r"([0-9]+\.[0-9]{2}%?)\s+([0-9]+\.[0-9]{2}%?)\s+"
-    r"(\d{1,2})\s+([0-9]+\.[0-9]{2}%?)\s+"
-    r"(\d{1,2})\s+([0-9]+\.[0-9]{2}%?)\s*(.*)$"
+    rf"({FLOATP})\s+({FLOATP})\s+"
+    rf"({FLOATP})\s+({FLOATP})\s+"
+    rf"(\d{{1,2}})\s+({FLOATP})\s+"
+    rf"(\d{{1,2}})\s+({FLOATP})\s*(.*)$"
 )
 
 # ✅ grade の直前（スペース無しでもOK）
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 
 # ✅ 「年齢 支部 体重」を“後ろから”確定（スペース無しでもOK）
-# 例: "26東京53" / "26 東京 53"
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
 def read_text_auto(path: str) -> List[str]:
@@ -157,12 +160,7 @@ def _to_int(x: str) -> Optional[int]:
 
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     """
-    ✅ 3段構えの核：後ろ（数値列）から確定して、詰め文字列でも落としにくくする
-    1) prefix: waku/regno
-    2) tail: nat_win..boat_2 (+note) を後ろから確定
-    3) tail手前: grade を後ろから確定
-    4) grade手前: age/branch/weight を後ろから確定
-    5) 残り = name
+    後ろ（数値列）→ grade → 年齢/支部/体重 の順に確定するので、詰め行に強い。
     """
     line = norm(line)
     mp = RE_BOAT_PREFIX.match(line)
@@ -175,7 +173,7 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     if not waku or not regno or not rest_all:
         return None
 
-    # ① まず末尾の数値列を確定
+    # ① 行末の数値列を確定
     mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
@@ -190,20 +188,19 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     boat_2   = _to_float(mt.group(8))
     note = (mt.group(9) or "").strip()
 
-    # 数値列が取れないなら成立しない（ここがアンカー）
     if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
         return None
 
-    head = rest_all[:mt.start()].strip()  # name+meta があるはず
+    head = rest_all[:mt.start()].strip()
 
     # ② grade を後ろから確定
     mg = RE_GRADE.search(head)
     if not mg:
         return None
     grade = mg.group(1)
-    head2 = head[:mg.start()].strip()  # name + age/branch/weight
+    head2 = head[:mg.start()].strip()
 
-    # ③ age/branch/weight を後ろから確定（スペース無しOK）
+    # ③ 年齢/支部/体重 を後ろから確定
     mm = RE_AGE_BRANCH_WEIGHT.search(head2)
     if not mm:
         return None
@@ -296,7 +293,7 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
 
         boat = _parse_boat_line(l)
 
-        # ✅ 第2段：行折り返し対策（次行と結合して再トライ）
+        # ✅ 行折り返し対策（次行と結合して再トライ）
         if not boat and i + 1 < len(block):
             nxt = block[i + 1]
             if (not RE_RACE_HEAD.search(nxt)) and (not RE_BOAT_PREFIX.match(nxt)):
