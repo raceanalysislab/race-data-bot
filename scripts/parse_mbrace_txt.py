@@ -48,7 +48,8 @@ RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
 # ===== 日目抽出用 =====
-RE_DAY_TEXT = re.compile(r"(?:第\s*)?(\d+)\s*日目?")
+# 「第 1日」「第1日」「1日目」全部拾う
+RE_DAY_TEXT = re.compile(r"(?:第\s*)?(\d+)\s*日(?:目)?")
 RE_TOTAL_DAYS_TEXT = re.compile(r"(\d+)\s*日間")
 RE_DAY_SLASH = re.compile(r"(\d+)\s*/\s*(\d+)")
 
@@ -152,6 +153,7 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     会場ブロック内から日目情報を拾う。
     想定:
       第3日
+      第 3日
       3日目
       6日間
       3/6
@@ -159,7 +161,6 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
-    # 先頭付近に出る可能性が高いので最初の120行くらいを見る
     for l in block[:120]:
         s = norm(l)
 
@@ -194,6 +195,15 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
             break
 
     return current_day, total_days
+
+def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> Optional[str]:
+    if current_day is None:
+        return None
+    if current_day == 1:
+        return "初日"
+    if total_days is not None and current_day == total_days:
+        return "最終日"
+    return f"{current_day}日目"
 
 def _to_float(x: str) -> Optional[float]:
     try:
@@ -413,6 +423,7 @@ def main():
         venue = parse_venue(b)
         ymd = parse_date(b)
         current_day, total_days = parse_day_info(b)
+        day_label = format_day_label(current_day, total_days)
         races = parse_races(b)
 
         if not venue or not races:
@@ -434,6 +445,8 @@ def main():
             venue_payload["day"] = current_day
         if total_days is not None:
             venue_payload["total_days"] = total_days
+        if day_label is not None:
+            venue_payload["day_label"] = day_label
 
         venues_out.append(venue_payload)
 
