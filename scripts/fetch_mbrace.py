@@ -6,20 +6,22 @@
 # - data/extract/bYYMMDD.txt
 #
 # 方針:
-# - 番組表は B 系だけを見る
-# - 今日分がまだ出ていない時は失敗にせず、正常終了でスキップする
-# - HEAD が通らない環境もあるため GET フォールバック付き
-# - 解凍失敗時に原因が分かるようログを出す
-# - 0KB ダウンロードを検知する
+# - 番組表は B 系のみを見る
+# - 今日分を最優先で取りに行く
+# - HEAD 判定に頼らず、実際に GET して検証する
+# - 404 HTML や壊れた LZH を自動で弾く
+# - 解凍は一時ディレクトリで行い、成功した txt だけを data/extract に移す
+# - 今日分が未公開なら失敗にせず正常終了でスキップする
 
 import os
 import re
 import shutil
 import subprocess
+import tempfile
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 JST = timezone(timedelta(hours=9))
 
@@ -27,6 +29,8 @@ DATA_DIR = "data"
 DOWNLOAD_DIR = os.path.join(DATA_DIR, "download")
 EXTRACT_DIR = os.path.join(DATA_DIR, "extract")
 SOURCE_URL_PATH = os.path.join(DATA_DIR, "source_final_url.txt")
+
+USER_AGENT = "Mozilla/5.0"
 
 def ensure_dirs() -> None:
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -42,47 +46,47 @@ def yyyymm(dt: datetime) -> str:
 def build_url(dt: datetime) -> str:
     return f"https://www.mbrace.or.jp/od2/B/{yyyymm(dt)}/b{yymmdd(dt)}.lzh"
 
-def url_exists(url: str, timeout: int = 20) -> bool:
-    try:
-        req = urllib.request.Request(
-            url,
-            method="HEAD",
-            headers={"User-Agent": "Mozilla/5.0"},
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as res:
-            return 200 <= getattr(res, "status", 200) < 400
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return False
-    except Exception:
-        pass
-
-    try:
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0",
-                "Range": "bytes=0-0",
-            },
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as res:
-            return 200 <= getattr(res, "status", 200) < 400
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return False
-        return False
-    except Exception:
-        return False
+def candidate_dates() -> List[datetime]:
+    now = datetime.now(JST)
+    # 当日最優先。その次に翌日、前日。
+    # 深夜またぎや公開タイミングのズレ対策で近傍も見る。
+    return [
+        now,
+        now + timedelta(days=1),
+        now - timedelta(days=1),
+        now + timedelta(days=2),
+        now - timedelta(days=2),
+    ]
 
 def download_file(url: str, dest_path: str, timeout: int = 60) -> None:
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "*/*",
+        },
+    )
     with urllib.request.urlopen(req, timeout=timeout) as res, open(dest_path, "wb") as f:
         shutil.copyfileobj(res, f)
 
-def extract_lzh(lzh_path: str, out_dir: str) -> None:
+def looks_like_html(path: str) -> bool:
+    try:
+        with open(path, "rb") as f:
+            head = f.read(512).lower()
+        return (
+            b"<html" in head
+            or b"<!doctype html" in head
+            or b"<head" in head
+            or b"not found" in head
+        )
+    except Exception:
+        return False
+
+def extract_lzh_to_temp(lzh_path: str) -> str:
+    temp_dir = tempfile.mkdtemp(prefix="mbrace_extract_")
     result = subprocess.run(
-        ["lhasa", "x", lzh_path],
-        cwd=out_dir,
+        ["lhasa", "x", os.path.abspath(lzh_path)],
+        cwd=temp_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -94,7 +98,10 @@ def extract_lzh(lzh_path: str, out_dir: str) -> None:
         print(result.stderr)
 
     if result.returncode != 0:
+        shutil.rmtree(temp_dir, ignore_errors=True)
         raise RuntimeError(f"lhasa extract failed: returncode={result.returncode}")
+
+    return temp_dir
 
 def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
     exact = os.path.join(out_dir, f"b{yyMMdd}.txt")
@@ -111,71 +118,85 @@ def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
 
     return None
 
-def pick_target_url() -> Tuple[Optional[str], Optional[str]]:
-    """
-    B 系のみを見る。
-    優先順:
-    1. 今日
-    2. 明日
-    3. 昨日
-    4. 明後日
-    5. 一昨日
-    見つからなければ (None, None) を返してスキップ。
-    """
-    now = datetime.now(JST)
-    candidates = [
-        now,
-        now + timedelta(days=1),
-        now - timedelta(days=1),
-        now + timedelta(days=2),
-        now - timedelta(days=2),
-    ]
+def move_txt_to_extract(temp_dir: str, yyMMdd: str) -> str:
+    txt_path = find_txt_for_date(temp_dir, yyMMdd)
+    if not txt_path:
+        txt_files = sorted(
+            [
+                os.path.join(temp_dir, fn)
+                for fn in os.listdir(temp_dir)
+                if fn.lower().endswith(".txt")
+            ]
+        )
+        if len(txt_files) == 1:
+            txt_path = txt_files[0]
 
-    checked = []
-    for dt in candidates:
-        url = build_url(dt)
-        checked.append(url)
-        if url_exists(url):
-            return url, yymmdd(dt)
+    if not txt_path:
+        raise FileNotFoundError(f"extracted txt not found for b{yyMMdd}.txt")
 
-    print("mbrace lzh not found yet")
-    print("checked:")
-    for url in checked:
-        print(" -", url)
-    return None, None
+    dst_path = os.path.join(EXTRACT_DIR, f"b{yyMMdd}.txt")
+    shutil.copy2(txt_path, dst_path)
+    return dst_path
 
-def main() -> None:
-    ensure_dirs()
-
-    url, yyMMdd = pick_target_url()
-    if not url or not yyMMdd:
-        print("skip: mbrace file is not published yet")
-        return
-
+def try_one(dt: datetime) -> Tuple[bool, Optional[str], Optional[str], Optional[str]]:
+    yyMMdd = yymmdd(dt)
+    url = build_url(dt)
     lzh_name = f"b{yyMMdd}.lzh"
     lzh_path = os.path.join(DOWNLOAD_DIR, lzh_name)
 
-    download_file(url, lzh_path)
+    print("try:", url)
+
+    try:
+        download_file(url, lzh_path)
+    except urllib.error.HTTPError as e:
+        print(f"http error: {e.code} {url}")
+        return False, None, None, None
+    except Exception as e:
+        print(f"download error: {url} {e}")
+        return False, None, None, None
 
     if not os.path.exists(lzh_path):
-        raise FileNotFoundError(f"downloaded file missing: {lzh_path}")
+        print(f"missing downloaded file: {lzh_path}")
+        return False, None, None, None
 
-    if os.path.getsize(lzh_path) == 0:
-        raise RuntimeError(f"downloaded lzh is empty: {lzh_path}")
+    size = os.path.getsize(lzh_path)
+    if size == 0:
+        print(f"empty lzh: {lzh_path}")
+        return False, None, None, None
+
+    if looks_like_html(lzh_path):
+        print(f"downloaded html instead of lzh: {lzh_path}")
+        return False, None, None, None
+
+    temp_dir = None
+    try:
+        temp_dir = extract_lzh_to_temp(lzh_path)
+        txt_path = move_txt_to_extract(temp_dir, yyMMdd)
+    except Exception as e:
+        print(f"extract error: {url} {e}")
+        return False, None, None, None
+    finally:
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     with open(SOURCE_URL_PATH, "w", encoding="utf-8") as f:
         f.write(url)
 
-    extract_lzh(lzh_path, EXTRACT_DIR)
+    return True, url, lzh_path, txt_path
 
-    txt_path = find_txt_for_date(EXTRACT_DIR, yyMMdd)
-    if not txt_path:
-        raise FileNotFoundError(f"extracted txt not found for b{yyMMdd}.txt")
+def main() -> None:
+    ensure_dirs()
 
-    print("source_url:", url)
-    print("downloaded:", lzh_path)
-    print("downloaded_size:", os.path.getsize(lzh_path))
-    print("extracted_txt:", txt_path)
+    for dt in candidate_dates():
+        ok, url, lzh_path, txt_path = try_one(dt)
+        if ok:
+            print("source_url:", url)
+            print("downloaded:", lzh_path)
+            print("downloaded_size:", os.path.getsize(lzh_path))
+            print("extracted_txt:", txt_path)
+            return
+
+    print("skip: mbrace file is not published yet")
 
 if __name__ == "__main__":
     main()
