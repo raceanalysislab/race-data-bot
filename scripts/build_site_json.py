@@ -55,17 +55,18 @@ def _parse_hhmm(hhmm: str) -> Optional[Tuple[int, int]]:
 def _minutes(h: int, m: int) -> int:
     return h * 60 + m
 
-def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[str]]:
+def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int], str]:
     """
     mbraceの各レース cutoff(HH:MM)から「次の締切」を計算して
     next_race / next_display ("<rno>R HH:MM") を作る。
+
+    返り値:
+      - 次レースあり: (rno, "xR HH:MM")
+      - 全レース終了: (None, "終了")
+      - cutoff不明のみ: (None, "終了")
     """
     now = datetime.now(JST)
     now_min = _minutes(now.hour, now.minute)
-
-    # 1〜2分のズレ保険
-    cushion = 2
-    threshold = now_min - cushion
 
     candidates: List[Tuple[int, int, str]] = []
     for r in races:
@@ -83,14 +84,15 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         candidates.append((tmin, rno, f"{_pad2(hm[0])}:{_pad2(hm[1])}"))
 
     if not candidates:
-        return None, None
+        return None, "終了"
 
     candidates.sort(key=lambda x: x[0])
 
     for tmin, rno, hhmm in candidates:
-        if tmin > threshold:
+        if tmin > now_min:
             return rno, f"{rno}R {hhmm}"
 
+    # 全レース終了
     return None, "終了"
 
 def main():
@@ -167,7 +169,13 @@ def main():
     if site_venues:
         print("first venue:", site_venues[0])
         for row in site_venues[:5]:
-            print("venue row:", row.get("name"), row.get("day"), row.get("day_label"), row.get("next_display"))
+            print(
+                "venue row:",
+                row.get("name"),
+                row.get("day"),
+                row.get("day_label"),
+                row.get("next_display")
+            )
 
 if __name__ == "__main__":
     main()
