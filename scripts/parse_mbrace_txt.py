@@ -47,12 +47,6 @@ RE_TAIL = re.compile(
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
-# ===== 日目抽出用 =====
-RE_DAY_TEXT_1 = re.compile(r"第\s*([0-9]+)\s*日")
-RE_DAY_TEXT_2 = re.compile(r"([0-9]+)\s*日目")
-RE_TOTAL_DAYS_TEXT = re.compile(r"([0-9]+)\s*日間")
-RE_DAY_SLASH = re.compile(r"([0-9]+)\s*/\s*([0-9]+)")
-
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
         try:
@@ -150,51 +144,31 @@ def parse_date(block: List[str]) -> str:
 
 def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     """
-    会場ブロック全体から日目情報を拾う。
-    想定:
-      第3日
-      第 3日
-      3日目
-      6日間
-      3/6
+    現状は全会場とも txt 内の「第◯日」表記で固定されている前提。
+    例:
+      第1日
+      第 1日
+      第 1 日
     """
     text = "\n".join(norm(x) for x in block if x)
+    compact = text.replace(" ", "")
 
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
-    m = RE_DAY_TEXT_1.search(text)
+    m = re.search(r"第([0-9]+)日", compact)
     if m:
         try:
             current_day = int(m.group(1))
         except Exception:
             pass
 
-    if current_day is None:
-        m = RE_DAY_TEXT_2.search(text)
-        if m:
-            try:
-                current_day = int(m.group(1))
-            except Exception:
-                pass
-
-    m = RE_TOTAL_DAYS_TEXT.search(text)
+    m = re.search(r"([0-9]+)日間", compact)
     if m:
         try:
             total_days = int(m.group(1))
         except Exception:
             pass
-
-    if current_day is None or total_days is None:
-        m = RE_DAY_SLASH.search(text)
-        if m:
-            try:
-                if current_day is None:
-                    current_day = int(m.group(1))
-                if total_days is None:
-                    total_days = int(m.group(2))
-            except Exception:
-                pass
 
     return current_day, total_days
 
