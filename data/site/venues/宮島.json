@@ -1,6 +1,9 @@
 {
   "venue": "宮島",
   "date": "2026-03-06",
+  "day": 1,
+  "total_days": null,
+  "day_label": "初日",
   "races": [
     {
       "rno": 1,
@@ -74,7 +77,5 @@
       "cutoff": "16:02",
       "distance": 1800
     }
-  ],
-  "day": 1,
-  "day_label": "初日"
+  ]
 }
