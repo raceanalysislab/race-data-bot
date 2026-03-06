@@ -122,16 +122,7 @@ def main():
 
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(OUT_VENUES, "w", encoding="utf-8") as f:
-        json.dump(
-            {
-                "date": mbrace.get("date"),
-                "generated_at": datetime.now(JST).isoformat(),
-                "venues": site_venues,
-            },
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
+        json.dump(site_venues, f, ensure_ascii=False, indent=2)
 
     for venue in (mbrace.get("venues") or []):
         venue_name = str(venue.get("venue") or "").strip()
