@@ -48,7 +48,6 @@ RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
 
 # ===== 日目抽出用 =====
-# txt実データに合わせて「第 1日」「第1日」を最優先で拾う
 RE_DAY_TEXT_1 = re.compile(r"第\s*([0-9]+)\s*日")
 RE_DAY_TEXT_2 = re.compile(r"([0-9]+)\s*日目")
 RE_TOTAL_DAYS_TEXT = re.compile(r"([0-9]+)\s*日間")
@@ -151,7 +150,7 @@ def parse_date(block: List[str]) -> str:
 
 def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     """
-    会場ブロック内から日目情報を拾う。
+    会場ブロック全体から日目情報を拾う。
     想定:
       第3日
       第 3日
@@ -159,49 +158,43 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
       6日間
       3/6
     """
+    text = "\n".join(norm(x) for x in block if x)
+
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
-    for l in block[:160]:
-        s = norm(l)
+    m = RE_DAY_TEXT_1.search(text)
+    if m:
+        try:
+            current_day = int(m.group(1))
+        except Exception:
+            pass
 
-        if current_day is None:
-            m = RE_DAY_TEXT_1.search(s)
-            if m:
-                try:
+    if current_day is None:
+        m = RE_DAY_TEXT_2.search(text)
+        if m:
+            try:
+                current_day = int(m.group(1))
+            except Exception:
+                pass
+
+    m = RE_TOTAL_DAYS_TEXT.search(text)
+    if m:
+        try:
+            total_days = int(m.group(1))
+        except Exception:
+            pass
+
+    if current_day is None or total_days is None:
+        m = RE_DAY_SLASH.search(text)
+        if m:
+            try:
+                if current_day is None:
                     current_day = int(m.group(1))
-                except Exception:
-                    pass
-
-        if current_day is None:
-            m = RE_DAY_TEXT_2.search(s)
-            if m:
-                try:
-                    current_day = int(m.group(1))
-                except Exception:
-                    pass
-
-        if total_days is None:
-            m = RE_TOTAL_DAYS_TEXT.search(s)
-            if m:
-                try:
-                    total_days = int(m.group(1))
-                except Exception:
-                    pass
-
-        if current_day is None or total_days is None:
-            m = RE_DAY_SLASH.search(s)
-            if m:
-                try:
-                    if current_day is None:
-                        current_day = int(m.group(1))
-                    if total_days is None:
-                        total_days = int(m.group(2))
-                except Exception:
-                    pass
-
-        if current_day is not None and total_days is not None:
-            break
+                if total_days is None:
+                    total_days = int(m.group(2))
+            except Exception:
+                pass
 
     return current_day, total_days
 
