@@ -9,6 +9,8 @@
 # - 番組表は B 系だけを見る
 # - 今日分がまだ出ていない時は失敗にせず、正常終了でスキップする
 # - HEAD が通らない環境もあるため GET フォールバック付き
+# - 解凍失敗時に原因が分かるようログを出す
+# - 0KB ダウンロードを検知する
 
 import os
 import re
@@ -41,7 +43,6 @@ def build_url(dt: datetime) -> str:
     return f"https://www.mbrace.or.jp/od2/B/{yyyymm(dt)}/b{yymmdd(dt)}.lzh"
 
 def url_exists(url: str, timeout: int = 20) -> bool:
-    # まず HEAD
     try:
         req = urllib.request.Request(
             url,
@@ -56,7 +57,6 @@ def url_exists(url: str, timeout: int = 20) -> bool:
     except Exception:
         pass
 
-    # HEAD が弾かれるケース用に GET フォールバック
     try:
         req = urllib.request.Request(
             url,
@@ -80,14 +80,21 @@ def download_file(url: str, dest_path: str, timeout: int = 60) -> None:
         shutil.copyfileobj(res, f)
 
 def extract_lzh(lzh_path: str, out_dir: str) -> None:
-    subprocess.run(
-        ["lhasa", "x", "-f", lzh_path],
+    result = subprocess.run(
+        ["lhasa", "x", lzh_path],
         cwd=out_dir,
-        check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
+
+    if result.stdout:
+        print(result.stdout)
+    if result.stderr:
+        print(result.stderr)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"lhasa extract failed: returncode={result.returncode}")
 
 def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
     exact = os.path.join(out_dir, f"b{yyMMdd}.txt")
@@ -150,6 +157,12 @@ def main() -> None:
 
     download_file(url, lzh_path)
 
+    if not os.path.exists(lzh_path):
+        raise FileNotFoundError(f"downloaded file missing: {lzh_path}")
+
+    if os.path.getsize(lzh_path) == 0:
+        raise RuntimeError(f"downloaded lzh is empty: {lzh_path}")
+
     with open(SOURCE_URL_PATH, "w", encoding="utf-8") as f:
         f.write(url)
 
@@ -161,6 +174,7 @@ def main() -> None:
 
     print("source_url:", url)
     print("downloaded:", lzh_path)
+    print("downloaded_size:", os.path.getsize(lzh_path))
     print("extracted_txt:", txt_path)
 
 if __name__ == "__main__":
