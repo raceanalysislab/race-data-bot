@@ -4,6 +4,8 @@
 # - data/source_final_url.txt
 # - data/download/bYYMMDD.lzh
 # - data/extract/bYYMMDD.txt
+#
+# 今日分がまだ出ていない時は失敗にせず、正常終了でスキップする
 
 import os
 import re
@@ -20,7 +22,6 @@ DOWNLOAD_DIR = os.path.join(DATA_DIR, "download")
 EXTRACT_DIR = os.path.join(DATA_DIR, "extract")
 SOURCE_URL_PATH = os.path.join(DATA_DIR, "source_final_url.txt")
 
-# mbrace の基本URL
 BASE_URL = "https://www.mbrace.or.jp/od2/K/"
 
 def ensure_dirs() -> None:
@@ -39,7 +40,7 @@ def url_exists(url: str, timeout: int = 20) -> bool:
         req = urllib.request.Request(
             url,
             method="HEAD",
-            headers={"User-Agent": "Mozilla/5.0"}
+            headers={"User-Agent": "Mozilla/5.0"},
         )
         with urllib.request.urlopen(req, timeout=timeout) as res:
             return 200 <= getattr(res, "status", 200) < 400
@@ -52,7 +53,6 @@ def download_file(url: str, dest_path: str, timeout: int = 60) -> None:
         shutil.copyfileobj(res, f)
 
 def extract_lzh(lzh_path: str, out_dir: str) -> None:
-    # 既存 txt を消しすぎないよう、まず対象日だけ後で拾う
     subprocess.run(
         ["lhasa", "x", "-f", lzh_path],
         cwd=out_dir,
@@ -63,7 +63,6 @@ def extract_lzh(lzh_path: str, out_dir: str) -> None:
     )
 
 def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
-    # 期待値: b260307.txt
     exact = os.path.join(out_dir, f"b{yyMMdd}.txt")
     if os.path.exists(exact):
         return exact
@@ -78,14 +77,16 @@ def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
 
     return None
 
-def pick_target_url() -> Tuple[str, str]:
+def pick_target_url() -> Tuple[Optional[str], Optional[str]]:
     """
-    原則:
-    - 今日
-    - 明日
-    - 昨日
-    の順ではなく、
-    まず「今日」を優先し、なければ近傍を探す
+    優先順:
+    1. 今日
+    2. 明日
+    3. 昨日
+    4. 明後日
+    5. 一昨日
+
+    見つからなければ (None, None) を返してスキップ。
     """
     now = datetime.now(JST)
     candidates = [
@@ -103,14 +104,20 @@ def pick_target_url() -> Tuple[str, str]:
         if url_exists(url):
             return url, yymmdd(dt)
 
-    raise FileNotFoundError(
-        "mbrace lzh not found. checked: " + " | ".join(checked)
-    )
+    print("mbrace lzh not found yet")
+    print("checked:")
+    for url in checked:
+        print(" -", url)
+    return None, None
 
 def main() -> None:
     ensure_dirs()
 
     url, yyMMdd = pick_target_url()
+    if not url or not yyMMdd:
+        print("skip: mbrace file is not published yet")
+        return
+
     lzh_name = f"b{yyMMdd}.lzh"
     lzh_path = os.path.join(DOWNLOAD_DIR, lzh_name)
 
