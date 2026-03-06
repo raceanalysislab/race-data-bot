@@ -72,7 +72,7 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         candidates.append((tmin, rno, f"{_pad2(hm[0])}:{_pad2(hm[1])}"))
 
     if not candidates:
-        return None, "終了"
+        return None, "発売終了"
 
     candidates.sort(key=lambda x: x[0])
 
@@ -80,7 +80,7 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         if tmin > now_min:
             return rno, f"{rno}R {hhmm}"
 
-    return None, "終了"
+    return None, "発売終了"
 
 def main():
     if not os.path.exists(MBRACE_PATH):
