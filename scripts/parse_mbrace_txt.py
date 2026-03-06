@@ -6,7 +6,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 JST = timezone(timedelta(hours=9))
 
@@ -32,18 +32,11 @@ RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 
-# ✅ 艇行の先頭（登録番号の直後はスペース無しでもOK）
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
-# ✅ 小数は「1〜2桁」許容（47.1 / 48.0 / 0.0 / 30.00）
 FLOAT = r"[0-9]+\.[0-9]{1,2}"
 FLOATP = rf"{FLOAT}%?"
 
-# ✅ 行末の数値列（後ろから確定）
-# nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 （+残りnote）
-# ★重要：
-#  - boat_no は 1〜3桁（例: 156, 172）を許容
-#  - motor_2 と boat_no の間はスペース無しでもOK（例: 30.00156）→ 事前に分割もする
 RE_TAIL = re.compile(
     rf"({FLOATP})\s+({FLOATP})\s+"
     rf"({FLOATP})\s+({FLOATP})\s+"
@@ -51,11 +44,13 @@ RE_TAIL = re.compile(
     rf"(\d{{1,3}})\s+({FLOATP})\s*(.*)$"
 )
 
-# ✅ grade の直前（スペース無しでもOK）
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
-
-# ✅ 「年齢 支部 体重」を後ろから確定（スペース無しでもOK）
 RE_AGE_BRANCH_WEIGHT = re.compile(r"(\d{1,2})\s*([^\d\s]{2,6})\s*(\d{2})\s*$")
+
+# ===== 日目抽出用 =====
+RE_DAY_TEXT = re.compile(r"(?:第\s*)?(\d+)\s*日目?")
+RE_TOTAL_DAYS_TEXT = re.compile(r"(\d+)\s*日間")
+RE_DAY_SLASH = re.compile(r"(\d+)\s*/\s*(\d+)")
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -92,9 +87,8 @@ def infer_txt_path() -> str:
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     """
-    ✅重要：福岡みたいに BBGN が付かない“先頭会場”がある。
-    なので「BBGNで始まるブロック」だけでなく、BBGNより前の先頭部分も1ブロックとして拾う。
-    さらに BEND が無い/欠けても、次のBBGN or EOF で閉じるようにする。
+    福岡みたいに BBGN が付かない先頭会場があるため、
+    BBGN以前の先頭部分も1ブロックとして拾う。
     """
     blocks: List[List[str]] = []
     cur: List[str] = []
@@ -103,7 +97,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
         l = raw.rstrip("\n")
 
         if RE_BBGN.search(l):
-            # 新しい会場ブロックが始まる → それまでのcurも保存（先頭会場用）
             if cur:
                 blocks.append(cur)
             cur = [l]
@@ -118,7 +111,6 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     if cur:
         blocks.append(cur)
 
-    # norm + 空行除去
     out: List[List[str]] = []
     for b in blocks:
         bb = [norm(x) for x in b if x.strip()]
@@ -132,7 +124,6 @@ def parse_venue(block: List[str]) -> str:
             continue
         s = l.replace("ボートレース", "").strip()
 
-        # 例: "福 岡 3月 5日 ..." / "福 岡 ３月 ５日 ..."
         m = re.search(r"\d{1,2}月", s)
         head = s[:m.start()] if m else s
         v = head.replace(" ", "").strip()
@@ -156,6 +147,54 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
+def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
+    """
+    会場ブロック内から日目情報を拾う。
+    想定:
+      第3日
+      3日目
+      6日間
+      3/6
+    """
+    current_day: Optional[int] = None
+    total_days: Optional[int] = None
+
+    # 先頭付近に出る可能性が高いので最初の120行くらいを見る
+    for l in block[:120]:
+        s = norm(l)
+
+        if current_day is None:
+            m = RE_DAY_TEXT.search(s)
+            if m:
+                try:
+                    current_day = int(m.group(1))
+                except Exception:
+                    pass
+
+        if total_days is None:
+            m = RE_TOTAL_DAYS_TEXT.search(s)
+            if m:
+                try:
+                    total_days = int(m.group(1))
+                except Exception:
+                    pass
+
+        if current_day is None or total_days is None:
+            m = RE_DAY_SLASH.search(s)
+            if m:
+                try:
+                    if current_day is None:
+                        current_day = int(m.group(1))
+                    if total_days is None:
+                        total_days = int(m.group(2))
+                except Exception:
+                    pass
+
+        if current_day is not None and total_days is not None:
+            break
+
+    return current_day, total_days
+
 def _to_float(x: str) -> Optional[float]:
     try:
         return float((x or "").replace("%", ""))
@@ -170,14 +209,11 @@ def _to_int(x: str) -> Optional[int]:
 
 def _deglue_numbers(s: str) -> str:
     """
-    ✅福岡/芦屋で出る “連結” を壊す
-      - motor_2 + boat_no: 30.00156 / 0.00103 / 33.33174 等
-    これを "30.00 156" のように分割する。
+    motor_2 + boat_no の連結を分割
+    例: 30.00156 -> 30.00 156
     """
     s = norm(s)
 
-    # 「小数(1-2桁)」+「2-3桁整数」が連結していたら分割
-    # 例: 30.00156 -> 30.00 156
     for _ in range(4):
         s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
         if s2 == s:
@@ -186,10 +222,6 @@ def _deglue_numbers(s: str) -> str:
     return s
 
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
-    """
-    後ろ（数値列）→ grade → 年齢/支部/体重 の順で確定。
-    事前に _deglue_numbers() を通して、福岡/芦屋の詰め行でも落とさない。
-    """
     line = _deglue_numbers(line)
     mp = RE_BOAT_PREFIX.match(line)
     if not mp:
@@ -203,7 +235,6 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
 
     rest_all = _deglue_numbers(rest_all)
 
-    # ① 行末の数値列（8項目）を後ろから確定
     mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
@@ -223,14 +254,12 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
 
     head = rest_all[:mt.start()].strip()
 
-    # ② grade を後ろから確定
     mg = RE_GRADE.search(head)
     if not mg:
         return None
     grade = mg.group(1)
     head2 = head[:mg.start()].strip()
 
-    # ③ 年齢/支部/体重 を後ろから確定
     mm = RE_AGE_BRANCH_WEIGHT.search(head2)
     if not mm:
         return None
@@ -323,7 +352,6 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
 
         boat = _parse_boat_line(l)
 
-        # ✅ 行折り返し対策（次行と結合して再トライ）
         if not boat and i + 1 < len(block):
             nxt = block[i + 1]
             nxt2 = _deglue_numbers(nxt)
@@ -384,6 +412,7 @@ def main():
     for b in blocks:
         venue = parse_venue(b)
         ymd = parse_date(b)
+        current_day, total_days = parse_day_info(b)
         races = parse_races(b)
 
         if not venue or not races:
@@ -396,11 +425,17 @@ def main():
             if missing:
                 warnings.append(f"{venue} {r.get('rno')}R missing={missing}")
 
-        venues_out.append({
+        venue_payload: Dict[str, Any] = {
             "venue": venue,
             "date": ymd,
             "races": races,
-        })
+        }
+        if current_day is not None:
+            venue_payload["day"] = current_day
+        if total_days is not None:
+            venue_payload["total_days"] = total_days
+
+        venues_out.append(venue_payload)
 
     top_date = venues_out[0]["date"] if venues_out else ""
 
