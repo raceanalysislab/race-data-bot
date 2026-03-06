@@ -51,20 +51,37 @@ jobs:
         run: |
           python scripts/fetch_mbrace.py
 
+      - name: Check extracted mbrace txt
+        id: check_mbrace
+        run: |
+          latest_txt="$(find data/extract -maxdepth 1 -type f -name 'b*.txt' | sort | tail -n 1)"
+          if [ -z "$latest_txt" ]; then
+            echo "mbrace_ready=false" >> "$GITHUB_OUTPUT"
+            echo "No extracted mbrace txt yet. Skip downstream steps."
+          else
+            echo "mbrace_ready=true" >> "$GITHUB_OUTPUT"
+            echo "latest_txt=$latest_txt" >> "$GITHUB_OUTPUT"
+            echo "Found extracted txt: $latest_txt"
+          fi
+
       - name: Parse mbrace txt -> json
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           python scripts/parse_mbrace_txt.py
 
       - name: Build site json
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           test -f data/mbrace_races_today.json
           python scripts/build_site_json.py
 
       - name: Build race json
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           python scripts/build_race_json.py
 
       - name: Show outputs (quick debug)
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           echo "----- data -----"
           ls -la data || true
@@ -85,6 +102,7 @@ jobs:
           head -n 30 data/mbrace_races_today.json || true
 
       - name: Commit fetched data to bot repo
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
