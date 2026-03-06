@@ -15,14 +15,14 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     env:
       TZ: Asia/Tokyo
       PYTHONUNBUFFERED: "1"
 
     steps:
-      - name: Checkout repo
+      - name: Checkout bot repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -53,7 +53,7 @@ jobs:
         run: |
           python scripts/fetch_mbrace.py
 
-      # mbrace txt -> json（全会場）
+      # mbrace txt -> json
       - name: Parse mbrace txt -> json
         run: |
           python scripts/parse_mbrace_txt.py
@@ -74,22 +74,22 @@ jobs:
           echo "----- data -----"
           ls -la data || true
 
-          echo "----- data/extract -----"
-          ls -la data/extract || true
-
           echo "----- data/site -----"
           ls -la data/site || true
+
+          echo "----- data/site/venues -----"
+          ls -la data/site/venues || true
 
           echo "----- data/site/races -----"
           ls -la data/site/races || true
 
           echo "----- site venues.json (head) -----"
-          head -n 40 data/site/venues.json || true
+          head -n 60 data/site/venues.json || true
 
           echo "----- mbrace_races_today.json (head) -----"
-          head -n 20 data/mbrace_races_today.json || true
+          head -n 30 data/mbrace_races_today.json || true
 
-      - name: Commit fetched data
+      - name: Commit fetched data to bot repo
         run: |
           git config user.name "race-data-bot"
           git config user.email "actions@users.noreply.github.com"
@@ -97,11 +97,59 @@ jobs:
           git add -A data || true
 
           if git diff --cached --quiet; then
-            echo "No changes"
+            echo "No changes in bot repo"
+          else
+            git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
+            git push origin HEAD:main
+          fi
+
+      # ===== analysis側へ自動同期 =====
+      - name: Checkout analysis repo
+        uses: actions/checkout@v4
+        with:
+          repository: raceanalysislab/race-analysis
+          token: ${{ secrets.REPO_SYNC_TOKEN }}
+          path: analysis_repo
+          fetch-depth: 0
+
+      - name: Sync site data to analysis repo
+        run: |
+          mkdir -p analysis_repo/data/site
+          rm -rf analysis_repo/data/site/venues
+          rm -rf analysis_repo/data/site/races
+
+          cp -f data/site/venues.json analysis_repo/data/site/venues.json
+
+          if [ -d data/site/venues ]; then
+            mkdir -p analysis_repo/data/site/venues
+            cp -R data/site/venues/. analysis_repo/data/site/venues/
+          fi
+
+          if [ -d data/site/races ]; then
+            mkdir -p analysis_repo/data/site/races
+            cp -R data/site/races/. analysis_repo/data/site/races/
+          fi
+
+          echo "----- analysis_repo/data/site -----"
+          ls -la analysis_repo/data/site || true
+
+          echo "----- synced venues.json (head) -----"
+          head -n 60 analysis_repo/data/site/venues.json || true
+
+      - name: Commit synced data to analysis repo
+        working-directory: analysis_repo
+        run: |
+          git config user.name "race-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          git add data/site
+
+          if git diff --cached --quiet; then
+            echo "No changes in analysis repo"
             exit 0
           fi
 
-          git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit -m "Sync site data $(date '+%Y-%m-%d %H:%M:%S')"
           git push origin HEAD:main
 
       - name: Upload debug artifacts (on failure)
@@ -111,5 +159,6 @@ jobs:
           name: debug
           path: |
             data/**
+            analysis_repo/data/**
             **/*.log
           if-no-files-found: ignore
