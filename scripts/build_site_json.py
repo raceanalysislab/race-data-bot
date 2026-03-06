@@ -1,9 +1,7 @@
 # scripts/build_site_json.py
 # mbrace_races_today.json を正として site 用 JSON を生成する
-# - data/site/venues.json : 開催中会場の一覧（mbraceに存在する会場）
-# - data/site/venues/<会場>.json : 会場ごとのレース概要（rno/name/cutoff/distance）
-#
-# ※ venues_today.json（boatrace.jp由来）は不安定なので一切使わない
+# - data/site/venues.json : 開催中会場の一覧
+# - data/site/venues/<会場>.json : 会場ごとのレース概要
 
 import json
 import os
@@ -20,7 +18,6 @@ OUT_VENUE_DIR = os.path.join(OUT_DIR, "venues")
 
 os.makedirs(OUT_VENUE_DIR, exist_ok=True)
 
-# ====== 会場名 → jcd（公式順） ======
 VENUE_TO_JCD: Dict[str, str] = {
     "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
     "多摩川": "05", "浜名湖": "06", "蒲郡": "07", "常滑": "08",
@@ -56,15 +53,6 @@ def _minutes(h: int, m: int) -> int:
     return h * 60 + m
 
 def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int], str]:
-    """
-    mbraceの各レース cutoff(HH:MM)から「次の締切」を計算して
-    next_race / next_display ("<rno>R HH:MM") を作る。
-
-    返り値:
-      - 次レースあり: (rno, "xR HH:MM")
-      - 全レース終了: (None, "終了")
-      - cutoff不明のみ: (None, "終了")
-    """
     now = datetime.now(JST)
     now_min = _minutes(now.hour, now.minute)
 
@@ -92,7 +80,6 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         if tmin > now_min:
             return rno, f"{rno}R {hhmm}"
 
-    # 全レース終了
     return None, "終了"
 
 def main():
@@ -135,7 +122,7 @@ def main():
 
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(OUT_VENUES, "w", encoding="utf-8") as f:
-        json.dump(site_venues, f, ensure_ascii=False, indent=2)
+        json.dump({"venues": site_venues}, f, ensure_ascii=False, indent=2)
 
     for venue in (mbrace.get("venues") or []):
         venue_name = str(venue.get("venue") or "").strip()
@@ -168,14 +155,6 @@ def main():
     print("venues.json count:", len(site_venues))
     if site_venues:
         print("first venue:", site_venues[0])
-        for row in site_venues[:5]:
-            print(
-                "venue row:",
-                row.get("name"),
-                row.get("day"),
-                row.get("day_label"),
-                row.get("next_display")
-            )
 
 if __name__ == "__main__":
     main()
