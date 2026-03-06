@@ -174,6 +174,8 @@ def main():
     print("venues.json count:", len(site_venues))
     if site_venues:
         print("first venue:", site_venues[0])
+        for row in site_venues[:5]:
+            print("venue row:", row.get("name"), row.get("day"), row.get("day_label"), row.get("next_display"))
 
 if __name__ == "__main__":
     main()
