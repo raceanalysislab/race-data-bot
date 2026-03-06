@@ -27,7 +27,7 @@ RE_RACE_HEAD = re.compile(
 )
 
 RE_YMD = re.compile(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日")
-RE_MD  = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
+RE_MD = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
@@ -144,35 +144,49 @@ def parse_date(block: List[str]) -> str:
 
 def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     """
-    現状は全会場とも txt 内の「第◯日」表記で固定されている前提。
-    例:
-      第1日
-      第 1日
-      第 1 日
-      第　１日
+    txt内の開催日情報を拾う。
+    想定:
+      第1日 / 第 1日 / 第　１日
+      1日目
+      6日間
+      1/6
     """
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
-    for line in block[:120]:
-        compact = norm(line).replace(" ", "")
-        # 例: 第1日
-        m = re.search(r"第([0-9]+)日", compact)
+    joined = "\n".join(block[:160])
+    compact = norm(joined).replace(" ", "")
+
+    m = re.search(r"第([0-9]+)日", compact)
+    if m:
+        try:
+            current_day = int(m.group(1))
+        except Exception:
+            pass
+
+    if current_day is None:
+        m = re.search(r"([0-9]+)日目", compact)
         if m:
             try:
                 current_day = int(m.group(1))
-                break
             except Exception:
                 pass
 
-    for line in block[:120]:
-        compact = norm(line).replace(" ", "")
-        # 将来、6日間表記があれば拾う
-        m = re.search(r"([0-9]+)日間", compact)
+    m = re.search(r"([0-9]+)日間", compact)
+    if m:
+        try:
+            total_days = int(m.group(1))
+        except Exception:
+            pass
+
+    if current_day is None or total_days is None:
+        m = re.search(r"([0-9]+)\/([0-9]+)", compact)
         if m:
             try:
-                total_days = int(m.group(1))
-                break
+                if current_day is None:
+                    current_day = int(m.group(1))
+                if total_days is None:
+                    total_days = int(m.group(2))
             except Exception:
                 pass
 
@@ -231,15 +245,15 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     if not mt:
         return None
 
-    nat_win  = _to_float(mt.group(1))
-    nat_2    = _to_float(mt.group(2))
-    loc_win  = _to_float(mt.group(3))
-    loc_2    = _to_float(mt.group(4))
+    nat_win = _to_float(mt.group(1))
+    nat_2 = _to_float(mt.group(2))
+    loc_win = _to_float(mt.group(3))
+    loc_2 = _to_float(mt.group(4))
     motor_no = _to_int(mt.group(5))
-    motor_2  = _to_float(mt.group(6))
-    boat_no  = _to_int(mt.group(7))
-    boat_2   = _to_float(mt.group(8))
-    note     = (mt.group(9) or "").strip()
+    motor_2 = _to_float(mt.group(6))
+    boat_no = _to_int(mt.group(7))
+    boat_2 = _to_float(mt.group(8))
+    note = (mt.group(9) or "").strip()
 
     if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
         return None
