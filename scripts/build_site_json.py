@@ -115,14 +115,10 @@ def main():
             "jcd": VENUE_TO_JCD.get(venue_name, ""),
             "next_race": next_race,
             "next_display": next_display,
+            "day": venue.get("day"),
+            "total_days": venue.get("total_days"),
+            "day_label": venue.get("day_label"),
         }
-
-        if venue.get("day") is not None:
-            row["day"] = venue.get("day")
-        if venue.get("total_days") is not None:
-            row["total_days"] = venue.get("total_days")
-        if venue.get("day_label") is not None:
-            row["day_label"] = venue.get("day_label")
 
         site_venues.append(row)
 
@@ -156,15 +152,11 @@ def main():
         payload: Dict[str, Any] = {
             "venue": venue_name,
             "date": venue.get("date"),
+            "day": venue.get("day"),
+            "total_days": venue.get("total_days"),
+            "day_label": venue.get("day_label"),
             "races": races_out,
         }
-
-        if venue.get("day") is not None:
-            payload["day"] = venue.get("day")
-        if venue.get("total_days") is not None:
-            payload["total_days"] = venue.get("total_days")
-        if venue.get("day_label") is not None:
-            payload["day_label"] = venue.get("day_label")
 
         path = os.path.join(OUT_VENUE_DIR, f"{venue_name}.json")
         with open(path, "w", encoding="utf-8") as f:
