@@ -2,9 +2,15 @@
 # mbrace_races_today.json を正として site 用 JSON を生成する
 # - data/site/venues.json : 開催中会場の一覧
 # - data/site/venues/<会場>.json : 会場ごとのレース概要
+#
+# 追加:
+# - grade_label（一般戦 / G3 / G2 / G1 / SG / PG1 / ルーキー / レディース など）
+# - card_tone（normal / morning / night）
+#   → app.js / grid.css 側で表示・色分けに使えるようにする
 
 import json
 import os
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -82,6 +88,64 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
 
     return None, "発売終了"
 
+def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
+    texts: List[str] = []
+
+    for key in ["grade", "grade_label", "title", "subtitle", "series_name", "series_title", "event_name"]:
+        v = venue.get(key)
+        if v:
+            texts.append(str(v))
+
+    for r in races[:3]:
+        for key in ["name", "title"]:
+            v = r.get(key)
+            if v:
+                texts.append(str(v))
+
+    joined = " / ".join(texts)
+
+    upper = joined.upper()
+
+    if "PG1" in upper:
+        return "PG1"
+    if re.search(r"\bSG\b", upper):
+        return "SG"
+    if re.search(r"\bG1\b", upper):
+        return "G1"
+    if re.search(r"\bG2\b", upper):
+        return "G2"
+    if re.search(r"\bG3\b", upper):
+        return "G3"
+
+    if any(k in joined for k in ["オールレディース", "レディース", "ヴィーナス", "女子戦", "クイーンズ"]):
+        return "レディース"
+
+    if any(k in joined for k in ["ルーキー", "ヤングダービー", "スカパー!・JLC杯ルーキーシリーズ"]):
+        return "ルーキー"
+
+    if any(k in joined for k in ["企業杯", "モーターボート大賞", "地区選"]):
+        return "一般戦"
+
+    return "一般戦"
+
+def _detect_card_tone(next_display: str) -> str:
+    if not isinstance(next_display, str):
+        return "normal"
+
+    m = re.search(r"(\d{1,2}):(\d{2})", next_display)
+    if not m:
+        return "normal"
+
+    hh = int(m.group(1))
+    mm = int(m.group(2))
+    tmin = _minutes(hh, mm)
+
+    if tmin < _minutes(12, 0):
+        return "morning"
+    if tmin >= _minutes(17, 0):
+        return "night"
+    return "normal"
+
 def main():
     if not os.path.exists(MBRACE_PATH):
         raise FileNotFoundError(f"missing: {MBRACE_PATH}")
@@ -98,6 +162,8 @@ def main():
 
         races = venue.get("races") or []
         next_race, next_display = compute_next_from_races(races)
+        grade_label = _detect_grade_label(venue, races)
+        card_tone = _detect_card_tone(next_display)
 
         row: Dict[str, Any] = {
             "name": venue_name,
@@ -107,6 +173,8 @@ def main():
             "day": venue.get("day"),
             "total_days": venue.get("total_days"),
             "day_label": venue.get("day_label"),
+            "grade_label": grade_label,
+            "card_tone": card_tone,
         }
 
         site_venues.append(row)
@@ -129,8 +197,11 @@ def main():
         if not venue_name:
             continue
 
+        races = venue.get("races") or []
+        grade_label = _detect_grade_label(venue, races)
+
         races_out: List[Dict[str, Any]] = []
-        for r in (venue.get("races") or []):
+        for r in races:
             races_out.append({
                 "rno": r.get("rno"),
                 "name": r.get("name"),
@@ -144,6 +215,7 @@ def main():
             "day": venue.get("day"),
             "total_days": venue.get("total_days"),
             "day_label": venue.get("day_label"),
+            "grade_label": grade_label,
             "races": races_out,
         }
 
