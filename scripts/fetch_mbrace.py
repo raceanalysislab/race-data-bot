@@ -76,4 +76,92 @@ def url_exists(url: str, timeout: int = 20) -> bool:
 
 def download_file(url: str, dest_path: str, timeout: int = 60) -> None:
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=timeout)
+    with urllib.request.urlopen(req, timeout=timeout) as res, open(dest_path, "wb") as f:
+        shutil.copyfileobj(res, f)
+
+def extract_lzh(lzh_path: str, out_dir: str) -> None:
+    subprocess.run(
+        ["lhasa", "x", "-f", lzh_path],
+        cwd=out_dir,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
+    exact = os.path.join(out_dir, f"b{yyMMdd}.txt")
+    if os.path.exists(exact):
+        return exact
+
+    cands = []
+    for fn in os.listdir(out_dir):
+        if re.fullmatch(rf"b{yyMMdd}\.txt", fn, re.IGNORECASE):
+            cands.append(os.path.join(out_dir, fn))
+    if cands:
+        cands.sort()
+        return cands[0]
+
+    return None
+
+def pick_target_url() -> Tuple[Optional[str], Optional[str]]:
+    """
+    B 系のみを見る。
+    優先順:
+    1. 今日
+    2. 明日
+    3. 昨日
+    4. 明後日
+    5. 一昨日
+    見つからなければ (None, None) を返してスキップ。
+    """
+    now = datetime.now(JST)
+    candidates = [
+        now,
+        now + timedelta(days=1),
+        now - timedelta(days=1),
+        now + timedelta(days=2),
+        now - timedelta(days=2),
+    ]
+
+    checked = []
+    for dt in candidates:
+        url = build_url(dt)
+        checked.append(url)
+        if url_exists(url):
+            return url, yymmdd(dt)
+
+    print("mbrace lzh not found yet")
+    print("checked:")
+    for url in checked:
+        print(" -", url)
+    return None, None
+
+def main() -> None:
+    ensure_dirs()
+
+    url, yyMMdd = pick_target_url()
+    if not url or not yyMMdd:
+        print("skip: mbrace file is not published yet")
+        return
+
+    lzh_name = f"b{yyMMdd}.lzh"
+    lzh_path = os.path.join(DOWNLOAD_DIR, lzh_name)
+
+    download_file(url, lzh_path)
+
+    with open(SOURCE_URL_PATH, "w", encoding="utf-8") as f:
+        f.write(url)
+
+    extract_lzh(lzh_path, EXTRACT_DIR)
+
+    txt_path = find_txt_for_date(EXTRACT_DIR, yyMMdd)
+    if not txt_path:
+        raise FileNotFoundError(f"extracted txt not found for b{yyMMdd}.txt")
+
+    print("source_url:", url)
+    print("downloaded:", lzh_path)
+    print("extracted_txt:", txt_path)
+
+if __name__ == "__main__":
+    main()
