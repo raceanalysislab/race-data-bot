@@ -1,5 +1,5 @@
 # scripts/fetch_mbrace.py
-# mbrace の lzh を取得して data/extract に展開する
+# mbrace の番組表 lzh を取得して data/extract に展開する
 # 出力:
 # - data/source_final_url.txt
 # - data/download/bYYMMDD.lzh
@@ -22,8 +22,6 @@ DOWNLOAD_DIR = os.path.join(DATA_DIR, "download")
 EXTRACT_DIR = os.path.join(DATA_DIR, "extract")
 SOURCE_URL_PATH = os.path.join(DATA_DIR, "source_final_url.txt")
 
-BASE_URL = "https://www.mbrace.or.jp/od2/K/"
-
 def ensure_dirs() -> None:
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -32,8 +30,11 @@ def ensure_dirs() -> None:
 def yymmdd(dt: datetime) -> str:
     return dt.strftime("%y%m%d")
 
+def yyyymm(dt: datetime) -> str:
+    return dt.strftime("%Y%m")
+
 def build_url(dt: datetime) -> str:
-    return f"{BASE_URL}b{yymmdd(dt)}.lzh"
+    return f"https://www.mbrace.or.jp/od2/B/{yyyymm(dt)}/b{yymmdd(dt)}.lzh"
 
 def url_exists(url: str, timeout: int = 20) -> bool:
     try:
@@ -78,16 +79,6 @@ def find_txt_for_date(out_dir: str, yyMMdd: str) -> Optional[str]:
     return None
 
 def pick_target_url() -> Tuple[Optional[str], Optional[str]]:
-    """
-    優先順:
-    1. 今日
-    2. 明日
-    3. 昨日
-    4. 明後日
-    5. 一昨日
-
-    見つからなければ (None, None) を返してスキップ。
-    """
     now = datetime.now(JST)
     candidates = [
         now,
