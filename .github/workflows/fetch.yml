@@ -16,6 +16,7 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     env:
       TZ: Asia/Tokyo
       PYTHONUNBUFFERED: "1"
@@ -60,11 +61,10 @@ jobs:
       # サイト用 会場JSON生成
       - name: Build site json
         run: |
-          test -f data/venues_today.json
           test -f data/mbrace_races_today.json
           python scripts/build_site_json.py
 
-      # ★追加：レースJSON生成
+      # レースJSON生成
       - name: Build race json
         run: |
           python scripts/build_race_json.py
@@ -83,8 +83,8 @@ jobs:
           echo "----- data/site/races -----"
           ls -la data/site/races || true
 
-          echo "----- venues_today.json (head) -----"
-          head -n 20 data/venues_today.json || true
+          echo "----- site venues.json (head) -----"
+          head -n 40 data/site/venues.json || true
 
           echo "----- mbrace_races_today.json (head) -----"
           head -n 20 data/mbrace_races_today.json || true
