@@ -6,6 +6,7 @@
 import json
 import os
 import re
+from typing import Any, Dict, List
 
 SRC = "data/mbrace_races_today.json"
 OUT = "data/site/races"
@@ -30,19 +31,26 @@ def safe_name(s: str) -> str:
     s = re.sub(r'[\\/:*?"<>|]', "_", s)
     return s
 
+def _write_json(path: str, obj: Dict[str, Any]) -> None:
+    with open(path, "w", encoding="utf-8") as wf:
+        json.dump(obj, wf, ensure_ascii=False, indent=2)
+
 def main():
     os.makedirs(OUT, exist_ok=True)
 
     with open(SRC, encoding="utf-8") as f:
         data = json.load(f)
 
-    venues = data.get("venues") or []
+    venues: List[Dict[str, Any]] = data.get("venues") or []
     created = 0
     skipped = 0
 
     for v in venues:
-        venue_name = v.get("venue") or ""
+        venue_name = str(v.get("venue") or "").strip()
         date = v.get("date") or data.get("date") or ""
+        day = v.get("day")
+        total_days = v.get("total_days")
+        day_label = v.get("day_label")
         races = v.get("races") or []
 
         jcd = VENUE_TO_JCD.get(venue_name, "")
@@ -58,26 +66,27 @@ def main():
                 skipped += 1
                 continue
 
-            out = {
+            out: Dict[str, Any] = {
                 "venue": venue_name,
                 "jcd": jcd if jcd != "00" else None,
                 "date": date,
+                "day": day,
+                "total_days": total_days,
+                "day_label": day_label,
                 "race": race,
             }
 
-            # ✅ 安定ファイル名（推奨）：{jcd}_{rno}R.json
+            # 安定ファイル名（推奨）：{jcd}_{rno}R.json
             stable_fname = f"{jcd}_{rno_i}R.json"
             stable_path = os.path.join(OUT, stable_fname)
-            with open(stable_path, "w", encoding="utf-8") as wf:
-                json.dump(out, wf, ensure_ascii=False, indent=2)
+            _write_json(stable_path, out)
             created += 1
 
-            # ✅ 旧互換：{venue}_{rno}R.json（リンクが残ってても壊れない）
+            # 旧互換：{venue}_{rno}R.json
             legacy_fname = f"{safe_name(venue_name)}_{rno_i}R.json"
             legacy_path = os.path.join(OUT, legacy_fname)
             if legacy_path != stable_path:
-                with open(legacy_path, "w", encoding="utf-8") as wf:
-                    json.dump(out, wf, ensure_ascii=False, indent=2)
+                _write_json(legacy_path, out)
 
     print("created:", created, "race json files")
     if skipped:
