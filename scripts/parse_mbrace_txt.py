@@ -149,48 +149,29 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
       第1日
       第 1日
       第 1 日
-    総日数が見つかれば total_days も拾う。
+      第　１日
     """
-    raw_text = "\n".join(x for x in block if x)
-    norm_text = "\n".join(norm(x) for x in block if x)
-    compact = norm_text.replace(" ", "")
-
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
-    patterns_day = [
-        r"第\s*([0-9]+)\s*日",   # norm後
-        r"第([0-9]+)日",         # compact後
-        r"第\s*([０-９]+)\s*日", # rawの全角保険
-    ]
-
-    for pat in patterns_day:
-        m = re.search(pat, norm_text)
-        if not m:
-            m = re.search(pat, compact)
-        if not m:
-            m = re.search(pat, raw_text)
+    for line in block[:120]:
+        compact = norm(line).replace(" ", "")
+        # 例: 第1日
+        m = re.search(r"第([0-9]+)日", compact)
         if m:
             try:
-                current_day = int(str(m.group(1)).translate(TRANS))
+                current_day = int(m.group(1))
                 break
             except Exception:
                 pass
 
-    patterns_total = [
-        r"([0-9]+)\s*日間",
-        r"([０-９]+)\s*日間",
-    ]
-
-    for pat in patterns_total:
-        m = re.search(pat, norm_text)
-        if not m:
-            m = re.search(pat, compact)
-        if not m:
-            m = re.search(pat, raw_text)
+    for line in block[:120]:
+        compact = norm(line).replace(" ", "")
+        # 将来、6日間表記があれば拾う
+        m = re.search(r"([0-9]+)日間", compact)
         if m:
             try:
-                total_days = int(str(m.group(1)).translate(TRANS))
+                total_days = int(m.group(1))
                 break
             except Exception:
                 pass
@@ -440,7 +421,6 @@ def main():
         venue_payload: Dict[str, Any] = {
             "venue": venue,
             "date": ymd,
-            "races": races,
         }
         if current_day is not None:
             venue_payload["day"] = current_day
@@ -448,6 +428,7 @@ def main():
             venue_payload["total_days"] = total_days
         if day_label is not None:
             venue_payload["day_label"] = day_label
+        venue_payload["races"] = races
 
         venues_out.append(venue_payload)
 
@@ -470,7 +451,8 @@ def main():
     print("txt:", txt_path)
     print("venues:", len(venues_out))
     if venues_out:
-        print("first_venue:", venues_out[0]["venue"], "races:", len(venues_out[0]["races"]))
+        print("first_venue:", venues_out[0]["venue"], "day:", venues_out[0].get("day"), "label:", venues_out[0].get("day_label"))
+        print("first_venue_races:", len(venues_out[0]["races"]))
     if warnings:
         print("WARNINGS:")
         for w in warnings[:80]:
