@@ -1,644 +1,126 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f6f7fb" />
-  <title>レース詳細</title>
-
-  <style>
-    :root{
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --raceTopH: 112px;
-
-      --bg:#f3f5f9;
-      --panel:#ffffff;
-      --panel-soft:#f8fafc;
-      --line:#e2e8f0;
-      --line-soft:#eef2f7;
-
-      --text:#0f172a;
-      --muted:#64748b;
-      --muted-2:#94a3b8;
-      --accent:#2563eb;
-
-      --shadow:0 2px 8px rgba(15,23,42,.06);
-    }
-
-    *{ box-sizing:border-box; }
-
-    html, body{
-      margin:0;
-      min-height:100%;
-      background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Segoe UI",sans-serif;
-      overscroll-behavior-y:none;
-    }
-
-    body{ padding-top:var(--safe-top); }
-
-    .raceTop{
-      position:sticky;
-      top:0;
-      z-index:50;
-      padding:8px 10px 6px;
-      background:rgba(246,247,251,.98);
-      border-bottom:1px solid rgba(226,232,240,.92);
-    }
-
-    .raceHead{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:10px;
-      box-shadow:var(--shadow);
-    }
-
-    .raceHead__left{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .raceVenue{
-      font-size:22px;
-      line-height:1;
-      font-weight:1000;
-      letter-spacing:.01em;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      color:#0f172a;
-    }
-
-    .raceMeta{
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-      align-items:center;
-      font-size:11px;
-      line-height:1;
-      color:var(--muted);
-    }
-
-    .metaChip{
-      display:inline-flex;
-      align-items:center;
-      min-height:24px;
-      padding:0 9px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:var(--panel-soft);
-      white-space:nowrap;
-      font-weight:700;
-    }
-
-    .raceBtn{
-      appearance:none;
-      border:1px solid var(--line);
-      background:var(--panel-soft);
-      color:var(--text);
-      min-width:64px;
-      height:38px;
-      border-radius:11px;
-      padding:0 12px;
-      font-size:13px;
-      font-weight:900;
-      flex:0 0 auto;
-    }
-
-    .raceTabs{
-      margin-top:8px;
-      display:flex;
-      gap:6px;
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
-      padding-bottom:2px;
-      scroll-behavior:smooth;
-    }
-
-    .raceTabs::-webkit-scrollbar{ display:none; }
-
-    .tab{
-      flex:0 0 auto;
-      appearance:none;
-      min-width:52px;
-      height:34px;
-      padding:0 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      color:#334155;
-      font-size:12px;
-      font-weight:900;
-      line-height:1;
-    }
-
-    .tab.is-active{
-      background:linear-gradient(180deg, #2f7cff 0%, #2563eb 100%);
-      color:#fff;
-      border-color:transparent;
-      box-shadow:0 4px 10px rgba(37,99,235,.14);
-    }
-
-    .raceBody{
-      height:calc(100dvh - var(--raceTopH));
-      overflow:hidden;
-      padding:6px 10px calc(8px + var(--safe-bottom));
-    }
-
-    .section{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:8px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .sectionHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:6px;
-      padding-bottom:6px;
-      border-bottom:1px solid var(--line-soft);
-      flex:0 0 auto;
-    }
-
-    .sectionTitle{
-      font-size:13px;
-      font-weight:1000;
-      letter-spacing:.03em;
-      color:#0f172a;
-    }
-
-    .sectionMeta{
-      font-size:10px;
-      line-height:1.3;
-      color:var(--muted-2);
-      text-align:right;
-      white-space:nowrap;
-    }
-
-    .table{
-      flex:1 1 auto;
-      min-height:0;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      justify-content:space-between;
-    }
-
-    .row{
-      flex:1 1 0;
-      min-height:0;
-      display:flex;
-      align-items:stretch;
-      gap:10px;
-      border-radius:15px;
-      background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border:1px solid #e5eaf2;
-      padding:8px;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.78),
-        0 1px 2px rgba(15,23,42,.03);
-    }
-
-    .waku{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      font-weight:1000;
-      letter-spacing:-.03em;
-      flex:0 0 auto;
-      align-self:center;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.38),
-        0 2px 6px rgba(15,23,42,.08);
-      border:1px solid rgba(15,23,42,.08);
-      text-shadow:0 1px 0 rgba(255,255,255,.18);
-    }
-
-    .waku.w1{ background:linear-gradient(180deg, #ffffff 0%, #f7fafc 100%); color:#111827; }
-    .waku.w2{ background:linear-gradient(180deg, #253251 0%, #162033 100%); color:#ffffff; }
-    .waku.w3{ background:linear-gradient(180deg, #f06f63 0%, #dd564b 100%); color:#ffffff; }
-    .waku.w4{ background:linear-gradient(180deg, #568cff 0%, #376ceb 100%); color:#ffffff; }
-    .waku.w5{ background:linear-gradient(180deg, #f7dd58 0%, #edca3f 100%); color:#111827; }
-    .waku.w6{ background:linear-gradient(180deg, #6fd275 0%, #55c561 100%); color:#0f172a; }
-
-    .info{
-      min-width:0;
-      flex:1 1 auto;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:5px;
-      padding-right:2px;
-    }
-
-    .sub{
-      font-size:10px;
-      line-height:1.1;
-      color:#64748b;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      font-weight:700;
-    }
-
-    .nameRow{
-      display:flex;
-      align-items:center;
-      min-width:0;
-    }
-
-    .name{
-      min-width:0;
-      max-width:100%;
-      font-size:clamp(20px, 2.5vw, 24px);
-      line-height:1;
-      font-weight:700;
-      color:#0f172a;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      letter-spacing:-.01em;
-    }
-
-    .metric{
-      flex:0 0 40%;
-      min-width:166px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      column-gap:14px;
-      align-self:stretch;
-      align-items:center;
-      justify-items:center;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .metricCol{
-      width:100%;
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-    }
-
-    .metricCol--nat{
-      gap:8px;
-      padding-top:2px;
-    }
-
-    .metricCol--motor{
-      gap:6px;
-      padding-top:1px;
-    }
-
-    .metricHead{
-      font-size:11px;
-      line-height:1;
-      font-weight:900;
-      color:#475569;
-      white-space:nowrap;
-      text-align:center;
-      width:100%;
-    }
-
-    .metricVal{
-      font-size:22px;
-      line-height:1;
-      font-weight:900;
-      color:#0f172a;
-      white-space:nowrap;
-      text-align:center;
-      width:100%;
-    }
-
-    .metricSub{
-      font-size:17px;
-      line-height:1;
-      font-weight:900;
-      color:#0f172a;
-      white-space:nowrap;
-      text-align:center;
-      width:100%;
-      margin-top:-1px;
-    }
-
-    .metricVal--motor{
-      font-size:18px;
-      margin-top:-2px;
-    }
-
-    .note{
-      margin-top:6px;
-      padding:0 2px;
-      color:var(--muted);
-      font-size:10px;
-      line-height:1.4;
-      flex:0 0 auto;
-    }
-
-    .err{
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px dashed #cbd5e1;
-      background:#f8fafc;
-      color:#475569;
-      font-size:12px;
-      line-height:1.7;
-      word-break:break-word;
-    }
-
-    @media (max-width: 390px){
-      .waku{
-        width:38px;
-        height:38px;
-        font-size:20px;
-        border-radius:12px;
+{
+  "venue": "桐生",
+  "jcd": "01",
+  "date": "2026-03-08",
+  "day": 3,
+  "total_days": null,
+  "day_label": "3日目",
+  "race": {
+    "rno": 10,
+    "name": "予選特賞",
+    "shinin": "",
+    "distance_m": 1800,
+    "cutoff": "19:36",
+    "boats": [
+      {
+        "waku": 1,
+        "regno": 4000,
+        "name": "松本博昭",
+        "age": 49,
+        "branch": "広島",
+        "weight": 57,
+        "grade": "A2",
+        "nat_win": 6.01,
+        "nat_2": 40.0,
+        "loc_win": 0.0,
+        "loc_2": 0.0,
+        "motor_no": 28,
+        "motor_2": 37.78,
+        "boat_no": 24,
+        "boat_2": 35.94,
+        "note": "1 4 1"
+      },
+      {
+        "waku": 2,
+        "regno": 4685,
+        "name": "島村隆幸",
+        "age": 35,
+        "branch": "徳島",
+        "weight": 51,
+        "grade": "A1",
+        "nat_win": 7.4,
+        "nat_2": 60.4,
+        "loc_win": 6.89,
+        "loc_2": 55.56,
+        "motor_no": 25,
+        "motor_2": 34.38,
+        "boat_no": 12,
+        "boat_2": 30.36,
+        "note": "35 6"
+      },
+      {
+        "waku": 3,
+        "regno": 4012,
+        "name": "中村有裕",
+        "age": 46,
+        "branch": "滋賀",
+        "weight": 58,
+        "grade": "A2",
+        "nat_win": 5.8,
+        "nat_2": 41.67,
+        "loc_win": 6.23,
+        "loc_2": 45.16,
+        "motor_no": 18,
+        "motor_2": 17.5,
+        "boat_no": 64,
+        "boat_2": 32.26,
+        "note": "2 1 4"
+      },
+      {
+        "waku": 4,
+        "regno": 3654,
+        "name": "武田光史",
+        "age": 52,
+        "branch": "福井",
+        "weight": 54,
+        "grade": "A1",
+        "nat_win": 5.63,
+        "nat_2": 40.0,
+        "loc_win": 8.86,
+        "loc_2": 71.43,
+        "motor_no": 57,
+        "motor_2": 26.47,
+        "boat_no": 66,
+        "boat_2": 40.98,
+        "note": "12 5"
+      },
+      {
+        "waku": 5,
+        "regno": 3081,
+        "name": "岡本慎治",
+        "age": 62,
+        "branch": "山口",
+        "weight": 52,
+        "grade": "B1",
+        "nat_win": 4.7,
+        "nat_2": 26.67,
+        "loc_win": 0.0,
+        "loc_2": 0.0,
+        "motor_no": 66,
+        "motor_2": 18.75,
+        "boat_no": 49,
+        "boat_2": 30.88,
+        "note": "32 2"
+      },
+      {
+        "waku": 6,
+        "regno": 4943,
+        "name": "八木治樹",
+        "age": 34,
+        "branch": "愛知",
+        "weight": 53,
+        "grade": "B1",
+        "nat_win": 3.98,
+        "nat_2": 21.82,
+        "loc_win": 5.55,
+        "loc_2": 30.0,
+        "motor_no": 68,
+        "motor_2": 15.38,
+        "boat_no": 72,
+        "boat_2": 32.26,
+        "note": "1 5 3"
       }
-
-      .sub{ font-size:9px; }
-
-      .metric{
-        min-width:148px;
-        column-gap:10px;
-      }
-
-      .metricHead{ font-size:10px; }
-      .metricVal{ font-size:19px; }
-      .metricSub{ font-size:15px; }
-      .metricVal--motor{ font-size:16px; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="raceTop" id="raceTop">
-    <div class="raceHead">
-      <div class="raceHead__left">
-        <div id="venueName" class="raceVenue">—</div>
-        <div class="raceMeta">
-          <span class="metaChip" id="raceNoLabel">—R</span>
-          <span class="metaChip" id="timeLabel">締切: --:--</span>
-          <span class="metaChip" id="dayLabel">—</span>
-        </div>
-      </div>
-      <button class="raceBtn" type="button" id="btnBack">戻る</button>
-    </div>
-
-    <div class="raceTabs" id="tabs" aria-label="レース番号"></div>
-  </div>
-
-  <div class="raceBody">
-    <section class="section">
-      <div class="sectionHead">
-        <div class="sectionTitle">出走表</div>
-        <div class="sectionMeta">無料版は<br>選手データ確認のみ</div>
-      </div>
-
-      <div class="table" id="table"></div>
-
-      <div class="note">
-        ※無料版は「各選手データの確認」専用です。予想は表示しません。
-      </div>
-    </section>
-  </div>
-
-  <script>
-    const qs = new URLSearchParams(location.search);
-    const venueName = decodeURIComponent(qs.get("name") || "会場");
-    const jcd = String(qs.get("jcd") || "").padStart(2, "0");
-
-    const $ = (id) => document.getElementById(id);
-    const $tabs = $("tabs");
-    const $table = $("table");
-    const $raceNoLabel = $("raceNoLabel");
-    const $timeLabel = $("timeLabel");
-    const $dayLabel = $("dayLabel");
-    const $raceTop = $("raceTop");
-
-    const BOT_RACES_BASE_URL =
-      "https://cdn.jsdelivr.net/gh/raceanalysislab/race-data-bot@main/data/site/races/";
-
-    $("venueName").textContent = venueName;
-
-    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
-
-    const safeNum = (v) => {
-      if (v === undefined || v === null || v === "") return "—";
-      const n = Number(v);
-      return Number.isFinite(n) ? n.toFixed(2) : "—";
-    };
-
-    const safeInt = (v) => {
-      if (v === undefined || v === null || v === "") return "—";
-      const n = Number(v);
-      return Number.isFinite(n) ? String(Math.trunc(n)) : "—";
-    };
-
-    const toHM = (x) => {
-      const m = String(x || "").match(/(\d{1,2}):(\d{2})/);
-      return m ? `${String(m[1]).padStart(2, "0")}:${m[2]}` : "--:--";
-    };
-
-    const setTopHeight = () => {
-      const h = $raceTop.getBoundingClientRect().height || 112;
-      document.documentElement.style.setProperty("--raceTopH", `${Math.ceil(h)}px`);
-    };
-
-    const fetchJSON = async (url) => {
-      const bust = url.includes("?") ? `&t=${Date.now()}` : `?t=${Date.now()}`;
-      const res = await fetch(url + bust, { cache:"no-store" });
-      if (!res.ok) throw new Error(`failed: ${url}`);
-      return res.json();
-    };
-
-    const centerActiveTab = () => {
-      const active = $tabs.querySelector(".tab.is-active");
-      if (!active) return;
-      const offset = active.offsetLeft - ($tabs.clientWidth / 2) + (active.clientWidth / 2);
-      $tabs.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
-    };
-
-    function makeTabs(active){
-      $tabs.innerHTML = Array.from({ length: 12 }, (_, i) => {
-        const r = i + 1;
-        return `<button type="button" class="tab${r === active ? " is-active" : ""}" data-race="${r}">${r}R</button>`;
-      }).join("");
-
-      $tabs.querySelectorAll(".tab").forEach((btn) => {
-        btn.addEventListener("click", () => setRace(Number(btn.dataset.race)));
-      });
-
-      requestAnimationFrame(centerActiveTab);
-    }
-
-    function normalizeBoatsTo6(boats){
-      const byWaku = new Map();
-      const rest = [];
-
-      boats.forEach((b) => {
-        const w = Number(b?.waku);
-        if (w >= 1 && w <= 6 && !byWaku.has(w)) byWaku.set(w, b);
-        else rest.push(b);
-      });
-
-      for (let w = 1; w <= 6; w++){
-        if (!byWaku.has(w) && rest.length) byWaku.set(w, { ...rest.shift(), waku: w });
-      }
-
-      return Array.from({ length: 6 }, (_, i) => {
-        const w = i + 1;
-        return byWaku.get(w) || {
-          waku:w,
-          name:"—",
-          regno:"",
-          branch:"",
-          age:"",
-          grade:"",
-          nat_win:null,
-          motor_no:null,
-          motor_2:null
-        };
-      });
-    }
-
-    function metricHTML(p){
-      return `
-        <div class="metric">
-          <div class="metricCol metricCol--nat">
-            <div class="metricHead">全国勝率</div>
-            <div class="metricVal">${esc(safeNum(p.nat_win))}</div>
-          </div>
-
-          <div class="metricCol metricCol--motor">
-            <div class="metricHead">モーターNo.</div>
-            <div class="metricSub">${esc(safeInt(p.motor_no))}</div>
-            <div class="metricVal metricVal--motor">${esc(safeNum(p.motor_2))}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function rowHTML(p){
-      const regno = p.regno || p.id || "—";
-      const grade = p.grade || "—";
-      const branch = p.branch || "—";
-      const age = (p.age !== undefined && p.age !== null && p.age !== "") ? `${p.age}歳` : "—";
-
-      return `
-        <div class="row">
-          <div class="waku w${Number(p.waku) || 0}">${Number(p.waku) || ""}</div>
-
-          <div class="info">
-            <div class="sub">${esc(regno)} / ${esc(grade)} / ${esc(branch)} / ${esc(age)}</div>
-            <div class="nameRow">
-              <div class="name">${esc(p.name || "—")}</div>
-            </div>
-          </div>
-
-          ${metricHTML(p)}
-        </div>
-      `;
-    }
-
-    function renderRaceJSON(r, json){
-      $raceNoLabel.textContent = `${r}R`;
-      $timeLabel.textContent = `締切: ${toHM(json?.race?.cutoff || json?.cutoff || "")}`;
-      $dayLabel.textContent = String(json?.day_label || "").trim() || "—";
-
-      const boatsRaw = Array.isArray(json?.race?.boats) ? json.race.boats : [];
-      if (!boatsRaw.length){
-        $table.innerHTML = `<div class="err">出走表が空です。<br>（race.boats が見つかりません）</div>`;
-        return;
-      }
-
-      $table.innerHTML = normalizeBoatsTo6(boatsRaw).map(rowHTML).join("");
-      requestAnimationFrame(setTopHeight);
-    }
-
-    function syncURLRace(r){
-      const next = new URL(location.href);
-      next.searchParams.set("race", String(r));
-      history.replaceState(null, "", next.toString());
-    }
-
-    function buildCandidateUrls(r){
-      return [
-        ...(jcd && jcd !== "00" ? [`${BOT_RACES_BASE_URL}${encodeURIComponent(`${jcd}_${r}R.json`)}`] : []),
-        `${BOT_RACES_BASE_URL}${encodeURIComponent(`${venueName}_${r}R.json`)}`
-      ];
-    }
-
-    async function fetchRaceJSON(r){
-      let lastErr = null;
-      for (const url of buildCandidateUrls(r)){
-        try { return await fetchJSON(url); }
-        catch (e) { lastErr = e; }
-      }
-      throw lastErr || new Error("race json not found");
-    }
-
-    async function setRace(r){
-      r = clamp(Number(r) || 1, 1, 12);
-      makeTabs(r);
-      syncURLRace(r);
-
-      $raceNoLabel.textContent = `${r}R`;
-      $timeLabel.textContent = "締切: --:--";
-      $dayLabel.textContent = "—";
-      $table.innerHTML = `<div class="err">データを読み込み中…</div>`;
-
-      if (!venueName || venueName === "会場"){
-        $table.innerHTML = `<div class="err">name が指定されていません。<br>例：race.html?jcd=20&name=若松</div>`;
-        return;
-      }
-
-      try {
-        renderRaceJSON(r, await fetchRaceJSON(r));
-      } catch (e) {
-        $table.innerHTML = `<div class="err">JSONの取得に失敗しました。<br>${buildCandidateUrls(r).map(esc).join("<br>")}<br>（ファイル未生成 or URL違い）</div>`;
-      }
-    }
-
-    async function boot(){
-      const initialRace = clamp(Number(qs.get("race") || 1) || 1, 1, 12);
-      makeTabs(initialRace);
-      await setRace(initialRace);
-      requestAnimationFrame(() => {
-        setTopHeight();
-        centerActiveTab();
-      });
-    }
-
-    addEventListener("resize", setTopHeight, { passive:true });
-    $("btnBack").addEventListener("click", () => history.back());
-    requestAnimationFrame(setTopHeight);
-    boot();
-  </script>
-</body>
-</html>
+    ],
+    "tags": []
+  }
+}

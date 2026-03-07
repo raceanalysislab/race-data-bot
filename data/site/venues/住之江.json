@@ -1,9 +1,9 @@
 {
   "venue": "住之江",
-  "date": "2026-03-07",
-  "day": 4,
+  "date": "2026-03-08",
+  "day": 5,
   "total_days": null,
-  "day_label": "4日目",
+  "day_label": "最終日",
   "grade_label": "一般戦",
   "first_race_time": "15:16",
   "card_band": "evening",
@@ -15,7 +15,7 @@
     },
     {
       "rno": 2,
-      "cutoff": "15:45"
+      "cutoff": "15:39"
     },
     {
       "rno": 3,
@@ -31,11 +31,11 @@
     },
     {
       "rno": 6,
-      "cutoff": "17:31"
+      "cutoff": "17:28"
     },
     {
       "rno": 7,
-      "cutoff": "17:57"
+      "cutoff": "17:55"
     },
     {
       "rno": 8,
@@ -43,43 +43,43 @@
     },
     {
       "rno": 9,
-      "cutoff": "18:51"
+      "cutoff": "18:54"
     },
     {
       "rno": 10,
-      "cutoff": "19:23"
+      "cutoff": "19:25"
     },
     {
       "rno": 11,
-      "cutoff": "20:06"
+      "cutoff": "19:58"
     },
     {
       "rno": 12,
-      "cutoff": "20:36"
+      "cutoff": "20:30"
     }
   ],
   "races": [
     {
       "rno": 1,
-      "name": "予選",
+      "name": "一般戦",
       "cutoff": "15:16",
       "distance": 1800
     },
     {
       "rno": 2,
-      "name": "予選",
-      "cutoff": "15:45",
+      "name": "一般戦",
+      "cutoff": "15:39",
       "distance": 1800
     },
     {
       "rno": 3,
-      "name": "予選",
+      "name": "一般戦",
       "cutoff": "16:07",
       "distance": 1800
     },
     {
       "rno": 4,
-      "name": "予選",
+      "name": "一般戦",
       "cutoff": "16:38",
       "distance": 1800
     },
@@ -91,44 +91,44 @@
     },
     {
       "rno": 6,
-      "name": "予選特別Ｂ戦",
-      "cutoff": "17:31",
+      "name": "一般戦",
+      "cutoff": "17:28",
       "distance": 1800
     },
     {
       "rno": 7,
-      "name": "予選",
-      "cutoff": "17:57",
+      "name": "一般戦",
+      "cutoff": "17:55",
       "distance": 1800
     },
     {
       "rno": 8,
-      "name": "トワイライト",
+      "name": "一般戦",
       "cutoff": "18:23",
       "distance": 1800
     },
     {
       "rno": 9,
-      "name": "予選",
-      "cutoff": "18:51",
+      "name": "準優勝戦",
+      "cutoff": "18:54",
       "distance": 1800
     },
     {
       "rno": 10,
-      "name": "予選特別Ｂ戦",
-      "cutoff": "19:23",
+      "name": "準優勝戦",
+      "cutoff": "19:25",
       "distance": 1800
     },
     {
       "rno": 11,
-      "name": "予選特別Ａ戦",
-      "cutoff": "20:06",
+      "name": "準優勝戦",
+      "cutoff": "19:58",
       "distance": 1800
     },
     {
       "rno": 12,
-      "name": "一般特別戦",
-      "cutoff": "20:36",
+      "name": "一般戦",
+      "cutoff": "20:30",
       "distance": 1800
     }
   ]

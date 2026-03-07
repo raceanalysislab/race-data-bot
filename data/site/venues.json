@@ -2,74 +2,74 @@
   {
     "name": "桐生",
     "jcd": "01",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 2,
+    "next_race": 1,
+    "next_display": "1R 15:20",
+    "day": 3,
     "total_days": null,
-    "day_label": "2日目",
+    "day_label": "3日目",
     "grade_label": "一般戦",
-    "first_race_time": "15:22",
+    "first_race_time": "15:20",
     "card_band": "evening",
     "card_tone": "night",
     "race_times": [
       {
         "rno": 1,
-        "cutoff": "15:22"
+        "cutoff": "15:20"
       },
       {
         "rno": 2,
-        "cutoff": "15:48"
+        "cutoff": "15:45"
       },
       {
         "rno": 3,
-        "cutoff": "16:15"
+        "cutoff": "16:12"
       },
       {
         "rno": 4,
-        "cutoff": "16:42"
+        "cutoff": "16:40"
       },
       {
         "rno": 5,
-        "cutoff": "17:11"
+        "cutoff": "17:10"
       },
       {
         "rno": 6,
-        "cutoff": "17:40"
+        "cutoff": "17:37"
       },
       {
         "rno": 7,
-        "cutoff": "18:05"
+        "cutoff": "18:04"
       },
       {
         "rno": 8,
-        "cutoff": "18:31"
+        "cutoff": "18:33"
       },
       {
         "rno": 9,
-        "cutoff": "19:14"
+        "cutoff": "19:04"
       },
       {
         "rno": 10,
-        "cutoff": "19:44"
+        "cutoff": "19:36"
       },
       {
         "rno": 11,
-        "cutoff": "20:16"
+        "cutoff": "20:07"
       },
       {
         "rno": 12,
-        "cutoff": "20:45"
+        "cutoff": "20:38"
       }
     ]
   },
   {
     "name": "戸田",
     "jcd": "02",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 1,
+    "next_race": 1,
+    "next_display": "1R 10:47",
+    "day": 2,
     "total_days": null,
-    "day_label": "初日",
+    "day_label": "2日目",
     "grade_label": "一般戦",
     "first_race_time": "10:47",
     "card_band": "day",
@@ -128,11 +128,11 @@
   {
     "name": "江戸川",
     "jcd": "03",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 1,
+    "next_race": 1,
+    "next_display": "1R 11:14",
+    "day": 2,
     "total_days": null,
-    "day_label": "初日",
+    "day_label": "2日目",
     "grade_label": "一般戦",
     "first_race_time": "11:14",
     "card_band": "day",
@@ -189,13 +189,76 @@
     ]
   },
   {
-    "name": "三国",
-    "jcd": "10",
-    "next_race": null,
-    "next_display": "発売終了",
+    "name": "常滑",
+    "jcd": "08",
+    "next_race": 1,
+    "next_display": "1R 10:18",
     "day": 1,
     "total_days": null,
     "day_label": "初日",
+    "grade_label": "一般戦",
+    "first_race_time": "10:18",
+    "card_band": "day",
+    "card_tone": "normal",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "10:18"
+      },
+      {
+        "rno": 2,
+        "cutoff": "10:45"
+      },
+      {
+        "rno": 3,
+        "cutoff": "11:12"
+      },
+      {
+        "rno": 4,
+        "cutoff": "11:43"
+      },
+      {
+        "rno": 5,
+        "cutoff": "12:12"
+      },
+      {
+        "rno": 6,
+        "cutoff": "12:41"
+      },
+      {
+        "rno": 7,
+        "cutoff": "13:07"
+      },
+      {
+        "rno": 8,
+        "cutoff": "13:35"
+      },
+      {
+        "rno": 9,
+        "cutoff": "14:08"
+      },
+      {
+        "rno": 10,
+        "cutoff": "14:42"
+      },
+      {
+        "rno": 11,
+        "cutoff": "15:12"
+      },
+      {
+        "rno": 12,
+        "cutoff": "16:00"
+      }
+    ]
+  },
+  {
+    "name": "三国",
+    "jcd": "10",
+    "next_race": 1,
+    "next_display": "1R 08:47",
+    "day": 2,
+    "total_days": null,
+    "day_label": "2日目",
     "grade_label": "一般戦",
     "first_race_time": "08:47",
     "card_band": "morning",
@@ -227,7 +290,7 @@
       },
       {
         "rno": 7,
-        "cutoff": "11:35"
+        "cutoff": "11:34"
       },
       {
         "rno": 8,
@@ -239,7 +302,7 @@
       },
       {
         "rno": 10,
-        "cutoff": "13:11"
+        "cutoff": "13:17"
       },
       {
         "rno": 11,
@@ -254,9 +317,9 @@
   {
     "name": "びわこ",
     "jcd": "11",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 5,
+    "next_race": 1,
+    "next_display": "1R 10:32",
+    "day": 6,
     "total_days": null,
     "day_label": "最終日",
     "grade_label": "一般戦",
@@ -282,46 +345,46 @@
       },
       {
         "rno": 5,
-        "cutoff": "12:35"
+        "cutoff": "12:36"
       },
       {
         "rno": 6,
-        "cutoff": "13:07"
+        "cutoff": "13:09"
       },
       {
         "rno": 7,
-        "cutoff": "13:39"
+        "cutoff": "13:42"
       },
       {
         "rno": 8,
-        "cutoff": "14:12"
+        "cutoff": "14:15"
       },
       {
         "rno": 9,
-        "cutoff": "14:45"
+        "cutoff": "14:48"
       },
       {
         "rno": 10,
-        "cutoff": "15:18"
+        "cutoff": "15:24"
       },
       {
         "rno": 11,
-        "cutoff": "15:52"
+        "cutoff": "15:56"
       },
       {
         "rno": 12,
-        "cutoff": "16:30"
+        "cutoff": "16:32"
       }
     ]
   },
   {
     "name": "住之江",
     "jcd": "12",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 4,
+    "next_race": 1,
+    "next_display": "1R 15:16",
+    "day": 5,
     "total_days": null,
-    "day_label": "4日目",
+    "day_label": "最終日",
     "grade_label": "一般戦",
     "first_race_time": "15:16",
     "card_band": "evening",
@@ -333,7 +396,7 @@
       },
       {
         "rno": 2,
-        "cutoff": "15:45"
+        "cutoff": "15:39"
       },
       {
         "rno": 3,
@@ -349,11 +412,11 @@
       },
       {
         "rno": 6,
-        "cutoff": "17:31"
+        "cutoff": "17:28"
       },
       {
         "rno": 7,
-        "cutoff": "17:57"
+        "cutoff": "17:55"
       },
       {
         "rno": 8,
@@ -361,93 +424,93 @@
       },
       {
         "rno": 9,
-        "cutoff": "18:51"
+        "cutoff": "18:54"
       },
       {
         "rno": 10,
-        "cutoff": "19:23"
+        "cutoff": "19:25"
       },
       {
         "rno": 11,
-        "cutoff": "20:06"
+        "cutoff": "19:58"
       },
       {
         "rno": 12,
-        "cutoff": "20:36"
+        "cutoff": "20:30"
       }
     ]
   },
   {
-    "name": "児島",
-    "jcd": "16",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 6,
+    "name": "尼崎",
+    "jcd": "13",
+    "next_race": 1,
+    "next_display": "1R 10:40",
+    "day": 1,
     "total_days": null,
-    "day_label": "最終日",
+    "day_label": "初日",
     "grade_label": "一般戦",
-    "first_race_time": "10:41",
+    "first_race_time": "10:40",
     "card_band": "day",
     "card_tone": "normal",
     "race_times": [
       {
         "rno": 1,
-        "cutoff": "10:41"
+        "cutoff": "10:40"
       },
       {
         "rno": 2,
-        "cutoff": "11:12"
+        "cutoff": "11:09"
       },
       {
         "rno": 3,
-        "cutoff": "11:52"
+        "cutoff": "11:37"
       },
       {
         "rno": 4,
-        "cutoff": "12:22"
+        "cutoff": "12:00"
       },
       {
         "rno": 5,
-        "cutoff": "12:55"
+        "cutoff": "12:27"
       },
       {
         "rno": 6,
-        "cutoff": "13:27"
+        "cutoff": "12:58"
       },
       {
         "rno": 7,
-        "cutoff": "14:02"
+        "cutoff": "13:27"
       },
       {
         "rno": 8,
-        "cutoff": "14:36"
+        "cutoff": "14:04"
       },
       {
         "rno": 9,
-        "cutoff": "15:07"
+        "cutoff": "14:38"
       },
       {
         "rno": 10,
-        "cutoff": "15:40"
+        "cutoff": "15:08"
       },
       {
         "rno": 11,
-        "cutoff": "16:13"
+        "cutoff": "15:37"
       },
       {
         "rno": 12,
-        "cutoff": "16:50"
+        "cutoff": "16:23"
       }
     ]
   },
   {
     "name": "宮島",
     "jcd": "17",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 2,
+    "next_race": 1,
+    "next_display": "1R 10:31",
+    "day": 3,
     "total_days": null,
-    "day_label": "2日目",
+    "day_label": "3日目",
     "grade_label": "一般戦",
     "first_race_time": "10:31",
     "card_band": "day",
@@ -459,31 +522,31 @@
       },
       {
         "rno": 2,
-        "cutoff": "10:58"
+        "cutoff": "10:57"
       },
       {
         "rno": 3,
-        "cutoff": "11:30"
+        "cutoff": "11:23"
       },
       {
         "rno": 4,
-        "cutoff": "12:02"
+        "cutoff": "11:53"
       },
       {
         "rno": 5,
-        "cutoff": "12:33"
+        "cutoff": "12:22"
       },
       {
         "rno": 6,
-        "cutoff": "12:58"
+        "cutoff": "12:52"
       },
       {
         "rno": 7,
-        "cutoff": "13:22"
+        "cutoff": "13:21"
       },
       {
         "rno": 8,
-        "cutoff": "13:55"
+        "cutoff": "13:54"
       },
       {
         "rno": 9,
@@ -491,89 +554,26 @@
       },
       {
         "rno": 10,
-        "cutoff": "15:00"
+        "cutoff": "14:59"
       },
       {
         "rno": 11,
-        "cutoff": "15:31"
+        "cutoff": "15:30"
       },
       {
         "rno": 12,
-        "cutoff": "16:04"
-      }
-    ]
-  },
-  {
-    "name": "若松",
-    "jcd": "20",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 7,
-    "total_days": null,
-    "day_label": "最終日",
-    "grade_label": "一般戦",
-    "first_race_time": "17:22",
-    "card_band": "night",
-    "card_tone": "night",
-    "race_times": [
-      {
-        "rno": 1,
-        "cutoff": "17:22"
-      },
-      {
-        "rno": 2,
-        "cutoff": "17:50"
-      },
-      {
-        "rno": 3,
-        "cutoff": "18:14"
-      },
-      {
-        "rno": 4,
-        "cutoff": "18:38"
-      },
-      {
-        "rno": 5,
-        "cutoff": "19:04"
-      },
-      {
-        "rno": 6,
-        "cutoff": "19:31"
-      },
-      {
-        "rno": 7,
-        "cutoff": "19:56"
-      },
-      {
-        "rno": 8,
-        "cutoff": "20:25"
-      },
-      {
-        "rno": 9,
-        "cutoff": "20:58"
-      },
-      {
-        "rno": 10,
-        "cutoff": "21:24"
-      },
-      {
-        "rno": 11,
-        "cutoff": "21:51"
-      },
-      {
-        "rno": 12,
-        "cutoff": "22:18"
+        "cutoff": "16:05"
       }
     ]
   },
   {
     "name": "唐津",
     "jcd": "23",
-    "next_race": null,
-    "next_display": "発売終了",
-    "day": 2,
+    "next_race": 1,
+    "next_display": "1R 08:35",
+    "day": 3,
     "total_days": null,
-    "day_label": "2日目",
+    "day_label": "最終日",
     "grade_label": "一般戦",
     "first_race_time": "08:35",
     "card_band": "morning",
@@ -597,15 +597,15 @@
       },
       {
         "rno": 5,
-        "cutoff": "10:22"
+        "cutoff": "10:24"
       },
       {
         "rno": 6,
-        "cutoff": "10:52"
+        "cutoff": "10:53"
       },
       {
         "rno": 7,
-        "cutoff": "11:23"
+        "cutoff": "11:25"
       },
       {
         "rno": 8,
@@ -613,19 +613,82 @@
       },
       {
         "rno": 9,
-        "cutoff": "12:28"
+        "cutoff": "12:30"
       },
       {
         "rno": 10,
-        "cutoff": "13:00"
+        "cutoff": "13:05"
       },
       {
         "rno": 11,
-        "cutoff": "13:34"
+        "cutoff": "13:39"
       },
       {
         "rno": 12,
-        "cutoff": "14:10"
+        "cutoff": "14:13"
+      }
+    ]
+  },
+  {
+    "name": "大村",
+    "jcd": "24",
+    "next_race": 1,
+    "next_display": "1R 15:17",
+    "day": 1,
+    "total_days": null,
+    "day_label": "初日",
+    "grade_label": "一般戦",
+    "first_race_time": "15:17",
+    "card_band": "evening",
+    "card_tone": "night",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "15:17"
+      },
+      {
+        "rno": 2,
+        "cutoff": "15:47"
+      },
+      {
+        "rno": 3,
+        "cutoff": "16:15"
+      },
+      {
+        "rno": 4,
+        "cutoff": "16:43"
+      },
+      {
+        "rno": 5,
+        "cutoff": "17:19"
+      },
+      {
+        "rno": 6,
+        "cutoff": "17:46"
+      },
+      {
+        "rno": 7,
+        "cutoff": "18:13"
+      },
+      {
+        "rno": 8,
+        "cutoff": "18:43"
+      },
+      {
+        "rno": 9,
+        "cutoff": "19:14"
+      },
+      {
+        "rno": 10,
+        "cutoff": "19:47"
+      },
+      {
+        "rno": 11,
+        "cutoff": "20:16"
+      },
+      {
+        "rno": 12,
+        "cutoff": "20:45"
       }
     ]
   }
