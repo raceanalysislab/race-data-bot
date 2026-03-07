@@ -15,6 +15,10 @@
 # - card_tone : 互換用（morning / normal / night）
 # - race_times : 一覧画面でリアルタイム切替するための全レース時刻
 #
+# 追加仕様:
+# - レース名に「優勝戦」が含まれる開催は day_label を「最終日」に上書き
+# - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
+#
 # ※ frontend は card_band を優先使用
 # ※ ☀️ / 🌙 / 上半分カラーは「今の next_display」ではなく
 #    「その会場の1R時刻」で固定する前提
@@ -230,6 +234,33 @@ def _legacy_card_tone(card_band: str) -> str:
     return "normal"
 
 
+def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
+    for r in races:
+        name = str(r.get("name") or "").strip()
+        title = str(r.get("title") or "").strip()
+        text = f"{name} {title}"
+        if "優勝戦" in text:
+            return True
+    return False
+
+
+def _resolve_day_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
+    if _is_final_day_by_races(races):
+        return "最終日"
+
+    day_label = str(venue.get("day_label") or "").strip()
+    if day_label:
+        return day_label
+
+    day = venue.get("day")
+    if isinstance(day, int):
+        if day == 1:
+            return "初日"
+        return f"{day}日目"
+
+    return ""
+
+
 def main():
     if not os.path.exists(MBRACE_PATH):
         raise FileNotFoundError(f"missing: {MBRACE_PATH}")
@@ -250,6 +281,7 @@ def main():
         grade_label = _detect_grade_label(venue, races)
         first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
+        day_label = _resolve_day_label(venue, races)
 
         row: Dict[str, Any] = {
             "name": venue_name,
@@ -258,7 +290,7 @@ def main():
             "next_display": next_display,
             "day": venue.get("day"),
             "total_days": venue.get("total_days"),
-            "day_label": venue.get("day_label"),
+            "day_label": day_label,
             "grade_label": grade_label,
             "first_race_time": first_race_time,
             "card_band": card_band,
@@ -291,6 +323,7 @@ def main():
         grade_label = _detect_grade_label(venue, races)
         first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
+        day_label = _resolve_day_label(venue, races)
 
         races_out: List[Dict[str, Any]] = []
         for r in races:
@@ -306,7 +339,7 @@ def main():
             "date": venue.get("date"),
             "day": venue.get("day"),
             "total_days": venue.get("total_days"),
-            "day_label": venue.get("day_label"),
+            "day_label": day_label,
             "grade_label": grade_label,
             "first_race_time": first_race_time,
             "card_band": card_band,
