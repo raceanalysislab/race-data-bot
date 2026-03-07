@@ -4,9 +4,19 @@
 # - data/site/venues/<会場>.json : 会場ごとのレース概要
 #
 # 追加:
-# - grade_label（一般戦 / G3 / G2 / G1 / SG / PG1 / ルーキー / レディース など）
-# - card_tone（normal / morning / night）
-#   → app.js / grid.css 側で表示・色分けに使えるようにする
+# - grade_label
+# - first_race_time : 1Rの締切時刻
+# - card_band :
+#     morning = 1R 08:00〜09:00
+#     day     = 1R 10:00〜12:00
+#     evening = 1R 15:00〜16:00
+#     night   = 1R 17:00〜18:00
+#     normal  = それ以外
+# - card_tone : 互換用（morning / normal / night）
+#
+# ※ frontend は card_band を優先使用
+# ※ ☀️ / 🌙 / 上半分カラーは「今の next_display」ではなく
+#    「その会場の1R時刻」で固定する前提
 
 import json
 import os
@@ -33,15 +43,17 @@ VENUE_TO_JCD: Dict[str, str] = {
     "芦屋": "21", "福岡": "22", "唐津": "23", "大村": "24",
 }
 
+
 def _pad2(n: int) -> str:
     return str(n).zfill(2)
+
 
 def _parse_hhmm(hhmm: str) -> Optional[Tuple[int, int]]:
     if not isinstance(hhmm, str):
         return None
 
     s = hhmm.strip()
-    if len(s) < 4 or ":" not in s:
+    if ":" not in s:
         return None
 
     try:
@@ -55,8 +67,17 @@ def _parse_hhmm(hhmm: str) -> Optional[Tuple[int, int]]:
 
     return None
 
+
 def _minutes(h: int, m: int) -> int:
     return h * 60 + m
+
+
+def _to_hhmm(value: str) -> Optional[str]:
+    hm = _parse_hhmm(value)
+    if not hm:
+        return None
+    return f"{_pad2(hm[0])}:{_pad2(hm[1])}"
+
 
 def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int], str]:
     now = datetime.now(JST)
@@ -70,12 +91,13 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         if not isinstance(rno, int):
             continue
 
-        hm = _parse_hhmm(str(cutoff or ""))
-        if not hm:
+        hhmm = _to_hhmm(str(cutoff or ""))
+        if not hhmm:
             continue
 
-        tmin = _minutes(hm[0], hm[1])
-        candidates.append((tmin, rno, f"{_pad2(hm[0])}:{_pad2(hm[1])}"))
+        h, m = _parse_hhmm(hhmm)  # type: ignore
+        tmin = _minutes(h, m)
+        candidates.append((tmin, rno, hhmm))
 
     if not candidates:
         return None, "発売終了"
@@ -87,6 +109,32 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
             return rno, f"{rno}R {hhmm}"
 
     return None, "発売終了"
+
+
+def _pick_first_race_time(races: List[Dict[str, Any]]) -> Optional[str]:
+    # まず1Rを優先
+    for r in races:
+        if r.get("rno") != 1:
+            continue
+        hhmm = _to_hhmm(str(r.get("cutoff") or ""))
+        if hhmm:
+            return hhmm
+
+    # 保険: 最小時刻
+    candidates: List[Tuple[int, str]] = []
+    for r in races:
+        hhmm = _to_hhmm(str(r.get("cutoff") or ""))
+        if not hhmm:
+            continue
+        h, m = _parse_hhmm(hhmm)  # type: ignore
+        candidates.append((_minutes(h, m), hhmm))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda x: x[0])
+    return candidates[0][1]
+
 
 def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
     texts: List[str] = []
@@ -103,7 +151,6 @@ def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> s
                 texts.append(str(v))
 
     joined = " / ".join(texts)
-
     upper = joined.upper()
 
     if "PG1" in upper:
@@ -123,28 +170,41 @@ def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> s
     if any(k in joined for k in ["ルーキー", "ヤングダービー", "スカパー!・JLC杯ルーキーシリーズ"]):
         return "ルーキー"
 
-    if any(k in joined for k in ["企業杯", "モーターボート大賞", "地区選"]):
-        return "一般戦"
-
     return "一般戦"
 
-def _detect_card_tone(next_display: str) -> str:
-    if not isinstance(next_display, str):
+
+def _classify_card_band(first_race_time: Optional[str]) -> str:
+    if not first_race_time:
         return "normal"
 
-    m = re.search(r"(\d{1,2}):(\d{2})", next_display)
-    if not m:
+    hm = _parse_hhmm(first_race_time)
+    if not hm:
         return "normal"
 
-    hh = int(m.group(1))
-    mm = int(m.group(2))
-    tmin = _minutes(hh, mm)
+    tmin = _minutes(hm[0], hm[1])
 
-    if tmin < _minutes(12, 0):
+    if _minutes(8, 0) <= tmin <= _minutes(9, 0):
         return "morning"
-    if tmin >= _minutes(17, 0):
+
+    if _minutes(10, 0) <= tmin <= _minutes(12, 0):
+        return "day"
+
+    if _minutes(15, 0) <= tmin <= _minutes(16, 0):
+        return "evening"
+
+    if _minutes(17, 0) <= tmin <= _minutes(18, 0):
+        return "night"
+
+    return "normal"
+
+
+def _legacy_card_tone(card_band: str) -> str:
+    if card_band == "morning":
+        return "morning"
+    if card_band in {"evening", "night"}:
         return "night"
     return "normal"
+
 
 def main():
     if not os.path.exists(MBRACE_PATH):
@@ -163,7 +223,8 @@ def main():
         races = venue.get("races") or []
         next_race, next_display = compute_next_from_races(races)
         grade_label = _detect_grade_label(venue, races)
-        card_tone = _detect_card_tone(next_display)
+        first_race_time = _pick_first_race_time(races)
+        card_band = _classify_card_band(first_race_time)
 
         row: Dict[str, Any] = {
             "name": venue_name,
@@ -174,7 +235,9 @@ def main():
             "total_days": venue.get("total_days"),
             "day_label": venue.get("day_label"),
             "grade_label": grade_label,
-            "card_tone": card_tone,
+            "first_race_time": first_race_time,
+            "card_band": card_band,
+            "card_tone": _legacy_card_tone(card_band),
         }
 
         site_venues.append(row)
@@ -199,6 +262,8 @@ def main():
 
         races = venue.get("races") or []
         grade_label = _detect_grade_label(venue, races)
+        first_race_time = _pick_first_race_time(races)
+        card_band = _classify_card_band(first_race_time)
 
         races_out: List[Dict[str, Any]] = []
         for r in races:
@@ -216,6 +281,9 @@ def main():
             "total_days": venue.get("total_days"),
             "day_label": venue.get("day_label"),
             "grade_label": grade_label,
+            "first_race_time": first_race_time,
+            "card_band": card_band,
+            "card_tone": _legacy_card_tone(card_band),
             "races": races_out,
         }
 
@@ -227,6 +295,7 @@ def main():
     print("venues.json count:", len(site_venues))
     if site_venues:
         print("first venue:", site_venues[0])
+
 
 if __name__ == "__main__":
     main()
