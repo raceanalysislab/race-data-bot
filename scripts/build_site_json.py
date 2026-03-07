@@ -239,7 +239,7 @@ def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
         name = str(r.get("name") or "").strip()
         title = str(r.get("title") or "").strip()
         text = f"{name} {title}"
-        if "優勝戦" in text:
+        if "優勝" in text:
             return True
     return False
 
