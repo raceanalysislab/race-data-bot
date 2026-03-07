@@ -13,6 +13,7 @@
 #     night   = 1R 17:00〜18:00
 #     normal  = それ以外
 # - card_tone : 互換用（morning / normal / night）
+# - race_times : 一覧画面でリアルタイム切替するための全レース時刻
 #
 # ※ frontend は card_band を優先使用
 # ※ ☀️ / 🌙 / 上半分カラーは「今の next_display」ではなく
@@ -79,12 +80,33 @@ def _to_hhmm(value: str) -> Optional[str]:
     return f"{_pad2(hm[0])}:{_pad2(hm[1])}"
 
 
-def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int], str]:
+def _build_race_times(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+
+    for r in races:
+        rno = r.get("rno")
+        if not isinstance(rno, int):
+            continue
+
+        hhmm = _to_hhmm(str(r.get("cutoff") or ""))
+        if not hhmm:
+            continue
+
+        out.append({
+            "rno": rno,
+            "cutoff": hhmm,
+        })
+
+    out.sort(key=lambda x: x["rno"])
+    return out
+
+
+def compute_next_from_race_times(race_times: List[Dict[str, Any]]) -> Tuple[Optional[int], str]:
     now = datetime.now(JST)
     now_min = _minutes(now.hour, now.minute)
 
     candidates: List[Tuple[int, int, str]] = []
-    for r in races:
+    for r in race_times:
         rno = r.get("rno")
         cutoff = r.get("cutoff")
 
@@ -95,8 +117,11 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
         if not hhmm:
             continue
 
-        h, m = _parse_hhmm(hhmm)  # type: ignore
-        tmin = _minutes(h, m)
+        hm = _parse_hhmm(hhmm)
+        if not hm:
+            continue
+
+        tmin = _minutes(hm[0], hm[1])
         candidates.append((tmin, rno, hhmm))
 
     if not candidates:
@@ -111,23 +136,22 @@ def compute_next_from_races(races: List[Dict[str, Any]]) -> Tuple[Optional[int],
     return None, "発売終了"
 
 
-def _pick_first_race_time(races: List[Dict[str, Any]]) -> Optional[str]:
-    # まず1Rを優先
-    for r in races:
-        if r.get("rno") != 1:
-            continue
-        hhmm = _to_hhmm(str(r.get("cutoff") or ""))
-        if hhmm:
-            return hhmm
+def _pick_first_race_time(race_times: List[Dict[str, Any]]) -> Optional[str]:
+    for r in race_times:
+        if r.get("rno") == 1:
+            hhmm = _to_hhmm(str(r.get("cutoff") or ""))
+            if hhmm:
+                return hhmm
 
-    # 保険: 最小時刻
     candidates: List[Tuple[int, str]] = []
-    for r in races:
+    for r in race_times:
         hhmm = _to_hhmm(str(r.get("cutoff") or ""))
         if not hhmm:
             continue
-        h, m = _parse_hhmm(hhmm)  # type: ignore
-        candidates.append((_minutes(h, m), hhmm))
+        hm = _parse_hhmm(hhmm)
+        if not hm:
+            continue
+        candidates.append((_minutes(hm[0], hm[1]), hhmm))
 
     if not candidates:
         return None
@@ -221,9 +245,10 @@ def main():
             continue
 
         races = venue.get("races") or []
-        next_race, next_display = compute_next_from_races(races)
+        race_times = _build_race_times(races)
+        next_race, next_display = compute_next_from_race_times(race_times)
         grade_label = _detect_grade_label(venue, races)
-        first_race_time = _pick_first_race_time(races)
+        first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
 
         row: Dict[str, Any] = {
@@ -238,6 +263,7 @@ def main():
             "first_race_time": first_race_time,
             "card_band": card_band,
             "card_tone": _legacy_card_tone(card_band),
+            "race_times": race_times,
         }
 
         site_venues.append(row)
@@ -261,8 +287,9 @@ def main():
             continue
 
         races = venue.get("races") or []
+        race_times = _build_race_times(races)
         grade_label = _detect_grade_label(venue, races)
-        first_race_time = _pick_first_race_time(races)
+        first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
 
         races_out: List[Dict[str, Any]] = []
@@ -270,7 +297,7 @@ def main():
             races_out.append({
                 "rno": r.get("rno"),
                 "name": r.get("name"),
-                "cutoff": r.get("cutoff"),
+                "cutoff": _to_hhmm(str(r.get("cutoff") or "")),
                 "distance": r.get("distance_m"),
             })
 
@@ -284,6 +311,7 @@ def main():
             "first_race_time": first_race_time,
             "card_band": card_band,
             "card_tone": _legacy_card_tone(card_band),
+            "race_times": race_times,
             "races": races_out,
         }
 
