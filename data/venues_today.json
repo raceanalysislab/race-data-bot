@@ -1,6 +1,6 @@
 {
   "date": "2026-03-08",
-  "checked_at": "2026-03-08T14:02:56.431618+09:00",
+  "checked_at": "2026-03-08T16:08:32.330938+09:00",
   "blocked": false,
   "held_places": [
     "桐生",
@@ -13,9 +13,9 @@
       "name": "桐生",
       "jcd": "01",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-08T15:20:00+09:00",
-      "next_display": "1R 15:20",
+      "next_race": 2,
+      "next_cutoff": "2026-03-08T16:25:00+09:00",
+      "next_display": "2R 16:25",
       "cutoffs": [
         {
           "rno": 1,
@@ -23,47 +23,47 @@
         },
         {
           "rno": 2,
-          "time": "15:45"
+          "time": "16:25"
         },
         {
           "rno": 3,
-          "time": "16:12"
+          "time": "16:52"
         },
         {
           "rno": 4,
-          "time": "16:40"
+          "time": "17:20"
         },
         {
           "rno": 5,
-          "time": "17:10"
+          "time": "17:50"
         },
         {
           "rno": 6,
-          "time": "17:37"
+          "time": "18:17"
         },
         {
           "rno": 7,
-          "time": "18:04"
+          "time": "18:44"
         },
         {
           "rno": 8,
-          "time": "18:33"
+          "time": "19:13"
         },
         {
           "rno": 9,
-          "time": "19:04"
+          "time": "19:44"
         },
         {
           "rno": 10,
-          "time": "19:36"
+          "time": "20:16"
         },
         {
           "rno": 11,
-          "time": "20:07"
+          "time": "20:47"
         },
         {
           "rno": 12,
-          "time": "20:38"
+          "time": "21:18"
         }
       ]
     },
@@ -71,9 +71,9 @@
       "name": "戸田",
       "jcd": "02",
       "held": true,
-      "next_race": 8,
-      "next_cutoff": "2026-03-08T14:16:00+09:00",
-      "next_display": "8R 14:16",
+      "next_race": 12,
+      "next_cutoff": "2026-03-08T16:30:00+09:00",
+      "next_display": "12R 16:30",
       "cutoffs": [
         {
           "rno": 1,
@@ -201,9 +201,9 @@
       "name": "びわこ",
       "jcd": "11",
       "held": true,
-      "next_race": 8,
-      "next_cutoff": "2026-03-08T14:15:00+09:00",
-      "next_display": "8R 14:15",
+      "next_race": 12,
+      "next_cutoff": "2026-03-08T16:32:00+09:00",
+      "next_display": "12R 16:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -304,9 +304,9 @@
       "name": "宮島",
       "jcd": "17",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-03-08T14:23:00+09:00",
-      "next_display": "9R 14:23",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
