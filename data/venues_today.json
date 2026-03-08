@@ -1,6 +1,6 @@
 {
-  "date": "2026-03-08",
-  "checked_at": "2026-03-08T23:53:32.249489+09:00",
+  "date": "2026-03-09",
+  "checked_at": "2026-03-09T00:48:33.185673+09:00",
   "blocked": false,
   "held_places": [
     "桐生",
@@ -13,9 +13,9 @@
       "name": "桐生",
       "jcd": "01",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-03-09T15:20:00+09:00",
+      "next_display": "1R 15:20",
       "cutoffs": [
         {
           "rno": 1,
@@ -23,47 +23,47 @@
         },
         {
           "rno": 2,
-          "time": "16:27"
+          "time": "15:45"
         },
         {
           "rno": 3,
-          "time": "16:49"
+          "time": "16:12"
         },
         {
           "rno": 4,
-          "time": "17:11"
+          "time": "16:40"
         },
         {
           "rno": 5,
-          "time": "17:33"
+          "time": "17:10"
         },
         {
           "rno": 6,
-          "time": "18:01"
+          "time": "17:37"
         },
         {
           "rno": 7,
-          "time": "19:29"
+          "time": "18:04"
         },
         {
           "rno": 8,
-          "time": "19:41"
+          "time": "18:33"
         },
         {
           "rno": 9,
-          "time": "19:47"
+          "time": "19:04"
         },
         {
           "rno": 10,
-          "time": "19:53"
+          "time": "19:36"
         },
         {
           "rno": 11,
-          "time": "19:59"
+          "time": "20:07"
         },
         {
           "rno": 12,
-          "time": "20:10"
+          "time": "20:38"
         }
       ]
     },
@@ -71,9 +71,9 @@
       "name": "戸田",
       "jcd": "02",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-03-09T10:47:00+09:00",
+      "next_display": "1R 10:47",
       "cutoffs": [
         {
           "rno": 1,
@@ -204,56 +204,7 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "10:32"
-        },
-        {
-          "rno": 2,
-          "time": "11:00"
-        },
-        {
-          "rno": 3,
-          "time": "11:31"
-        },
-        {
-          "rno": 4,
-          "time": "12:03"
-        },
-        {
-          "rno": 5,
-          "time": "12:36"
-        },
-        {
-          "rno": 6,
-          "time": "13:09"
-        },
-        {
-          "rno": 7,
-          "time": "13:42"
-        },
-        {
-          "rno": 8,
-          "time": "14:15"
-        },
-        {
-          "rno": 9,
-          "time": "14:48"
-        },
-        {
-          "rno": 10,
-          "time": "15:24"
-        },
-        {
-          "rno": 11,
-          "time": "15:56"
-        },
-        {
-          "rno": 12,
-          "time": "16:32"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "住之江",
@@ -304,29 +255,29 @@
       "name": "宮島",
       "jcd": "17",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-03-09T10:41:00+09:00",
+      "next_display": "1R 10:41",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "10:31"
+          "time": "10:41"
         },
         {
           "rno": 2,
-          "time": "10:57"
+          "time": "11:09"
         },
         {
           "rno": 3,
-          "time": "11:23"
+          "time": "11:34"
         },
         {
           "rno": 4,
-          "time": "11:53"
+          "time": "12:04"
         },
         {
           "rno": 5,
-          "time": "12:22"
+          "time": "12:28"
         },
         {
           "rno": 6,
@@ -334,11 +285,11 @@
         },
         {
           "rno": 7,
-          "time": "13:21"
+          "time": "13:22"
         },
         {
           "rno": 8,
-          "time": "13:54"
+          "time": "13:53"
         },
         {
           "rno": 9,
@@ -346,7 +297,7 @@
         },
         {
           "rno": 10,
-          "time": "14:59"
+          "time": "14:56"
         },
         {
           "rno": 11,
@@ -354,7 +305,7 @@
         },
         {
           "rno": 12,
-          "time": "16:05"
+          "time": "16:04"
         }
       ]
     },
