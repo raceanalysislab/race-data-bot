@@ -16,7 +16,7 @@
 # - race_times : 一覧画面でリアルタイム切替するための全レース時刻
 #
 # 追加仕様:
-# - 12R のレース名/タイトルが「優勝戦」の開催は day_label を「最終日」に上書き
+# - 12R のレース名/タイトルに「優勝戦」を含む開催は day_label を「最終日」に上書き
 # - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
 #
 # ※ frontend は card_band を優先使用
@@ -242,7 +242,7 @@ def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
         name = str(r.get("name") or "").replace(" ", "").replace("　", "").strip()
         title = str(r.get("title") or "").replace(" ", "").replace("　", "").strip()
 
-        if name == "優勝戦" or title == "優勝戦":
+        if "優勝戦" in name or "優勝戦" in title:
             return True
 
     return False
