@@ -16,8 +16,8 @@
 # - race_times : 一覧画面でリアルタイム切替するための全レース時刻
 #
 # 追加仕様:
-# - どこかのレース名/タイトルに「優勝戦」を含む開催は day_label を「最終日」に上書き
-# - ただし「準優勝戦」「準優勝」を含むものは除外
+# - レース名/タイトルが「本当の優勝戦」のときだけ day_label を「最終日」に上書き
+# - 準優勝戦 / 準優勝 / 紹介 / インタビュー / トライアル等は除外
 # - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
 #
 # ※ frontend は card_band を優先使用
@@ -239,18 +239,32 @@ def _legacy_card_tone(card_band: str) -> str:
     return "normal"
 
 
+def _is_true_final_race_text(text: str) -> bool:
+    if not text:
+        return False
+
+    exclude_keywords = [
+        "準優",
+        "紹介",
+        "インタビュー",
+        "トライアル",
+        "出場選手",
+        "表彰",
+        "戦線",
+    ]
+    if any(k in text for k in exclude_keywords):
+        return False
+
+    return "優勝戦" in text
+
+
 def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
     for r in races:
         name = _normalize_text(r.get("name"))
         title = _normalize_text(r.get("title"))
 
-        for text in (name, title):
-            if not text:
-                continue
-            if "準優勝戦" in text or "準優勝" in text:
-                continue
-            if "優勝戦" in text:
-                return True
+        if _is_true_final_race_text(name) or _is_true_final_race_text(title):
+            return True
 
     return False
 
