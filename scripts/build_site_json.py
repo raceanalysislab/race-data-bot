@@ -16,9 +16,8 @@
 # - race_times : 一覧画面でリアルタイム切替するための全レース時刻
 #
 # 追加仕様:
-# - day == total_days のときは day_label を「最終日」に上書き
-# - total_days が使えない場合は、レース名/タイトルに「優勝戦」を含む開催を「最終日」に上書き
-# - ただし「準優勝戦」は除外
+# - どこかのレース名/タイトルに「優勝戦」を含む開催は day_label を「最終日」に上書き
+# - ただし「準優勝戦」「準優勝」を含むものは除外
 # - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
 #
 # ※ frontend は card_band を優先使用
@@ -248,7 +247,7 @@ def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
         for text in (name, title):
             if not text:
                 continue
-            if "準優勝戦" in text:
+            if "準優勝戦" in text or "準優勝" in text:
                 continue
             if "優勝戦" in text:
                 return True
@@ -256,20 +255,8 @@ def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
     return False
 
 
-def _is_final_day_by_counts(venue: Dict[str, Any]) -> bool:
-    day = venue.get("day")
-    total_days = venue.get("total_days")
-
-    return (
-        isinstance(day, int)
-        and isinstance(total_days, int)
-        and total_days > 0
-        and day == total_days
-    )
-
-
 def _resolve_day_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
-    if _is_final_day_by_counts(venue) or _is_final_day_by_races(races):
+    if _is_final_day_by_races(races):
         return "最終日"
 
     day_label = str(venue.get("day_label") or "").strip()
