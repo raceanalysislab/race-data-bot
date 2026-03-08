@@ -17,6 +17,7 @@
 #
 # 追加仕様:
 # - 12R のレース名/タイトルに「優勝戦」を含む開催は day_label を「最終日」に上書き
+# - ただし「準優勝戦」は除外
 # - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
 #
 # ※ frontend は card_band を優先使用
@@ -242,8 +243,13 @@ def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
         name = str(r.get("name") or "").replace(" ", "").replace("　", "").strip()
         title = str(r.get("title") or "").replace(" ", "").replace("　", "").strip()
 
-        if "優勝戦" in name or "優勝戦" in title:
-            return True
+        for text in (name, title):
+            if not text:
+                continue
+            if "準優勝戦" in text:
+                continue
+            if "優勝戦" in text:
+                return True
 
     return False
 
