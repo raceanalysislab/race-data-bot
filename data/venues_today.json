@@ -1,11 +1,11 @@
 {
   "date": "2026-03-09",
-  "checked_at": "2026-03-09T02:51:45.914223+09:00",
+  "checked_at": "2026-03-09T04:01:45.083792+09:00",
   "blocked": false,
   "held_places": [
     "桐生",
     "戸田",
-    "びわこ",
+    "平和島",
     "宮島"
   ],
   "venues": [
@@ -137,11 +137,60 @@
     {
       "name": "平和島",
       "jcd": "04",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-09T10:57:00+09:00",
+      "next_display": "1R 10:57",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:57"
+        },
+        {
+          "rno": 2,
+          "time": "11:26"
+        },
+        {
+          "rno": 3,
+          "time": "11:55"
+        },
+        {
+          "rno": 4,
+          "time": "12:24"
+        },
+        {
+          "rno": 5,
+          "time": "12:54"
+        },
+        {
+          "rno": 6,
+          "time": "13:24"
+        },
+        {
+          "rno": 7,
+          "time": "13:55"
+        },
+        {
+          "rno": 8,
+          "time": "14:26"
+        },
+        {
+          "rno": 9,
+          "time": "14:58"
+        },
+        {
+          "rno": 10,
+          "time": "15:31"
+        },
+        {
+          "rno": 11,
+          "time": "16:05"
+        },
+        {
+          "rno": 12,
+          "time": "16:40"
+        }
+      ]
     },
     {
       "name": "多摩川",
@@ -200,7 +249,7 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
