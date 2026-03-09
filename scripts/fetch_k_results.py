@@ -6,7 +6,7 @@ import requests
 
 JST = timezone(timedelta(hours=9))
 
-BASE = "https://www1.mbrace.or.jp/od2/K/"
+BASE = "https://www1.mbrace.or.jp/od2/K"
 DOWNLOAD_DIR = "data/download_k"
 EXTRACT_DIR = "data/extract_k"
 
@@ -22,8 +22,12 @@ def yymmdd(dt: datetime) -> str:
     return dt.strftime("%y%m%d")
 
 
+def yyyymm(dt: datetime) -> str:
+    return dt.strftime("%Y%m")
+
+
 def build_url(dt: datetime) -> str:
-    return f"{BASE}k{yymmdd(dt)}.lzh"
+    return f"{BASE}/{yyyymm(dt)}/k{yymmdd(dt)}.lzh"
 
 
 def download_file(url: str, dest_path: str) -> bool:
@@ -57,8 +61,14 @@ def collect_dates(days: int = 30):
 
 
 def already_done(dt: datetime) -> bool:
-    txt_path = os.path.join(EXTRACT_DIR, f"k{yymmdd(dt)}.txt")
-    return os.path.exists(txt_path)
+    yy = yymmdd(dt)
+
+    cand1 = os.path.join(EXTRACT_DIR, f"k{yy}.txt")
+    cand2 = os.path.join(EXTRACT_DIR, f"K{yy}.TXT")
+    cand3 = os.path.join(EXTRACT_DIR, f"K{yy}.txt")
+    cand4 = os.path.join(EXTRACT_DIR, f"k{yy}.TXT")
+
+    return any(os.path.exists(p) for p in [cand1, cand2, cand3, cand4])
 
 
 def try_one(dt: datetime):
