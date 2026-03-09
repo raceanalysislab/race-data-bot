@@ -12,6 +12,9 @@ EXTRACT_DIR = "data/extract_k"
 
 USER_AGENT = "Mozilla/5.0"
 
+# まずは3年分
+FETCH_DAYS = 365 * 3
+
 
 def ensure_dirs():
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -55,7 +58,7 @@ def extract_lzh(lzh_path: str):
     )
 
 
-def collect_dates(days: int = 30):
+def collect_dates(days: int = FETCH_DAYS):
     now = datetime.now(JST)
     return [now - timedelta(days=i) for i in range(days)]
 
@@ -63,12 +66,14 @@ def collect_dates(days: int = 30):
 def already_done(dt: datetime) -> bool:
     yy = yymmdd(dt)
 
-    cand1 = os.path.join(EXTRACT_DIR, f"k{yy}.txt")
-    cand2 = os.path.join(EXTRACT_DIR, f"K{yy}.TXT")
-    cand3 = os.path.join(EXTRACT_DIR, f"K{yy}.txt")
-    cand4 = os.path.join(EXTRACT_DIR, f"k{yy}.TXT")
+    candidates = [
+        os.path.join(EXTRACT_DIR, f"k{yy}.txt"),
+        os.path.join(EXTRACT_DIR, f"K{yy}.TXT"),
+        os.path.join(EXTRACT_DIR, f"K{yy}.txt"),
+        os.path.join(EXTRACT_DIR, f"k{yy}.TXT"),
+    ]
 
-    return any(os.path.exists(p) for p in [cand1, cand2, cand3, cand4])
+    return any(os.path.exists(p) for p in candidates)
 
 
 def try_one(dt: datetime):
@@ -98,15 +103,33 @@ def try_one(dt: datetime):
 def main():
     ensure_dirs()
 
-    dates = collect_dates(days=30)
+    dates = collect_dates()
 
     success_count = 0
+    exists_count = 0
+    skip_count = 0
 
     for dt in dates:
-        if try_one(dt):
-            success_count += 1
+        yy = yymmdd(dt)
 
-    print(f"done: success_count={success_count}")
+        if already_done(dt):
+            print(f"exists: k{yy}.txt")
+            success_count += 1
+            exists_count += 1
+            continue
+
+        ok = try_one(dt)
+        if ok:
+            success_count += 1
+        else:
+            skip_count += 1
+
+    print(
+        f"done: total_days={len(dates)} "
+        f"success_count={success_count} "
+        f"exists_count={exists_count} "
+        f"skip_count={skip_count}"
+    )
 
 
 if __name__ == "__main__":
