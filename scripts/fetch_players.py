@@ -26,9 +26,9 @@ def main():
     print("open menu:", MENU_URL)
     menu_html = fetch(MENU_URL)
 
-    print("===== DMENU HTML START =====")
-    print(menu_html[:5000])
-    print("===== DMENU HTML END =====")
+    print("===== DMENU HTML FULL START =====")
+    print(menu_html)
+    print("===== DMENU HTML FULL END =====")
 
 
 if __name__ == "__main__":
