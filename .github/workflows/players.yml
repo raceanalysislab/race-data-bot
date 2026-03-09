@@ -1,4 +1,4 @@
-name: Update players.json
+name: Update k results
 
 on:
   schedule:
@@ -21,13 +21,16 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Generate players.json
-        run: python scripts/fetch_players.py
+      - name: Install lhasa
+        run: sudo apt-get update && sudo apt-get install -y lhasa
 
-      - name: Commit players.json
+      - name: Run k results fetch
+        run: python scripts/fetch_k_results.py
+
+      - name: Commit extracted k files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/site/players.json
-          git commit -m "update players.json" || echo "no changes"
+          git add data/download_k data/extract_k
+          git commit -m "update k results" || echo "no changes"
           git push
