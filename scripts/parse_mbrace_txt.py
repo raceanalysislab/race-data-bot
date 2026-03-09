@@ -12,6 +12,8 @@
 #   - 次行連結の再試行を強化
 #   - 1号艇だけ落ちるケースを拾いやすくした
 # - パース失敗時のDEBUGログ追加
+# - 級(A1/A2/B1/B2)位置を基準に前後分割する保険追加
+# - 数値8個を「前から読む」保険追加
 
 import json
 import os
@@ -369,6 +371,9 @@ def _normalize_boat_line(s: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
+def _extract_numeric_tokens(s: str) -> List[str]:
+    return re.findall(r"\d+\.\d{1,2}|\d{1,3}", s)
+
 def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int, str]]:
     mg = RE_GRADE.search(head)
     if not mg:
@@ -455,6 +460,42 @@ def _parse_tail_by_regex(rest_all: str) -> Optional[Tuple[float, float, float, f
         int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
     )
 
+def _parse_tail_by_grade_order(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
+    """
+    級(A1/A2/B1/B2)の位置で前後を切る。
+    後半は前から8個の数値を読む。
+    """
+    s = _normalize_boat_line(rest_all)
+
+    mg = RE_GRADE.search(s)
+    if not mg:
+        return None
+
+    head = s[:mg.end()].strip()
+    tail = s[mg.end():].strip()
+
+    nums = _extract_numeric_tokens(tail)
+    if len(nums) < 8:
+        return None
+
+    nat_win = _to_float(nums[0])
+    nat_2 = _to_float(nums[1])
+    loc_win = _to_float(nums[2])
+    loc_2 = _to_float(nums[3])
+    motor_no = _to_int(nums[4])
+    motor_2 = _to_float(nums[5])
+    boat_no = _to_int(nums[6])
+    boat_2 = _to_float(nums[7])
+
+    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+        return None
+
+    note = ""
+    return (
+        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
+        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+    )
+
 def _parse_tail_by_split(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
     """
     RE_TAILで落ちた行用の保険。
@@ -501,6 +542,8 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
         return None
 
     parsed_tail = _parse_tail_by_regex(rest_all)
+    if not parsed_tail:
+        parsed_tail = _parse_tail_by_grade_order(rest_all)
     if not parsed_tail:
         parsed_tail = _parse_tail_by_split(rest_all)
     if not parsed_tail:
@@ -553,7 +596,7 @@ def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
     if None in (waku, regno, age, weight) or not name:
         return None
 
-    nums = re.findall(r"\d+\.\d{1,2}|\d{1,3}", tail)
+    nums = _extract_numeric_tokens(tail)
     if len(nums) < 8:
         return None
 
