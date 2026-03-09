@@ -28,7 +28,7 @@ def main():
 
     month = datetime.now().strftime("%Y%m")
 
-    url = f"{BASE}{MONTH_DIR}{month}/index.html"
+    url = f"{BASE}{MONTH_DIR}{month}/"
 
     print("open month page:", url)
 
