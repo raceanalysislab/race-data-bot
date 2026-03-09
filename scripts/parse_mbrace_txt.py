@@ -101,6 +101,7 @@ G3_WORDS = [
     "ウエスタンヤング",
     "マスターズリーグ",
     "オールレディース",
+    "シャボン玉石けん杯",
 ]
 
 def read_text_auto(path: str) -> List[str]:
