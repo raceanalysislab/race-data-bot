@@ -1,18 +1,16 @@
 import csv
 import json
-import requests
+import re
 from pathlib import Path
+from urllib.parse import urljoin
 
-# ここは「ダウンロードページ」ではなく、
-# 実際のデータファイルURLに差し替えること。
-# いまの official download ページURLを入れると HTML が返って {} になる。
-DATA_URL = "https://www.boatrace.jp/owpc/pc/extra/data/download.html"
+import requests
 
+INDEX_URL = "https://www1.mbrace.or.jp/od2/K/dindex.html"
 OUT_PATH = Path("data/site/players.json")
 
 
-def fetch_bytes(url: str) -> tuple[bytes, str]:
-    print(f"downloading: {url}")
+def fetch_text(url: str) -> str:
     r = requests.get(
         url,
         timeout=30,
@@ -22,19 +20,43 @@ def fetch_bytes(url: str) -> tuple[bytes, str]:
         },
     )
     r.raise_for_status()
-    content_type = r.headers.get("Content-Type", "")
-    return r.content, content_type
+    return r.text
 
 
-def ensure_not_html(data: bytes, content_type: str) -> None:
-    head = data[:500].decode("utf-8", errors="ignore").lower()
+def fetch_bytes(url: str) -> bytes:
+    r = requests.get(
+        url,
+        timeout=30,
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "*/*",
+        },
+    )
+    r.raise_for_status()
+    return r.content
 
-    if "text/html" in content_type.lower() or "<html" in head or "<!doctype html" in head:
-        raise RuntimeError(
-            "HTMLページを取得しています。"
-            "DATA_URL がダウンロードページのままです。"
-            "実際のデータファイルURLに差し替えてください。"
-        )
+
+def extract_links(html: str) -> list[str]:
+    hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.IGNORECASE)
+    return [urljoin(INDEX_URL, h) for h in hrefs]
+
+
+def pick_player_url(links: list[str]) -> str:
+    candidates = []
+    for link in links:
+        low = link.lower()
+        if "player" in low and (low.endswith(".csv") or low.endswith(".lzh") or low.endswith(".zip")):
+            candidates.append(link)
+
+    if not candidates:
+        raise RuntimeError("選手データらしい配布ファイルURLが見つかりませんでした。")
+
+    # csv優先
+    candidates.sort(key=lambda x: (0 if x.lower().endswith(".csv") else 1, x))
+    print("player candidates:")
+    for c in candidates:
+        print(" -", c)
+    return candidates[0]
 
 
 def decode_text(data: bytes) -> str:
@@ -64,7 +86,7 @@ def parse_csv(data: bytes) -> dict:
     reader = csv.DictReader(text.splitlines())
 
     if not reader.fieldnames:
-        raise RuntimeError("CSVヘッダが見つかりません。データ形式を確認してください。")
+        raise RuntimeError("CSVヘッダが見つかりません。")
 
     players = {}
 
@@ -84,28 +106,35 @@ def parse_csv(data: bytes) -> dict:
         }
 
     if not players:
-        sample_headers = ", ".join(reader.fieldnames[:20])
-        raise RuntimeError(
-            "players が 0 件です。"
-            f"CSVの列名が想定と違う可能性があります。headers={sample_headers}"
-        )
+        headers = ", ".join(reader.fieldnames[:20])
+        raise RuntimeError(f"players が 0 件です。headers={headers}")
 
     return players
 
 
 def save_json(players: dict) -> None:
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(players, f, ensure_ascii=False, indent=2)
-
     print(f"saved: {OUT_PATH}")
     print(f"players: {len(players)}")
 
 
 def main() -> None:
-    data, content_type = fetch_bytes(DATA_URL)
-    ensure_not_html(data, content_type)
+    print(f"downloading index: {INDEX_URL}")
+    html = fetch_text(INDEX_URL)
+
+    links = extract_links(html)
+    player_url = pick_player_url(links)
+    print(f"selected: {player_url}")
+
+    if not player_url.lower().endswith(".csv"):
+        raise RuntimeError(
+            "見つかったのがCSV直ファイルではありません。"
+            "まず候補URLをログで確認してください。"
+        )
+
+    data = fetch_bytes(player_url)
     players = parse_csv(data)
     save_json(players)
 
