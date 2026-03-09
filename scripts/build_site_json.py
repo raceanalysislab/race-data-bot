@@ -89,6 +89,33 @@ def _normalize_text(value: Any) -> str:
     return str(value or "").replace(" ", "").replace("　", "").strip()
 
 
+def _normalize_grade_label(value: Any) -> str:
+    s = str(value or "").strip()
+    if not s:
+        return "一般"
+
+    s = (
+        s.replace("Ｇ", "G")
+         .replace("Ⅰ", "I")
+         .replace("Ⅱ", "II")
+         .replace("Ⅲ", "III")
+         .upper()
+    )
+
+    if s == "SG":
+        return "SG"
+    if s in {"G1", "GI", "PG1", "PGI"}:
+        return "G1"
+    if s in {"G2", "GII"}:
+        return "G2"
+    if s in {"G3", "GIII"}:
+        return "G3"
+    if s in {"一般", "一般戦"}:
+        return "一般"
+
+    return "一般"
+
+
 def _build_race_times(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
 
@@ -172,7 +199,7 @@ def _pick_first_race_time(race_times: List[Dict[str, Any]]) -> Optional[str]:
 def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
     texts: List[str] = []
 
-    for key in ["grade", "grade_label", "title", "subtitle", "series_name", "series_title", "event_name"]:
+    for key in ["grade", "grade_label", "title", "subtitle", "series_name", "series_title", "event_name", "event_title"]:
         v = venue.get(key)
         if v:
             texts.append(str(v))
@@ -187,7 +214,7 @@ def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> s
     upper = joined.upper()
 
     if "PG1" in upper:
-        return "PG1"
+        return "G1"
     if re.search(r"\bSG\b", upper):
         return "SG"
     if re.search(r"\bG1\b", upper):
@@ -197,13 +224,16 @@ def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> s
     if re.search(r"\bG3\b", upper):
         return "G3"
 
-    if any(k in joined for k in ["オールレディース", "レディース", "ヴィーナス", "女子戦", "クイーンズ"]):
-        return "レディース"
+    return "一般"
 
-    if any(k in joined for k in ["ルーキー", "ヤングダービー", "スカパー!・JLC杯ルーキーシリーズ"]):
-        return "ルーキー"
 
-    return "一般戦"
+def _resolve_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
+    direct = _normalize_grade_label(venue.get("grade_label"))
+    if direct != "一般":
+        return direct
+
+    fallback = _normalize_grade_label(_detect_grade_label(venue, races))
+    return fallback
 
 
 def _classify_card_band(first_race_time: Optional[str]) -> str:
@@ -303,7 +333,7 @@ def main():
         races = venue.get("races") or []
         race_times = _build_race_times(races)
         next_race, next_display = compute_next_from_race_times(race_times)
-        grade_label = _detect_grade_label(venue, races)
+        grade_label = _resolve_grade_label(venue, races)
         first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
         day_label = _resolve_day_label(venue, races)
@@ -317,6 +347,7 @@ def main():
             "total_days": venue.get("total_days"),
             "day_label": day_label,
             "grade_label": grade_label,
+            "event_title": str(venue.get("event_title") or "").strip(),
             "first_race_time": first_race_time,
             "card_band": card_band,
             "card_tone": _legacy_card_tone(card_band),
@@ -345,7 +376,7 @@ def main():
 
         races = venue.get("races") or []
         race_times = _build_race_times(races)
-        grade_label = _detect_grade_label(venue, races)
+        grade_label = _resolve_grade_label(venue, races)
         first_race_time = _pick_first_race_time(race_times)
         card_band = _classify_card_band(first_race_time)
         day_label = _resolve_day_label(venue, races)
@@ -366,6 +397,7 @@ def main():
             "total_days": venue.get("total_days"),
             "day_label": day_label,
             "grade_label": grade_label,
+            "event_title": str(venue.get("event_title") or "").strip(),
             "first_race_time": first_race_time,
             "card_band": card_band,
             "card_tone": _legacy_card_tone(card_band),
