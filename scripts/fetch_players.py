@@ -1,8 +1,7 @@
 import requests
 from datetime import datetime
 
-BASE = "https://www1.mbrace.or.jp/od2/K/"
-
+BASE = "https://www1.mbrace.or.jp/od2/B/"
 
 def fetch(url):
     r = requests.get(
