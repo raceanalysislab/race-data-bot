@@ -1,0 +1,33 @@
+name: Update players.json
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 毎日 12:00 JST
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate players.json
+        run: python scripts/fetch_players.py
+
+      - name: Commit players.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/site/players.json
+          git commit -m "update players.json" || echo "no changes"
+          git push
