@@ -11,6 +11,7 @@
 #   - 1行崩れに強い
 #   - 次行連結の再試行を強化
 #   - 1号艇だけ落ちるケースを拾いやすくした
+# - パース失敗時のDEBUGログ追加
 
 import json
 import os
@@ -73,7 +74,6 @@ RE_TAIL = re.compile(
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(rf"(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*$")
 
-# front側の保険
 RE_FRONT_CORE = re.compile(
     rf"^\s*([1-6])\s+(\d{{4}})\s*(.+?)\s*(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*(A1|A2|B1|B2)\s+(.*)$"
 )
@@ -357,7 +357,7 @@ def _deglue_numbers(s: str) -> str:
     """
     s = norm(s)
 
-    for _ in range(6):
+    for _ in range(8):
         s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
         if s2 == s:
             break
@@ -369,7 +369,7 @@ def _normalize_boat_line(s: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
-def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int]]:
+def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int, str]]:
     mg = RE_GRADE.search(head)
     if not mg:
         return None
@@ -391,20 +391,47 @@ def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int]]:
     if not name:
         return None
 
-    return name, int(age), branch, int(weight)
+    return name, int(age), branch, int(weight), grade
 
-def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
-    line = _normalize_boat_line(line)
-    mp = RE_BOAT_PREFIX.match(line)
-    if not mp:
-        return None
+def _build_boat_dict(
+    *,
+    waku: int,
+    regno: int,
+    name: str,
+    age: int,
+    branch: str,
+    weight: int,
+    grade: str,
+    nat_win: float,
+    nat_2: float,
+    loc_win: float,
+    loc_2: float,
+    motor_no: int,
+    motor_2: float,
+    boat_no: int,
+    boat_2: float,
+    note: str,
+) -> Dict[str, Any]:
+    return {
+        "waku": int(waku),
+        "regno": int(regno),
+        "name": name,
+        "age": int(age),
+        "branch": branch,
+        "weight": int(weight),
+        "grade": grade,
+        "nat_win": float(nat_win),
+        "nat_2": float(nat_2),
+        "loc_win": float(loc_win),
+        "loc_2": float(loc_2),
+        "motor_no": int(motor_no),
+        "motor_2": float(motor_2),
+        "boat_no": int(boat_no),
+        "boat_2": float(boat_2),
+        "note": note,
+    }
 
-    waku = _to_int(mp.group(1))
-    regno = _to_int(mp.group(2))
-    rest_all = (mp.group(3) or "").strip()
-    if not waku or not regno or not rest_all:
-        return None
-
+def _parse_tail_by_regex(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
     mt = RE_TAIL.search(rest_all)
     if not mt:
         return None
@@ -423,30 +450,87 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
         return None
 
     head = rest_all[:mt.start()].strip()
-    parsed = _parse_head_part(head)
-    if not parsed:
+    return (
+        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
+        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+    )
+
+def _parse_tail_by_split(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
+    """
+    RE_TAILで落ちた行用の保険。
+    後ろから数値8個を拾う。
+    """
+    s = _normalize_boat_line(rest_all)
+    matches = list(re.finditer(r"\d+\.\d{1,2}|\d{1,3}", s))
+    if len(matches) < 8:
         return None
 
-    name, age, branch, weight = parsed
+    last8 = matches[-8:]
+    vals = [m.group(0) for m in last8]
 
-    return {
-        "waku": int(waku),
-        "regno": int(regno),
-        "name": name,
-        "age": int(age),
-        "branch": branch,
-        "weight": int(weight),
-        "grade": RE_GRADE.search(head).group(1),
-        "nat_win": float(nat_win),
-        "nat_2": float(nat_2),
-        "loc_win": float(loc_win),
-        "loc_2": float(loc_2),
-        "motor_no": int(motor_no),
-        "motor_2": float(motor_2),
-        "boat_no": int(boat_no),
-        "boat_2": float(boat_2),
-        "note": note,
-    }
+    nat_win = _to_float(vals[0])
+    nat_2 = _to_float(vals[1])
+    loc_win = _to_float(vals[2])
+    loc_2 = _to_float(vals[3])
+    motor_no = _to_int(vals[4])
+    motor_2 = _to_float(vals[5])
+    boat_no = _to_int(vals[6])
+    boat_2 = _to_float(vals[7])
+
+    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+        return None
+
+    head = s[:last8[0].start()].strip()
+    note = s[last8[-1].end():].strip()
+
+    return (
+        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
+        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+    )
+
+def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
+    line = _normalize_boat_line(line)
+    mp = RE_BOAT_PREFIX.match(line)
+    if not mp:
+        return None
+
+    waku = _to_int(mp.group(1))
+    regno = _to_int(mp.group(2))
+    rest_all = (mp.group(3) or "").strip()
+    if not waku or not regno or not rest_all:
+        return None
+
+    parsed_tail = _parse_tail_by_regex(rest_all)
+    if not parsed_tail:
+        parsed_tail = _parse_tail_by_split(rest_all)
+    if not parsed_tail:
+        return None
+
+    nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note, head = parsed_tail
+    parsed_head = _parse_head_part(head)
+    if not parsed_head:
+        return None
+
+    name, age, branch, weight, grade = parsed_head
+
+    return _build_boat_dict(
+        waku=int(waku),
+        regno=int(regno),
+        name=name,
+        age=int(age),
+        branch=branch,
+        weight=int(weight),
+        grade=grade,
+        nat_win=float(nat_win),
+        nat_2=float(nat_2),
+        loc_win=float(loc_win),
+        loc_2=float(loc_2),
+        motor_no=int(motor_no),
+        motor_2=float(motor_2),
+        boat_no=int(boat_no),
+        boat_2=float(boat_2),
+        note=note,
+    )
 
 def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
     """
@@ -470,8 +554,6 @@ def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
         return None
 
     nums = re.findall(r"\d+\.\d{1,2}|\d{1,3}", tail)
-    # 想定:
-    # nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 [note...]
     if len(nums) < 8:
         return None
 
@@ -487,24 +569,24 @@ def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
     if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
         return None
 
-    return {
-        "waku": int(waku),
-        "regno": int(regno),
-        "name": name,
-        "age": int(age),
-        "branch": branch,
-        "weight": int(weight),
-        "grade": grade,
-        "nat_win": float(nat_win),
-        "nat_2": float(nat_2),
-        "loc_win": float(loc_win),
-        "loc_2": float(loc_2),
-        "motor_no": int(motor_no),
-        "motor_2": float(motor_2),
-        "boat_no": int(boat_no),
-        "boat_2": float(boat_2),
-        "note": "",
-    }
+    return _build_boat_dict(
+        waku=int(waku),
+        regno=int(regno),
+        name=name,
+        age=int(age),
+        branch=branch,
+        weight=int(weight),
+        grade=grade,
+        nat_win=float(nat_win),
+        nat_2=float(nat_2),
+        loc_win=float(loc_win),
+        loc_2=float(loc_2),
+        motor_no=int(motor_no),
+        motor_2=float(motor_2),
+        boat_no=int(boat_no),
+        boat_2=float(boat_2),
+        note="",
+    )
 
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     return _parse_boat_line_main(line) or _parse_boat_line_fallback(line)
@@ -571,10 +653,8 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
 
         boat = None
         if _is_boat_candidate(l):
-            # まず単体
             boat = _parse_boat_line(l)
 
-            # 落ちたら次行連結
             if not boat and i + 1 < len(block):
                 nxt = block[i + 1]
                 nxt_norm = _normalize_boat_line(nxt)
@@ -583,7 +663,6 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                     if boat:
                         i += 1
 
-            # まだ落ちたら2行先まで連結
             if not boat and i + 2 < len(block):
                 nxt1 = block[i + 1]
                 nxt2 = block[i + 2]
@@ -598,6 +677,15 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                     boat = _parse_boat_line(f"{l} {nxt1} {nxt2}")
                     if boat:
                         i += 2
+
+            if not boat:
+                race_no = cur.get("rno")
+                print(f"BOAT_PARSE_FAIL race={race_no}")
+                print("BOAT_PARSE_FAIL_RAW:", repr(l))
+                if i + 1 < len(block):
+                    print("BOAT_PARSE_FAIL_NEXT1:", repr(block[i + 1]))
+                if i + 2 < len(block):
+                    print("BOAT_PARSE_FAIL_NEXT2:", repr(block[i + 2]))
 
             if boat:
                 cur["boats"].append(boat)
