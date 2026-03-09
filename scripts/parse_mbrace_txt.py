@@ -1,6 +1,11 @@
 # scripts/parse_mbrace_txt.py
 # mbrace番組表txt（STARTB...FINALB / xxBBGN...xxBEND 想定）→ 会場ごとにパースしてJSON化
 # 出力: data/mbrace_races_today.json
+# 修正内容:
+# - 開催タイトル抽出
+# - 開催グレード推定（SG / G1 / G2 / G3 / 一般）
+# - 「開設○周年記念」先頭一致のみG1扱い
+# - 「福岡県知事杯争奪 福岡都市圏開設36周年記念競走」のような一般開催を誤ってG1にしない
 
 import json
 import os
@@ -15,6 +20,7 @@ TRANS = str.maketrans({
     "５": "5", "６": "6", "７": "7", "８": "8", "９": "9",
     "Ｒ": "R", "Ｈ": "H", "ｍ": "m", "：": ":", "　": " ",
     "％": "%", "－": "-", "―": "-", "−": "-",
+    "Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III",
 })
 
 BRANCHES = [
@@ -33,6 +39,9 @@ def norm(s: str) -> str:
     s = (s or "").translate(TRANS)
     s = re.sub(r"\s+", " ", s)
     return s.strip()
+
+def compact(s: str) -> str:
+    return norm(s).replace(" ", "")
 
 RE_RACE_HEAD = re.compile(
     r"^\s*([0-9]{1,2})R\s+(.+?)\s+(進入固定|進入自由)?\s*H?([0-9]{3,4})m.*?締切予定\s*([0-9]{1,2}:[0-9]{2})"
@@ -58,6 +67,41 @@ RE_TAIL = re.compile(
 
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(rf"(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*$")
+
+SG_WORDS = [
+    "ボートレースクラシック",
+    "ボートレースオールスター",
+    "グランドチャンピオン",
+    "オーシャンカップ",
+    "メモリアル",
+    "ダービー",
+    "チャレンジカップ",
+    "グランプリ",
+    "クイーンズクライマックス",
+]
+
+G2_WORDS = [
+    "レディースオールスター",
+    "モーターボート誕生祭",
+    "全国ボートレース甲子園",
+    "レディースチャレンジカップ",
+]
+
+G1_WORDS = [
+    "地区選手権",
+    "ダイヤモンドカップ",
+    "モーターボート大賞",
+    "周年記念",
+]
+
+G3_WORDS = [
+    "オールレディース",
+    "企業杯",
+    "イースタンヤング",
+    "ウエスタンヤング",
+    "マスターズリーグ",
+    "オールレディース",
+]
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -158,7 +202,7 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     """
     txt内の開催日情報を拾う。
     想定:
-      第1日 / 第 1日 / 第　１日
+      第1日 / 第 1日 / 第 １日
       1日目
       6日間
       1/6
@@ -167,9 +211,9 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     total_days: Optional[int] = None
 
     joined = "\n".join(block[:160])
-    compact = norm(joined).replace(" ", "")
+    c = compact(joined)
 
-    m = re.search(r"第([0-9]+)日", compact)
+    m = re.search(r"第([0-9]+)日", c)
     if m:
         try:
             current_day = int(m.group(1))
@@ -177,14 +221,14 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
             pass
 
     if current_day is None:
-        m = re.search(r"([0-9]+)日目", compact)
+        m = re.search(r"([0-9]+)日目", c)
         if m:
             try:
                 current_day = int(m.group(1))
             except Exception:
                 pass
 
-    m = re.search(r"([0-9]+)日間", compact)
+    m = re.search(r"([0-9]+)日間", c)
     if m:
         try:
             total_days = int(m.group(1))
@@ -192,7 +236,7 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
             pass
 
     if current_day is None or total_days is None:
-        m = re.search(r"([0-9]+)\/([0-9]+)", compact)
+        m = re.search(r"([0-9]+)\/([0-9]+)", c)
         if m:
             try:
                 if current_day is None:
@@ -212,6 +256,106 @@ def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> O
     if total_days is not None and current_day == total_days:
         return "最終日"
     return f"{current_day}日目"
+
+def parse_event_title(block: List[str]) -> str:
+    """
+    ＊＊＊ 番組表 ＊＊＊ の次あたりにある独立した開催タイトルを拾う。
+    取れなければ冒頭行から補助抽出。
+    """
+    cleaned = [norm(x) for x in block if norm(x)]
+    if not cleaned:
+        return ""
+
+    # 1. 「番組表」以降の独立行から拾う
+    for i, line in enumerate(cleaned[:80]):
+        c = compact(line)
+        if "番組表" not in c:
+            continue
+
+        for j in range(i + 1, min(i + 8, len(cleaned))):
+            cand = norm(cleaned[j])
+            cc = compact(cand)
+            if not cc:
+                continue
+
+            if "ボートレース" in cc:
+                continue
+            if "主催者発行" in cc:
+                continue
+            if "内容については主催者発行のものと照合して下さい" in cc:
+                continue
+            if re.search(r"第[0-9]+日", cc) and re.search(r"[0-9]{4}年", cc):
+                continue
+            if RE_RACE_HEAD.search(cand):
+                continue
+            if cc.startswith("----"):
+                continue
+            if "締切予定" in cc:
+                continue
+
+            return cand.strip()
+
+    # 2. 冒頭の会場ヘッダ行から補助抽出
+    for line in cleaned[:12]:
+        if "ボートレース" not in line:
+            continue
+
+        s = norm(line)
+
+        # 例:
+        # ボートレース大 村 3月10日 開設73周年記念 海 第3日
+        m = re.search(r"\d{1,2}月\s*\d{1,2}日\s+(.*?)\s+第\s*[0-9]+\s*日", s)
+        if m:
+            title = norm(m.group(1))
+            if title:
+                return title
+
+    return ""
+
+def detect_grade_from_title(title: str) -> str:
+    raw = compact(title)
+    upper = raw.upper()
+
+    if not raw:
+        return "一般"
+
+    # 明示表記優先
+    if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
+        return "SG"
+    if re.search(r"(^|[^A-Z])(G1|GI)([^A-Z]|$)", upper):
+        return "G1"
+    if re.search(r"(^|[^A-Z])(G2|GII)([^A-Z]|$)", upper):
+        return "G2"
+    if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
+        return "G3"
+
+    # SG
+    if any(w in raw for w in map(compact, SG_WORDS)):
+        return "SG"
+
+    # G2
+    if any(w in raw for w in map(compact, G2_WORDS)):
+        return "G2"
+
+    # G1
+    # 先頭が「開設○周年記念」で始まるケースのみG1確定にする
+    # 例: 開設73周年記念海の王者決定戦 -> G1
+    # 福岡県知事杯争奪福岡都市圏開設36周年記念競走 -> 一般（ここでは誤判定しない）
+    if re.match(r"^開設[0-9]+周年記念", raw):
+        return "G1"
+
+    if any(w in raw for w in map(compact, G1_WORDS)):
+        # 周年記念だけは誤爆しやすいので上の先頭一致以外では採用しない
+        if "周年記念" in raw:
+            pass
+        else:
+            return "G1"
+
+    # G3
+    if any(w in raw for w in map(compact, G3_WORDS)):
+        return "G3"
+
+    return "一般"
 
 def _to_float(x: str) -> Optional[float]:
     try:
@@ -432,6 +576,8 @@ def main():
         ymd = parse_date(b)
         current_day, total_days = parse_day_info(b)
         day_label = format_day_label(current_day, total_days)
+        event_title = parse_event_title(b)
+        grade_label = detect_grade_from_title(event_title)
         races = parse_races(b)
 
         if not venue or not races:
@@ -447,6 +593,8 @@ def main():
         venue_payload: Dict[str, Any] = {
             "venue": venue,
             "date": ymd,
+            "event_title": event_title,
+            "grade_label": grade_label,
         }
         if current_day is not None:
             venue_payload["day"] = current_day
@@ -477,7 +625,18 @@ def main():
     print("txt:", txt_path)
     print("venues:", len(venues_out))
     if venues_out:
-        print("first_venue:", venues_out[0]["venue"], "day:", venues_out[0].get("day"), "label:", venues_out[0].get("day_label"))
+        print(
+            "first_venue:",
+            venues_out[0]["venue"],
+            "day:",
+            venues_out[0].get("day"),
+            "label:",
+            venues_out[0].get("day_label"),
+            "grade:",
+            venues_out[0].get("grade_label"),
+            "title:",
+            venues_out[0].get("event_title"),
+        )
         print("first_venue_races:", len(venues_out[0]["races"]))
     if warnings:
         print("WARNINGS:")
