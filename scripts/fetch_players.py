@@ -1,34 +1,45 @@
 import requests
-from urllib.parse import urljoin
+from datetime import datetime
 
-BASE = "https://www1.mbrace.or.jp/od2/K/"
-INDEX_URL = urljoin(BASE, "dindex.html")
-MENU_URL = urljoin(BASE, "dmenu.html")
+BASE = "https://www1.mbrace.or.jp"
+MONTH_DIR = "/od2/K/"
 
+def fetch(url, referer=None):
 
-def fetch(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+    }
+
+    if referer:
+        headers["Referer"] = referer
+
     r = requests.get(
         url,
+        headers=headers,
         timeout=30,
-        headers={
-            "User-Agent": "Mozilla/5.0",
-            "Referer": BASE,
-        },
     )
+
     r.raise_for_status()
+
     return r.text
 
 
 def main():
-    print("open index")
-    _ = fetch(INDEX_URL)
 
-    print("open menu:", MENU_URL)
-    menu_html = fetch(MENU_URL)
+    month = datetime.now().strftime("%Y%m")
 
-    print("===== DMENU HTML FULL START =====")
-    print(menu_html)
-    print("===== DMENU HTML FULL END =====")
+    url = f"{BASE}{MONTH_DIR}{month}/index.html"
+
+    print("open month page:", url)
+
+    html = fetch(
+        url,
+        referer=f"{BASE}{MONTH_DIR}dmenu.html"
+    )
+
+    print("===== MONTH PAGE START =====")
+    print(html[:5000])
+    print("===== MONTH PAGE END =====")
 
 
 if __name__ == "__main__":
