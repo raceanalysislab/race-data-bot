@@ -1,41 +1,26 @@
-import re
 import requests
-from urllib.parse import urljoin
 
 INDEX_URL = "https://www1.mbrace.or.jp/od2/K/dindex.html"
 
 
-def fetch_text(url: str) -> str:
+def main():
     r = requests.get(
-        url,
+        INDEX_URL,
         timeout=30,
         headers={
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "*/*",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+            "Referer": "https://www1.mbrace.or.jp/",
+            "Accept-Language": "ja-JP,ja;q=0.9",
         },
     )
     r.raise_for_status()
-    return r.text
 
-
-def extract_links(html: str) -> list[str]:
-    hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.IGNORECASE)
-    return [urljoin(INDEX_URL, h) for h in hrefs]
-
-
-def main() -> None:
-    print(f"downloading index: {INDEX_URL}")
-    html = fetch_text(INDEX_URL)
-
-    links = extract_links(html)
-
-    print("===== ALL LINKS START =====")
-    for link in links:
-        print(f"LINK: {link}")
-    print("===== ALL LINKS END =====")
-
-    if not links:
-      raise RuntimeError("リンクが1件も取れませんでした。")
+    print("status:", r.status_code)
+    print("content-type:", r.headers.get("Content-Type"))
+    print("final-url:", r.url)
+    print("===== HTML HEAD START =====")
+    print(r.text[:3000])
+    print("===== HTML HEAD END =====")
 
 
 if __name__ == "__main__":
