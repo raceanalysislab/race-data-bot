@@ -1,11 +1,16 @@
 # scripts/parse_mbrace_txt.py
 # mbrace番組表txt（STARTB...FINALB / xxBBGN...xxBEND 想定）→ 会場ごとにパースしてJSON化
 # 出力: data/mbrace_races_today.json
+#
 # 修正内容:
 # - 開催タイトル抽出
 # - 開催グレード推定（SG / G1 / G2 / G3 / 一般）
 # - 「開設○周年記念」先頭一致のみG1扱い
 # - 「福岡県知事杯争奪 福岡都市圏開設36周年記念競走」のような一般開催を誤ってG1にしない
+# - 舟番行パース強化
+#   - 1行崩れに強い
+#   - 次行連結の再試行を強化
+#   - 1号艇だけ落ちるケースを拾いやすくした
 
 import json
 import os
@@ -67,6 +72,11 @@ RE_TAIL = re.compile(
 
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 RE_AGE_BRANCH_WEIGHT = re.compile(rf"(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*$")
+
+# front側の保険
+RE_FRONT_CORE = re.compile(
+    rf"^\s*([1-6])\s+(\d{{4}})\s*(.+?)\s*(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*(A1|A2|B1|B2)\s+(.*)$"
+)
 
 SG_WORDS = [
     "ボートレースクラシック",
@@ -138,10 +148,6 @@ def infer_txt_path() -> str:
     return os.path.join("data", "extract", "b260303.txt")
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
-    """
-    福岡みたいに BBGN が付かない先頭会場があるため、
-    BBGN以前の先頭部分も1ブロックとして拾う。
-    """
     blocks: List[List[str]] = []
     cur: List[str] = []
 
@@ -200,14 +206,6 @@ def parse_date(block: List[str]) -> str:
     return ""
 
 def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
-    """
-    txt内の開催日情報を拾う。
-    想定:
-      第1日 / 第 1日 / 第 １日
-      1日目
-      6日間
-      1/6
-    """
     current_day: Optional[int] = None
     total_days: Optional[int] = None
 
@@ -259,15 +257,10 @@ def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> O
     return f"{current_day}日目"
 
 def parse_event_title(block: List[str]) -> str:
-    """
-    ＊＊＊ 番組表 ＊＊＊ の次あたりにある独立した開催タイトルを拾う。
-    取れなければ冒頭行から補助抽出。
-    """
     cleaned = [norm(x) for x in block if norm(x)]
     if not cleaned:
         return ""
 
-    # 1. 「番組表」以降の独立行から拾う
     for i, line in enumerate(cleaned[:80]):
         c = compact(line)
         if "番組表" not in c:
@@ -296,15 +289,11 @@ def parse_event_title(block: List[str]) -> str:
 
             return cand.strip()
 
-    # 2. 冒頭の会場ヘッダ行から補助抽出
     for line in cleaned[:12]:
         if "ボートレース" not in line:
             continue
 
         s = norm(line)
-
-        # 例:
-        # ボートレース大 村 3月10日 開設73周年記念 海 第3日
         m = re.search(r"\d{1,2}月\s*\d{1,2}日\s+(.*?)\s+第\s*[0-9]+\s*日", s)
         if m:
             title = norm(m.group(1))
@@ -320,7 +309,6 @@ def detect_grade_from_title(title: str) -> str:
     if not raw:
         return "一般"
 
-    # 明示表記優先
     if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
         return "SG"
     if re.search(r"(^|[^A-Z])(G1|GI)([^A-Z]|$)", upper):
@@ -330,29 +318,21 @@ def detect_grade_from_title(title: str) -> str:
     if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
         return "G3"
 
-    # SG
     if any(w in raw for w in map(compact, SG_WORDS)):
         return "SG"
 
-    # G2
     if any(w in raw for w in map(compact, G2_WORDS)):
         return "G2"
 
-    # G1
-    # 先頭が「開設○周年記念」で始まるケースのみG1確定にする
-    # 例: 開設73周年記念海の王者決定戦 -> G1
-    # 福岡県知事杯争奪福岡都市圏開設36周年記念競走 -> 一般（ここでは誤判定しない）
     if re.match(r"^開設[0-9]+周年記念", raw):
         return "G1"
 
     if any(w in raw for w in map(compact, G1_WORDS)):
-        # 周年記念だけは誤爆しやすいので上の先頭一致以外では採用しない
         if "周年記念" in raw:
             pass
         else:
             return "G1"
 
-    # G3
     if any(w in raw for w in map(compact, G3_WORDS)):
         return "G3"
 
@@ -377,46 +357,19 @@ def _deglue_numbers(s: str) -> str:
     """
     s = norm(s)
 
-    for _ in range(4):
+    for _ in range(6):
         s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
         if s2 == s:
             break
         s = s2
     return s
 
-def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
-    line = _deglue_numbers(line)
-    mp = RE_BOAT_PREFIX.match(line)
-    if not mp:
-        return None
+def _normalize_boat_line(s: str) -> str:
+    s = _deglue_numbers(s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
-    waku = _to_int(mp.group(1))
-    regno = _to_int(mp.group(2))
-    rest_all = (mp.group(3) or "").strip()
-    if not waku or not regno or not rest_all:
-        return None
-
-    rest_all = _deglue_numbers(rest_all)
-
-    mt = RE_TAIL.search(rest_all)
-    if not mt:
-        return None
-
-    nat_win = _to_float(mt.group(1))
-    nat_2 = _to_float(mt.group(2))
-    loc_win = _to_float(mt.group(3))
-    loc_2 = _to_float(mt.group(4))
-    motor_no = _to_int(mt.group(5))
-    motor_2 = _to_float(mt.group(6))
-    boat_no = _to_int(mt.group(7))
-    boat_2 = _to_float(mt.group(8))
-    note = (mt.group(9) or "").strip()
-
-    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
-        return None
-
-    head = rest_all[:mt.start()].strip()
-
+def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int]]:
     mg = RE_GRADE.search(head)
     if not mg:
         return None
@@ -438,6 +391,102 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     if not name:
         return None
 
+    return name, int(age), branch, int(weight)
+
+def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
+    line = _normalize_boat_line(line)
+    mp = RE_BOAT_PREFIX.match(line)
+    if not mp:
+        return None
+
+    waku = _to_int(mp.group(1))
+    regno = _to_int(mp.group(2))
+    rest_all = (mp.group(3) or "").strip()
+    if not waku or not regno or not rest_all:
+        return None
+
+    mt = RE_TAIL.search(rest_all)
+    if not mt:
+        return None
+
+    nat_win = _to_float(mt.group(1))
+    nat_2 = _to_float(mt.group(2))
+    loc_win = _to_float(mt.group(3))
+    loc_2 = _to_float(mt.group(4))
+    motor_no = _to_int(mt.group(5))
+    motor_2 = _to_float(mt.group(6))
+    boat_no = _to_int(mt.group(7))
+    boat_2 = _to_float(mt.group(8))
+    note = (mt.group(9) or "").strip()
+
+    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+        return None
+
+    head = rest_all[:mt.start()].strip()
+    parsed = _parse_head_part(head)
+    if not parsed:
+        return None
+
+    name, age, branch, weight = parsed
+
+    return {
+        "waku": int(waku),
+        "regno": int(regno),
+        "name": name,
+        "age": int(age),
+        "branch": branch,
+        "weight": int(weight),
+        "grade": RE_GRADE.search(head).group(1),
+        "nat_win": float(nat_win),
+        "nat_2": float(nat_2),
+        "loc_win": float(loc_win),
+        "loc_2": float(loc_2),
+        "motor_no": int(motor_no),
+        "motor_2": float(motor_2),
+        "boat_no": int(boat_no),
+        "boat_2": float(boat_2),
+        "note": note,
+    }
+
+def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
+    """
+    front側から強めに取る保険。
+    mainで落ちた行だけ使う。
+    """
+    line = _normalize_boat_line(line)
+    fm = RE_FRONT_CORE.match(line)
+    if not fm:
+        return None
+
+    waku = _to_int(fm.group(1))
+    regno = _to_int(fm.group(2))
+    name = re.sub(r"\s+", "", fm.group(3) or "")
+    age = _to_int(fm.group(4))
+    branch = fm.group(5)
+    weight = _to_int(fm.group(6))
+    grade = fm.group(7)
+    tail = (fm.group(8) or "").strip()
+    if None in (waku, regno, age, weight) or not name:
+        return None
+
+    nums = re.findall(r"\d+\.\d{1,2}|\d{1,3}", tail)
+    # 想定:
+    # nat_win nat_2 loc_win loc_2 motor_no motor_2 boat_no boat_2 [note...]
+    if len(nums) < 8:
+        return None
+
+    nat_win = _to_float(nums[0])
+    nat_2 = _to_float(nums[1])
+    loc_win = _to_float(nums[2])
+    loc_2 = _to_float(nums[3])
+    motor_no = _to_int(nums[4])
+    motor_2 = _to_float(nums[5])
+    boat_no = _to_int(nums[6])
+    boat_2 = _to_float(nums[7])
+
+    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+        return None
+
     return {
         "waku": int(waku),
         "regno": int(regno),
@@ -454,8 +503,11 @@ def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
         "motor_2": float(motor_2),
         "boat_no": int(boat_no),
         "boat_2": float(boat_2),
-        "note": note,
+        "note": "",
     }
+
+def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
+    return _parse_boat_line_main(line) or _parse_boat_line_fallback(line)
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     m = {int(b.get("waku")): b for b in boats if b.get("waku") is not None}
@@ -485,6 +537,10 @@ def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             })
     return out
 
+def _is_boat_candidate(line: str) -> bool:
+    s = _normalize_boat_line(line)
+    return bool(RE_BOAT_PREFIX.match(s))
+
 def parse_races(block: List[str]) -> List[Dict[str, Any]]:
     races: List[Dict[str, Any]] = []
     cur: Optional[Dict[str, Any]] = None
@@ -513,18 +569,38 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
             i += 1
             continue
 
-        boat = _parse_boat_line(l)
+        boat = None
+        if _is_boat_candidate(l):
+            # まず単体
+            boat = _parse_boat_line(l)
 
-        if not boat and i + 1 < len(block):
-            nxt = block[i + 1]
-            nxt2 = _deglue_numbers(nxt)
-            if (not RE_RACE_HEAD.search(nxt2)) and (not RE_BOAT_PREFIX.match(nxt2)):
-                boat = _parse_boat_line(l + " " + nxt)
-                if boat:
-                    i += 1
+            # 落ちたら次行連結
+            if not boat and i + 1 < len(block):
+                nxt = block[i + 1]
+                nxt_norm = _normalize_boat_line(nxt)
+                if not RE_RACE_HEAD.search(nxt_norm) and not _is_boat_candidate(nxt_norm):
+                    boat = _parse_boat_line(f"{l} {nxt}")
+                    if boat:
+                        i += 1
 
-        if boat:
-            cur["boats"].append(boat)
+            # まだ落ちたら2行先まで連結
+            if not boat and i + 2 < len(block):
+                nxt1 = block[i + 1]
+                nxt2 = block[i + 2]
+                nxt1_norm = _normalize_boat_line(nxt1)
+                nxt2_norm = _normalize_boat_line(nxt2)
+                if (
+                    not RE_RACE_HEAD.search(nxt1_norm) and
+                    not RE_RACE_HEAD.search(nxt2_norm) and
+                    not _is_boat_candidate(nxt1_norm) and
+                    not _is_boat_candidate(nxt2_norm)
+                ):
+                    boat = _parse_boat_line(f"{l} {nxt1} {nxt2}")
+                    if boat:
+                        i += 2
+
+            if boat:
+                cur["boats"].append(boat)
 
         i += 1
 
