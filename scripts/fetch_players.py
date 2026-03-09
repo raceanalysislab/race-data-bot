@@ -19,26 +19,24 @@ def fetch(url):
     return r.text
 
 
-def extract_links(html):
-    return re.findall(r'href=["\']([^"\']+)["\']', html, re.I)
-
-
 def main():
     print("open index")
+
     html = fetch(INDEX_URL)
 
-    menu_match = re.search(r'SRC="([^"]+dmenu\.html)"', html, re.I)
+    # 大文字小文字無視で dmenu.html を探す
+    match = re.search(r'dmenu\.html', html, re.IGNORECASE)
 
-    if not menu_match:
+    if not match:
         raise RuntimeError("dmenu.html 見つからない")
 
-    menu_url = urljoin(BASE, menu_match.group(1))
+    menu_url = urljoin(BASE, "dmenu.html")
 
     print("open menu:", menu_url)
 
     menu_html = fetch(menu_url)
 
-    links = extract_links(menu_html)
+    links = re.findall(r'href=["\']([^"\']+)["\']', menu_html, re.I)
 
     print("===== LINKS =====")
 
