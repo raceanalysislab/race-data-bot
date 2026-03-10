@@ -1,28 +1,26 @@
 # scripts/build_site_json.py
-# mbrace_races_today.json を正として site 用 JSON を生成する
-# - data/site/venues.json : 開催中会場の一覧
-# - data/site/venues/<会場>.json : 会場ごとのレース概要
+# mbrace_races_today.json / mbrace_races_tomorrow.json を正として site 用 JSON を生成する
+#
+# 出力:
+# - data/site/venues_today.json
+# - data/site/venues_tomorrow.json
+# - data/site/venues/today/<会場>.json
+# - data/site/venues/tomorrow/<会場>.json
+#
+# 互換:
+# - data/site/venues.json には today を優先、なければ tomorrow を出す
+# - data/site/venues/<会場>.json には today を優先、なければ tomorrow を出す
 #
 # 追加:
 # - grade_label
-# - first_race_time : 1Rの締切時刻
-# - card_band :
-#     morning = 1R 08:00〜09:00
-#     day     = 1R 10:00〜12:00
-#     evening = 1R 15:00〜16:00
-#     night   = 1R 17:00〜18:00
-#     normal  = それ以外
-# - card_tone : 互換用（morning / normal / night）
-# - race_times : 一覧画面でリアルタイム切替するための全レース時刻
+# - first_race_time
+# - card_band
+# - card_tone
+# - race_times
 #
 # 追加仕様:
-# - レース名/タイトルが「本当の優勝戦」のときだけ day_label を「最終日」に上書き
-# - 準優勝戦 / 準優勝 / 紹介 / インタビュー / トライアル等は除外
-# - それ以外は元の day_label（初日 / 2日目 / 3日目 ...）をそのまま使う
-#
-# ※ frontend は card_band を優先使用
-# ※ ☀️ / 🌙 / 上半分カラーは「今の next_display」ではなく
-#    「その会場の1R時刻」で固定する前提
+# - 本当の優勝戦のときだけ day_label を「最終日」に上書き
+# - 準優勝戦 / 紹介 / インタビュー / トライアル等は除外
 
 import json
 import os
@@ -32,13 +30,22 @@ from typing import Any, Dict, List, Optional, Tuple
 
 JST = timezone(timedelta(hours=9))
 
-MBRACE_PATH = "data/mbrace_races_today.json"
+SRC_SPECS = [
+    ("data/mbrace_races_today.json", "today"),
+    ("data/mbrace_races_tomorrow.json", "tomorrow"),
+]
 
 OUT_DIR = "data/site"
-OUT_VENUES = os.path.join(OUT_DIR, "venues.json")
-OUT_VENUE_DIR = os.path.join(OUT_DIR, "venues")
+OUT_VENUES_TODAY = os.path.join(OUT_DIR, "venues_today.json")
+OUT_VENUES_TOMORROW = os.path.join(OUT_DIR, "venues_tomorrow.json")
+OUT_VENUES_COMPAT = os.path.join(OUT_DIR, "venues.json")
 
-os.makedirs(OUT_VENUE_DIR, exist_ok=True)
+OUT_VENUE_DIR = os.path.join(OUT_DIR, "venues")
+OUT_VENUE_DIR_TODAY = os.path.join(OUT_VENUE_DIR, "today")
+OUT_VENUE_DIR_TOMORROW = os.path.join(OUT_VENUE_DIR, "tomorrow")
+
+os.makedirs(OUT_VENUE_DIR_TODAY, exist_ok=True)
+os.makedirs(OUT_VENUE_DIR_TOMORROW, exist_ok=True)
 
 VENUE_TO_JCD: Dict[str, str] = {
     "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
@@ -316,14 +323,42 @@ def _resolve_day_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> st
     return ""
 
 
-def main():
-    if not os.path.exists(MBRACE_PATH):
-        raise FileNotFoundError(f"missing: {MBRACE_PATH}")
+def _sort_key(v: Dict[str, Any]):
+    j = v.get("jcd") or ""
+    try:
+        return (0, int(j))
+    except Exception:
+        return (1, 999)
 
-    with open(MBRACE_PATH, "r", encoding="utf-8") as f:
-        mbrace = json.load(f)
 
+def _write_json(path: str, obj: Any) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+
+
+def _safe_name(s: str) -> str:
+    s = str(s or "").strip().replace(" ", "").replace("　", "")
+    s = re.sub(r'[\\/:*?"<>|]', "_", s)
+    return s
+
+
+def _clear_json_files(dir_path: str) -> None:
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path, exist_ok=True)
+        return
+
+    for name in os.listdir(dir_path):
+        if name.lower().endswith(".json"):
+            try:
+                os.remove(os.path.join(dir_path, name))
+            except Exception:
+                pass
+
+
+def build_site_payload(mbrace: Dict[str, Any], slot: str) -> Tuple[List[Dict[str, Any]], List[Tuple[str, Dict[str, Any]]]]:
     site_venues: List[Dict[str, Any]] = []
+    venue_payloads: List[Tuple[str, Dict[str, Any]]] = []
 
     for venue in (mbrace.get("venues") or []):
         venue_name = str(venue.get("venue") or "").strip()
@@ -339,6 +374,8 @@ def main():
         day_label = _resolve_day_label(venue, races)
 
         row: Dict[str, Any] = {
+            "slot": slot,
+            "date": venue.get("date") or mbrace.get("date") or "",
             "name": venue_name,
             "jcd": VENUE_TO_JCD.get(venue_name, ""),
             "next_race": next_race,
@@ -356,31 +393,6 @@ def main():
 
         site_venues.append(row)
 
-    def sort_key(v: Dict[str, Any]):
-        j = v.get("jcd") or ""
-        try:
-            return (0, int(j))
-        except Exception:
-            return (1, 999)
-
-    site_venues.sort(key=sort_key)
-
-    os.makedirs(OUT_DIR, exist_ok=True)
-    with open(OUT_VENUES, "w", encoding="utf-8") as f:
-        json.dump(site_venues, f, ensure_ascii=False, indent=2)
-
-    for venue in (mbrace.get("venues") or []):
-        venue_name = str(venue.get("venue") or "").strip()
-        if not venue_name:
-            continue
-
-        races = venue.get("races") or []
-        race_times = _build_race_times(races)
-        grade_label = _resolve_grade_label(venue, races)
-        first_race_time = _pick_first_race_time(race_times)
-        card_band = _classify_card_band(first_race_time)
-        day_label = _resolve_day_label(venue, races)
-
         races_out: List[Dict[str, Any]] = []
         for r in races:
             races_out.append({
@@ -391,8 +403,9 @@ def main():
             })
 
         payload: Dict[str, Any] = {
+            "slot": slot,
             "venue": venue_name,
-            "date": venue.get("date"),
+            "date": venue.get("date") or mbrace.get("date") or "",
             "day": venue.get("day"),
             "total_days": venue.get("total_days"),
             "day_label": day_label,
@@ -405,14 +418,73 @@ def main():
             "races": races_out,
         }
 
-        path = os.path.join(OUT_VENUE_DIR, f"{venue_name}.json")
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
+        venue_payloads.append((venue_name, payload))
 
-    print("site json build complete")
-    print("venues.json count:", len(site_venues))
-    if site_venues:
-        print("first venue:", site_venues[0])
+    site_venues.sort(key=_sort_key)
+    return site_venues, venue_payloads
+
+
+def load_mbrace(path: str) -> Optional[Dict[str, Any]]:
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+    os.makedirs(OUT_VENUE_DIR, exist_ok=True)
+    os.makedirs(OUT_VENUE_DIR_TODAY, exist_ok=True)
+    os.makedirs(OUT_VENUE_DIR_TOMORROW, exist_ok=True)
+
+    _clear_json_files(OUT_VENUE_DIR_TODAY)
+    _clear_json_files(OUT_VENUE_DIR_TOMORROW)
+
+    built_slots: Dict[str, List[Dict[str, Any]]] = {}
+    compat_venue_payloads: Dict[str, Dict[str, Any]] = {}
+
+    for src_path, slot in SRC_SPECS:
+        mbrace = load_mbrace(src_path)
+        if not mbrace:
+            print(f"skip: {src_path} not found")
+            built_slots[slot] = []
+            continue
+
+        site_venues, venue_payloads = build_site_payload(mbrace, slot)
+        built_slots[slot] = site_venues
+
+        if slot == "today":
+            _write_json(OUT_VENUES_TODAY, site_venues)
+        elif slot == "tomorrow":
+            _write_json(OUT_VENUES_TOMORROW, site_venues)
+
+        slot_dir = OUT_VENUE_DIR_TODAY if slot == "today" else OUT_VENUE_DIR_TOMORROW
+
+        for venue_name, payload in venue_payloads:
+            path = os.path.join(slot_dir, f"{_safe_name(venue_name)}.json")
+            _write_json(path, payload)
+
+            # 互換用は today 優先
+            if venue_name not in compat_venue_payloads or slot == "today":
+                compat_venue_payloads[venue_name] = payload
+
+        print(f"site json build complete: {slot}")
+        print(f"{slot} venues count:", len(site_venues))
+        if site_venues:
+            print(f"{slot} first venue:", site_venues[0])
+
+    today_list = built_slots.get("today") or []
+    tomorrow_list = built_slots.get("tomorrow") or []
+
+    compat_list = today_list if today_list else tomorrow_list
+    _write_json(OUT_VENUES_COMPAT, compat_list)
+
+    for venue_name, payload in compat_venue_payloads.items():
+        path = os.path.join(OUT_VENUE_DIR, f"{_safe_name(venue_name)}.json")
+        _write_json(path, payload)
+
+    print("compat venues.json count:", len(compat_list))
+    print("compat venue files:", len(compat_venue_payloads))
 
 
 if __name__ == "__main__":
