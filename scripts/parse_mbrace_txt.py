@@ -14,6 +14,7 @@
 # - パース失敗時のDEBUGログ追加
 # - 級(A1/A2/B1/B2)位置を基準に前後分割する保険追加
 # - 数値8個を「前から読む」保険追加
+# - 17100.00156 -> 17 100.00 156 の特殊連結に対応
 
 import json
 import os
@@ -354,16 +355,31 @@ def _to_int(x: str) -> Optional[int]:
 
 def _deglue_numbers(s: str) -> str:
     """
-    motor_2 + boat_no の連結を分割
-    例: 30.00156 -> 30.00 156
+    数値連結を分割する。
+    主に以下を想定:
+    - 30.00156      -> 30.00 156
+    - 17100.00156   -> 17 100.00 156
     """
     s = norm(s)
 
+    # motor_no + motor_2 + boat_no が全部連結しているケース
+    for _ in range(6):
+        s2 = re.sub(
+            r"(?<!\d)(\d{1,3})(\d{1,3}\.\d{2})(\d{2,3})(?=\s|$)",
+            r"\1 \2 \3",
+            s
+        )
+        if s2 == s:
+            break
+        s = s2
+
+    # float + int 連結
     for _ in range(8):
         s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
         if s2 == s:
             break
         s = s2
+
     return s
 
 def _normalize_boat_line(s: str) -> str:
