@@ -32,6 +32,9 @@ VENUE_NAME_TO_JCD = {
     "大村": "24",
 }
 
+JCD_TO_VENUE_NAME = {v: k for k, v in VENUE_NAME_TO_JCD.items()}
+KNOWN_VENUE_NAMES = set(VENUE_NAME_TO_JCD.keys())
+
 
 def load_json(path: Path):
     with path.open("r", encoding="utf-8") as f:
@@ -67,7 +70,38 @@ def normalize_jcd(value, venue_name=""):
     v = "".join(ch for ch in str(value or "") if ch.isdigit())
     if v:
         return v.zfill(2)
-    return VENUE_NAME_TO_JCD.get(str(venue_name or "").strip(), "")
+    venue_name = str(venue_name or "").strip()
+    return VENUE_NAME_TO_JCD.get(venue_name, "")
+
+
+def is_valid_venue_name(value):
+    return str(value or "").strip() in KNOWN_VENUE_NAMES
+
+
+def extract_path_hints(path: Path):
+    stem = path.stem.strip()
+
+    # 例:
+    # 10_7R.json -> jcd=10
+    # 三国_7R.json -> venue=三国
+    parts = stem.split("_")
+    head = parts[0].strip() if parts else ""
+
+    hinted_jcd = ""
+    hinted_venue = ""
+
+    digits = "".join(ch for ch in head if ch.isdigit())
+    if digits and digits.zfill(2) in JCD_TO_VENUE_NAME:
+        hinted_jcd = digits.zfill(2)
+        hinted_venue = JCD_TO_VENUE_NAME[hinted_jcd]
+        return hinted_jcd, hinted_venue
+
+    if head in VENUE_NAME_TO_JCD:
+        hinted_venue = head
+        hinted_jcd = VENUE_NAME_TO_JCD[head]
+        return hinted_jcd, hinted_venue
+
+    return "", ""
 
 
 def extract_boats(race_root: dict):
@@ -114,18 +148,52 @@ def extract_race_no(data: dict, path: Path):
     return normalize_race_no(tail)
 
 
-def extract_venue_name(data: dict):
+def extract_venue_name(data: dict, path: Path):
+    hinted_jcd, hinted_venue = extract_path_hints(path)
+    if hinted_venue:
+        return hinted_venue
+
     race_obj = pick(data, "race", default={})
     if isinstance(race_obj, dict):
-        venue_name = str(
-            pick(race_obj, "venue_name", "name", "venue", default="")
-        ).strip()
-        if venue_name:
+        for key in ("venue_name", "name", "venue"):
+            venue_name = str(pick(race_obj, key, default="")).strip()
+            if is_valid_venue_name(venue_name):
+                return venue_name
+
+    for key in ("venue_name", "name", "venue"):
+        venue_name = str(pick(data, key, default="")).strip()
+        if is_valid_venue_name(venue_name):
             return venue_name
 
-    return str(
-        pick(data, "venue_name", "name", "venue", default="")
-    ).strip()
+    raw_jcd = normalize_jcd(
+        pick(data, "jcd", default="") or pick(race_obj, "jcd", default=""),
+        ""
+    )
+    if raw_jcd and raw_jcd in JCD_TO_VENUE_NAME:
+        return JCD_TO_VENUE_NAME[raw_jcd]
+
+    if hinted_jcd and hinted_jcd in JCD_TO_VENUE_NAME:
+        return JCD_TO_VENUE_NAME[hinted_jcd]
+
+    return ""
+
+
+def extract_jcd(data: dict, path: Path, venue_name: str):
+    hinted_jcd, _ = extract_path_hints(path)
+    if hinted_jcd:
+        return hinted_jcd
+
+    race_obj = pick(data, "race", default={})
+    jcd = normalize_jcd(pick(data, "jcd", default=""), venue_name)
+    if jcd:
+        return jcd
+
+    if isinstance(race_obj, dict):
+        jcd = normalize_jcd(pick(race_obj, "jcd", default=""), venue_name)
+        if jcd:
+            return jcd
+
+    return normalize_jcd("", venue_name)
 
 
 def extract_day_label(data: dict):
@@ -173,7 +241,7 @@ def main():
         except Exception:
             continue
 
-        venue_name = extract_venue_name(data)
+        venue_name = extract_venue_name(data, path)
         if not venue_name:
             continue
 
@@ -181,7 +249,7 @@ def main():
         if not race_no:
             continue
 
-        jcd = normalize_jcd(pick(data, "jcd", default=""), venue_name)
+        jcd = extract_jcd(data, path, venue_name)
         race_title = extract_race_title(data)
         day_label = extract_day_label(data)
 
