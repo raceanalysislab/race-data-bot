@@ -2,7 +2,11 @@ name: Update k results
 
 on:
   schedule:
-    - cron: "0 3 * * *"   # 毎日 12:00 JST
+    - cron: "0 3 * * *"    # 毎日 12:00 JST
+    - cron: "0 12 * * *"   # 毎日 21:00 JST
+    - cron: "0 13 * * *"   # 毎日 22:00 JST
+    - cron: "0 14 * * *"   # 毎日 23:00 JST
+    - cron: "10 15 * * *"  # 毎日 00:10 JST
   workflow_dispatch:
 
 jobs:
@@ -30,13 +34,30 @@ jobs:
       - name: Parse races
         run: python scripts/parse_mbrace_txt.py
 
+      - name: Build race json
+        run: python scripts/build_race_json.py
+
+      - name: Build site json
+        run: python scripts/build_site_json.py
+
       - name: Build player index
         run: python scripts/build_player_index.py
 
-      - name: Commit extracted k files
+      - name: Commit generated files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/download_k data/extract_k data/mbrace_races_today.json data/player_index_today.json
+          git add \
+            data/download_k \
+            data/extract_k \
+            data/mbrace_races_today.json \
+            data/mbrace_races_tomorrow.json \
+            data/player_index_today.json \
+            data/player_index_tomorrow.json \
+            data/site/venues.json \
+            data/site/venues_today.json \
+            data/site/venues_tomorrow.json \
+            data/site/venues \
+            data/site/races
           git commit -m "update k results" || echo "no changes"
           git push
