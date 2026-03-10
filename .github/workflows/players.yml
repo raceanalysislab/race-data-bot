@@ -47,17 +47,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add \
-            data/download_k \
-            data/extract_k \
-            data/mbrace_races_today.json \
-            data/mbrace_races_tomorrow.json \
-            data/player_index_today.json \
-            data/player_index_tomorrow.json \
-            data/site/venues.json \
-            data/site/venues_today.json \
-            data/site/venues_tomorrow.json \
-            data/site/venues \
-            data/site/races
+          git add -A
           git commit -m "update k results" || echo "no changes"
           git push
