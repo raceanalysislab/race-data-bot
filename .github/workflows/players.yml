@@ -9,6 +9,9 @@ on:
     - cron: "10 15 * * *"  # 毎日 00:10 JST
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,11 +37,29 @@ jobs:
       - name: Parse races
         run: python scripts/parse_mbrace_txt.py
 
+      - name: Check after parse
+        run: |
+          echo "=== pwd ==="
+          pwd
+          echo "=== data files ==="
+          ls -la data || true
+          find data -maxdepth 3 -type f | sort || true
+
       - name: Build race json
         run: python scripts/build_race_json.py
 
       - name: Build site json
         run: python scripts/build_site_json.py
+
+      - name: Check site json outputs
+        run: |
+          echo "=== site files ==="
+          ls -la data/site || true
+          find data/site -maxdepth 3 -type f | sort || true
+          echo "=== venues_today preview ==="
+          head -n 40 data/site/venues_today.json || true
+          echo "=== git status before commit ==="
+          git status --short
 
       - name: Build player index
         run: python scripts/build_player_index.py
@@ -48,5 +69,6 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add -A
+          git status --short
           git commit -m "update k results" || echo "no changes"
           git push
