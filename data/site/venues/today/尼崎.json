@@ -1,10 +1,10 @@
 {
   "slot": "today",
   "venue": "尼崎",
-  "date": "2026-03-10",
-  "day": 3,
+  "date": "2026-03-11",
+  "day": 4,
   "total_days": null,
-  "day_label": "3日目",
+  "day_label": "最終日",
   "grade_label": "一般",
   "event_title": "春到来！ ＢＯＡＴＢｏｙカップ 2026",
   "first_race_time": "10:38",
@@ -25,31 +25,31 @@
     },
     {
       "rno": 4,
-      "cutoff": "12:00"
+      "cutoff": "11:59"
     },
     {
       "rno": 5,
-      "cutoff": "12:30"
+      "cutoff": "12:29"
     },
     {
       "rno": 6,
-      "cutoff": "12:59"
+      "cutoff": "13:04"
     },
     {
       "rno": 7,
-      "cutoff": "13:34"
+      "cutoff": "13:33"
     },
     {
       "rno": 8,
-      "cutoff": "14:05"
+      "cutoff": "14:04"
     },
     {
       "rno": 9,
-      "cutoff": "14:42"
+      "cutoff": "14:38"
     },
     {
       "rno": 10,
-      "cutoff": "15:11"
+      "cutoff": "15:08"
     },
     {
       "rno": 11,
@@ -57,7 +57,7 @@
     },
     {
       "rno": 12,
-      "cutoff": "16:12"
+      "cutoff": "16:25"
     }
   ],
   "races": [
@@ -69,68 +69,68 @@
     },
     {
       "rno": 2,
-      "name": "予選",
+      "name": "一般",
       "cutoff": "11:06",
       "distance": 1800
     },
     {
       "rno": 3,
-      "name": "予選",
+      "name": "一般",
       "cutoff": "11:35",
       "distance": 1800
     },
     {
       "rno": 4,
-      "name": "予選",
-      "cutoff": "12:00",
+      "name": "一般",
+      "cutoff": "11:59",
       "distance": 1800
     },
     {
       "rno": 5,
-      "name": "予選",
-      "cutoff": "12:30",
+      "name": "一般",
+      "cutoff": "12:29",
       "distance": 1800
     },
     {
       "rno": 6,
       "name": "昼どきピンク",
-      "cutoff": "12:59",
+      "cutoff": "13:04",
       "distance": 1800
     },
     {
       "rno": 7,
-      "name": "予選",
-      "cutoff": "13:34",
+      "name": "一般",
+      "cutoff": "13:33",
       "distance": 1800
     },
     {
       "rno": 8,
-      "name": "予選",
-      "cutoff": "14:05",
+      "name": "一般",
+      "cutoff": "14:04",
       "distance": 1800
     },
     {
       "rno": 9,
-      "name": "予選特賞",
-      "cutoff": "14:42",
+      "name": "一般特選",
+      "cutoff": "14:38",
       "distance": 1800
     },
     {
       "rno": 10,
-      "name": "予選特賞",
-      "cutoff": "15:11",
+      "name": "選抜戦",
+      "cutoff": "15:08",
       "distance": 1800
     },
     {
       "rno": 11,
-      "name": "予選特選",
+      "name": "選抜戦",
       "cutoff": "15:40",
       "distance": 1800
     },
     {
       "rno": 12,
-      "name": "予選特選",
-      "cutoff": "16:12",
+      "name": "優勝戦",
+      "cutoff": "16:25",
       "distance": 1800
     }
   ]

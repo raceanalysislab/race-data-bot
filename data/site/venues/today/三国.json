@@ -1,10 +1,10 @@
 {
   "slot": "today",
   "venue": "三国",
-  "date": "2026-03-10",
-  "day": 4,
+  "date": "2026-03-11",
+  "day": 5,
   "total_days": null,
-  "day_label": "4日目",
+  "day_label": "最終日",
   "grade_label": "一般",
   "event_title": "スポーツライブ＋杯",
   "first_race_time": "08:35",
@@ -33,11 +33,11 @@
     },
     {
       "rno": 6,
-      "cutoff": "10:53"
+      "cutoff": "10:52"
     },
     {
       "rno": 7,
-      "cutoff": "11:23"
+      "cutoff": "11:21"
     },
     {
       "rno": 8,
@@ -49,15 +49,15 @@
     },
     {
       "rno": 10,
-      "cutoff": "13:05"
+      "cutoff": "13:06"
     },
     {
       "rno": 11,
-      "cutoff": "13:37"
+      "cutoff": "13:39"
     },
     {
       "rno": 12,
-      "cutoff": "14:12"
+      "cutoff": "14:20"
     }
   ],
   "races": [
@@ -94,13 +94,13 @@
     {
       "rno": 6,
       "name": "一般",
-      "cutoff": "10:53",
+      "cutoff": "10:52",
       "distance": 1800
     },
     {
       "rno": 7,
       "name": "一般",
-      "cutoff": "11:23",
+      "cutoff": "11:21",
       "distance": 1800
     },
     {
@@ -111,26 +111,26 @@
     },
     {
       "rno": 9,
-      "name": "一般",
+      "name": "一般特選",
       "cutoff": "12:27",
       "distance": 1800
     },
     {
       "rno": 10,
-      "name": "準優勝戦",
-      "cutoff": "13:05",
+      "name": "選抜戦",
+      "cutoff": "13:06",
       "distance": 1800
     },
     {
       "rno": 11,
-      "name": "準優勝戦",
-      "cutoff": "13:37",
+      "name": "選抜戦",
+      "cutoff": "13:39",
       "distance": 1800
     },
     {
       "rno": 12,
-      "name": "準優勝戦",
-      "cutoff": "14:12",
+      "name": "優勝戦",
+      "cutoff": "14:20",
       "distance": 1800
     }
   ]
