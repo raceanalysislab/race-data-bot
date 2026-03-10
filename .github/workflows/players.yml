@@ -27,10 +27,13 @@ jobs:
       - name: Run k results fetch
         run: python scripts/fetch_k_results.py
 
+      - name: Build player index
+        run: python scripts/build_player_index.py
+
       - name: Commit extracted k files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/download_k data/extract_k
+          git add data/download_k data/extract_k data/player_index_today.json
           git commit -m "update k results" || echo "no changes"
           git push
