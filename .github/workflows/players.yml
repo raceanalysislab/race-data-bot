@@ -27,6 +27,9 @@ jobs:
       - name: Run k results fetch
         run: python scripts/fetch_k_results.py
 
+      - name: Parse races
+        run: python scripts/parse_mbrace_txt.py
+
       - name: Build player index
         run: python scripts/build_player_index.py
 
@@ -34,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/download_k data/extract_k data/player_index_today.json
+          git add data/download_k data/extract_k data/mbrace_races_today.json data/player_index_today.json
           git commit -m "update k results" || echo "no changes"
           git push
