@@ -1,6 +1,9 @@
 # scripts/parse_mbrace_txt.py
 # mbrace番組表txt（STARTB...FINALB / xxBBGN...xxBEND 想定）→ 会場ごとにパースしてJSON化
-# 出力: data/mbrace_races_today.json
+# 出力:
+#   data/mbrace_races_today.json
+#   data/mbrace_races_tomorrow.json
+#   （それ以外の日付は data/mbrace_races_YYYY-MM-DD.json）
 
 import json
 import os
@@ -38,7 +41,6 @@ RE_MD = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
-RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 
 SG_WORDS = [
     "ボートレースクラシック",
@@ -403,10 +405,10 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
 
     m_tail = re.match(
         r"^\s*"
-        r"(\d{1,3})\s*"            # motor_no
-        r"(\d{1,3}\.\d{2})\s*"     # motor_2
-        r"(\d{2,3})\s+"            # boat_no
-        r"([0-9]+\.[0-9]{1,2})"    # boat_2
+        r"(\d{1,3})\s*"
+        r"(\d{1,3}\.\d{2})\s*"
+        r"(\d{2,3})\s+"
+        r"([0-9]+\.[0-9]{1,2})"
         r"(.*)$",
         rest,
     )
@@ -652,6 +654,31 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
     return tags
 
 
+def decide_slot(date_str: str) -> str:
+    today = datetime.now(JST).date()
+    tomorrow = today + timedelta(days=1)
+
+    try:
+        target = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except Exception:
+        return "unknown"
+
+    if target == today:
+        return "today"
+    if target == tomorrow:
+        return "tomorrow"
+    return "other"
+
+
+def build_output_path(date_str: str, slot: str) -> str:
+    if slot == "today":
+        return os.path.join("data", "mbrace_races_today.json")
+    if slot == "tomorrow":
+        return os.path.join("data", "mbrace_races_tomorrow.json")
+    safe_date = date_str if date_str else "unknown"
+    return os.path.join("data", f"mbrace_races_{safe_date}.json")
+
+
 def main():
     txt_path = infer_txt_path()
     lines_raw = read_text_auto(txt_path)
@@ -674,8 +701,7 @@ def main():
 
         for r in races:
             r["tags"] = classify_race(r)
-            boats = r.get("boats") or []
-            missing = sum(1 for bb in boats if bb.get("_missing"))
+            missing = sum(1 for bb in (r.get("boats") or []) if bb.get("_missing"))
             if missing:
                 warnings.append(f"{venue} {r.get('rno')}R missing={missing} race_name={r.get('name')}")
 
@@ -696,22 +722,26 @@ def main():
         venues_out.append(venue_payload)
 
     top_date = venues_out[0]["date"] if venues_out else ""
+    slot = decide_slot(top_date)
+    out_path = build_output_path(top_date, slot)
 
     payload: Dict[str, Any] = {
         "source": os.path.basename(txt_path),
         "date": top_date,
+        "data_slot": slot,
         "parsed_at": datetime.now(JST).isoformat(),
         "venue_count": len(venues_out),
         "venues": venues_out,
         "warnings": warnings,
     }
 
-    out_path = os.path.join("data", "mbrace_races_today.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print("txt:", txt_path)
+    print("slot:", slot)
+    print("out:", out_path)
     print("venues:", len(venues_out))
     if venues_out:
         print(
