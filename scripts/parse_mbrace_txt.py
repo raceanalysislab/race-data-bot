@@ -1,23 +1,6 @@
 # scripts/parse_mbrace_txt.py
 # mbrace番組表txt（STARTB...FINALB / xxBBGN...xxBEND 想定）→ 会場ごとにパースしてJSON化
 # 出力: data/mbrace_races_today.json
-#
-# 修正内容:
-# - 開催タイトル抽出
-# - 開催グレード推定（SG / G1 / G2 / G3 / 一般）
-# - 「開設○周年記念」先頭一致のみG1扱い
-# - 「福岡県知事杯争奪 福岡都市圏開設36周年記念競走」のような一般開催を誤ってG1にしない
-# - 舟番行パースを再構成
-#   - 級(A1/A2/B1/B2)までを前半として抽出
-#   - 級の後ろは
-#       全国勝率 / 全国2率 / 当地勝率 / 当地2率 /
-#       モーターNO / モーター2率 / ボートNO / ボート2率 / note
-#     の順で読む
-#   - 50.00122 -> 50.00 / 122
-#   - 17100.00156 -> 17 / 100.00 / 156
-#   に対応
-# - 次行/次々行/3行先連結の再試行
-# - パース失敗時のDEBUGログ追加
 
 import json
 import os
@@ -47,24 +30,13 @@ BRANCHES = [
 ]
 BRANCH_PATTERN = "|".join(sorted(map(re.escape, BRANCHES), key=len, reverse=True))
 
-def norm(s: str) -> str:
-    s = (s or "").translate(TRANS)
-    s = re.sub(r"\s+", " ", s)
-    return s.strip()
-
-def compact(s: str) -> str:
-    return norm(s).replace(" ", "")
-
 RE_RACE_HEAD = re.compile(
     r"^\s*([0-9]{1,2})R\s+(.+?)\s+(進入固定|進入自由)?\s*H?([0-9]{3,4})m.*?締切予定\s*([0-9]{1,2}:[0-9]{2})"
 )
-
 RE_YMD = re.compile(r"(\d{4})年\s*([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_MD = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
-
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
-
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
 
@@ -104,6 +76,17 @@ G3_WORDS = [
     "シャボン玉石けん杯",
 ]
 
+
+def norm(s: str) -> str:
+    s = (s or "").translate(TRANS)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def compact(s: str) -> str:
+    return norm(s).replace(" ", "")
+
+
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
         try:
@@ -113,6 +96,7 @@ def read_text_auto(path: str) -> List[str]:
             pass
     with open(path, "r", encoding="cp932", errors="ignore") as f:
         return f.readlines()
+
 
 def infer_txt_path() -> str:
     p = os.path.join("data", "source_final_url.txt")
@@ -136,6 +120,7 @@ def infer_txt_path() -> str:
             return os.path.join(exdir, cands[-1])
 
     return os.path.join("data", "extract", "b260303.txt")
+
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
     blocks: List[List[str]] = []
@@ -166,6 +151,7 @@ def split_blocks(lines_raw: List[str]) -> List[List[str]]:
             out.append(bb)
     return out
 
+
 def parse_venue(block: List[str]) -> str:
     for l in block[:200]:
         if "ボートレース" not in l:
@@ -178,6 +164,7 @@ def parse_venue(block: List[str]) -> str:
         if v:
             return v
     return ""
+
 
 def parse_date(block: List[str]) -> str:
     for l in block[:300]:
@@ -194,6 +181,7 @@ def parse_date(block: List[str]) -> str:
             return f"{y:04d}-{int(mo):02d}-{int(d):02d}"
 
     return ""
+
 
 def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
     current_day: Optional[int] = None
@@ -237,6 +225,7 @@ def parse_day_info(block: List[str]) -> Tuple[Optional[int], Optional[int]]:
 
     return current_day, total_days
 
+
 def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> Optional[str]:
     if current_day is None:
         return None
@@ -245,6 +234,7 @@ def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> O
     if total_days is not None and current_day == total_days:
         return "最終日"
     return f"{current_day}日目"
+
 
 def parse_event_title(block: List[str]) -> str:
     cleaned = [norm(x) for x in block if norm(x)]
@@ -292,6 +282,7 @@ def parse_event_title(block: List[str]) -> str:
 
     return ""
 
+
 def detect_grade_from_title(title: str) -> str:
     raw = compact(title)
     upper = raw.upper()
@@ -328,11 +319,13 @@ def detect_grade_from_title(title: str) -> str:
 
     return "一般"
 
+
 def _to_float(x: str) -> Optional[float]:
     try:
         return float((x or "").replace("%", ""))
     except Exception:
         return None
+
 
 def _to_int(x: str) -> Optional[int]:
     try:
@@ -340,8 +333,10 @@ def _to_int(x: str) -> Optional[int]:
     except Exception:
         return None
 
+
 def _normalize_boat_line(s: str) -> str:
     return norm(s)
+
 
 def _build_boat_dict(
     *,
@@ -381,18 +376,8 @@ def _build_boat_dict(
         "note": note,
     }
 
-def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str]]:
-    """
-    級の後ろ:
-      全国勝率 / 全国2率 / 当地勝率 / 当地2率 /
-      モーターNO / モーター2率 / ボートNO / ボート2率 / note
-    を読む。
 
-    例:
-      4.26 19.74 3.59 13.79 17100.00156 27.27              8
-      5.88 44.71 4.76 24.14 25 50.00122 46.15             10
-      6.76 48.81 6.53 50.65 27 47.06128 36.36             12
-    """
+def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str]]:
     s = _normalize_boat_line(tail)
 
     m4 = re.match(
@@ -416,16 +401,6 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
     if None in (nat_win, nat_2, loc_win, loc_2):
         return None
 
-    # 末尾ブロック:
-    # motor_no + motor_2 + boat_no + boat_2 + note
-    #
-    # motor_no と motor_2 がくっつく / motor_2 と boat_no がくっつくの両方に対応
-    #
-    # 例:
-    #   17100.00156 27.27 8
-    #   25 50.00122 46.15 10
-    #   27 47.06128 36.36 12
-    #   41 26.79 27 40.40 3 32
     m_tail = re.match(
         r"^\s*"
         r"(\d{1,3})\s*"            # motor_no
@@ -459,8 +434,8 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
         note,
     )
 
+
 def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
-    original_line = line
     line = _normalize_boat_line(line)
 
     mp = RE_BOAT_PREFIX.match(line)
@@ -472,26 +447,20 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     rest_all = (mp.group(3) or "").strip()
 
     if not waku or not regno or not rest_all:
-        print("PARSE_FAIL_STAGE=prefix", repr(original_line))
         return None
 
-    # 級の位置で前半/後半を分割
     mg = re.search(r"(A1|A2|B1|B2)\s+", rest_all)
     if not mg:
-        # 行末ぴったりで終わってるケースも拾う
         mg = re.search(r"(A1|A2|B1|B2)", rest_all)
         if not mg:
-            print("PARSE_FAIL_STAGE=grade", repr(original_line), "REST=", repr(rest_all))
             return None
 
     grade = mg.group(1)
     head = rest_all[:mg.start()].strip()
     tail = rest_all[mg.end():].strip()
 
-    # head = 名前 + 年齢 + 支部 + 体重
     mh = re.search(rf"(.+?)(\d{{1,2}})({BRANCH_PATTERN})(\d{{2}})$", head)
     if not mh:
-        print("PARSE_FAIL_STAGE=head", repr(original_line), "HEAD=", repr(head))
         return None
 
     name = re.sub(r"\s+", "", mh.group(1) or "")
@@ -500,12 +469,10 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     weight = _to_int(mh.group(4))
 
     if not name or age is None or weight is None:
-        print("PARSE_FAIL_STAGE=head_values", repr(original_line), "HEAD=", repr(head))
         return None
 
     parsed_tail = _parse_stats_tail(tail)
     if not parsed_tail:
-        print("PARSE_FAIL_STAGE=tail", repr(original_line), "TAIL=", repr(tail))
         return None
 
     nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note = parsed_tail
@@ -529,8 +496,10 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
         note=note,
     )
 
+
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
     return _parse_boat_line_main(line)
+
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     m = {int(b.get("waku")): b for b in boats if b.get("waku") is not None}
@@ -560,9 +529,11 @@ def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             })
     return out
 
+
 def _is_boat_candidate(line: str) -> bool:
     s = _normalize_boat_line(line)
     return bool(RE_BOAT_PREFIX.match(s))
+
 
 def parse_races(block: List[str]) -> List[Dict[str, Any]]:
     races: List[Dict[str, Any]] = []
@@ -638,17 +609,6 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                     if boat:
                         i += 3
 
-            if not boat:
-                race_no = cur.get("rno")
-                print(f"BOAT_PARSE_FAIL race={race_no}")
-                print("BOAT_PARSE_FAIL_RAW:", repr(l))
-                if i + 1 < len(block):
-                    print("BOAT_PARSE_FAIL_NEXT1:", repr(block[i + 1]))
-                if i + 2 < len(block):
-                    print("BOAT_PARSE_FAIL_NEXT2:", repr(block[i + 2]))
-                if i + 3 < len(block):
-                    print("BOAT_PARSE_FAIL_NEXT3:", repr(block[i + 3]))
-
             if boat:
                 cur["boats"].append(boat)
 
@@ -659,6 +619,7 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
         races.append(cur)
 
     return races
+
 
 def classify_race(race: Dict[str, Any]) -> List[str]:
     tags: List[str] = []
@@ -689,6 +650,7 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
         tags.append("要確認")
 
     return tags
+
 
 def main():
     txt_path = infer_txt_path()
@@ -771,6 +733,7 @@ def main():
             print(" -", w)
         if len(warnings) > 120:
             print(" - ...", len(warnings) - 120, "more")
+
 
 if __name__ == "__main__":
     main()
