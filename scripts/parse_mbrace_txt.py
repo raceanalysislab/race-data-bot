@@ -9,12 +9,13 @@
 # - 「福岡県知事杯争奪 福岡都市圏開設36周年記念競走」のような一般開催を誤ってG1にしない
 # - 舟番行パース強化
 #   - 1行崩れに強い
-#   - 次行連結の再試行を強化
-#   - 1号艇だけ落ちるケースを拾いやすくした
+#   - 次行/次々行/3行先連結の再試行を強化
+#   - 17100.00156 -> 17 100.00 156 の特殊連結に対応
+#   - 級(A1/A2/B1/B2)位置を基準に前後分割する保険追加
+#   - 数値8個を「前から読む」保険追加
 # - パース失敗時のDEBUGログ追加
-# - 級(A1/A2/B1/B2)位置を基準に前後分割する保険追加
-# - 数値8個を「前から読む」保険追加
-# - 17100.00156 -> 17 100.00 156 の特殊連結に対応
+#   - prefix / tail / head のどこで落ちたか出す
+#   - 行本体と次行も出す
 
 import json
 import os
@@ -546,6 +547,7 @@ def _parse_tail_by_split(rest_all: str) -> Optional[Tuple[float, float, float, f
     )
 
 def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
+    original_line = line
     line = _normalize_boat_line(line)
     mp = RE_BOAT_PREFIX.match(line)
     if not mp:
@@ -555,6 +557,7 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     regno = _to_int(mp.group(2))
     rest_all = (mp.group(3) or "").strip()
     if not waku or not regno or not rest_all:
+        print("PARSE_FAIL_STAGE=prefix", repr(original_line))
         return None
 
     parsed_tail = _parse_tail_by_regex(rest_all)
@@ -563,11 +566,13 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     if not parsed_tail:
         parsed_tail = _parse_tail_by_split(rest_all)
     if not parsed_tail:
+        print("PARSE_FAIL_STAGE=tail", repr(original_line), "REST=", repr(rest_all))
         return None
 
     nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note, head = parsed_tail
     parsed_head = _parse_head_part(head)
     if not parsed_head:
+        print("PARSE_FAIL_STAGE=head", repr(original_line), "HEAD=", repr(head))
         return None
 
     name, age, branch, weight, grade = parsed_head
@@ -737,6 +742,25 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                     if boat:
                         i += 2
 
+            if not boat and i + 3 < len(block):
+                nxt1 = block[i + 1]
+                nxt2 = block[i + 2]
+                nxt3 = block[i + 3]
+                nxt1_norm = _normalize_boat_line(nxt1)
+                nxt2_norm = _normalize_boat_line(nxt2)
+                nxt3_norm = _normalize_boat_line(nxt3)
+                if (
+                    not RE_RACE_HEAD.search(nxt1_norm) and
+                    not RE_RACE_HEAD.search(nxt2_norm) and
+                    not RE_RACE_HEAD.search(nxt3_norm) and
+                    not _is_boat_candidate(nxt1_norm) and
+                    not _is_boat_candidate(nxt2_norm) and
+                    not _is_boat_candidate(nxt3_norm)
+                ):
+                    boat = _parse_boat_line(f"{l} {nxt1} {nxt2} {nxt3}")
+                    if boat:
+                        i += 3
+
             if not boat:
                 race_no = cur.get("rno")
                 print(f"BOAT_PARSE_FAIL race={race_no}")
@@ -745,6 +769,8 @@ def parse_races(block: List[str]) -> List[Dict[str, Any]]:
                     print("BOAT_PARSE_FAIL_NEXT1:", repr(block[i + 1]))
                 if i + 2 < len(block):
                     print("BOAT_PARSE_FAIL_NEXT2:", repr(block[i + 2]))
+                if i + 3 < len(block):
+                    print("BOAT_PARSE_FAIL_NEXT3:", repr(block[i + 3]))
 
             if boat:
                 cur["boats"].append(boat)
@@ -812,7 +838,7 @@ def main():
             boats = r.get("boats") or []
             missing = sum(1 for bb in boats if bb.get("_missing"))
             if missing:
-                warnings.append(f"{venue} {r.get('rno')}R missing={missing}")
+                warnings.append(f"{venue} {r.get('rno')}R missing={missing} race_name={r.get('name')}")
 
         venue_payload: Dict[str, Any] = {
             "venue": venue,
@@ -864,10 +890,10 @@ def main():
         print("first_venue_races:", len(venues_out[0]["races"]))
     if warnings:
         print("WARNINGS:")
-        for w in warnings[:80]:
+        for w in warnings[:120]:
             print(" -", w)
-        if len(warnings) > 80:
-            print(" - ...", len(warnings) - 80, "more")
+        if len(warnings) > 120:
+            print(" - ...", len(warnings) - 120, "more")
 
 if __name__ == "__main__":
     main()
