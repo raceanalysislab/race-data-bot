@@ -2,8 +2,12 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RACES_DIR = ROOT / "data" / "site" / "races"
-DST = ROOT / "data" / "player_index_today.json"
+RACES_BASE_DIR = ROOT / "data" / "site" / "races"
+RACES_DIR_TODAY = RACES_BASE_DIR / "today"
+RACES_DIR_TOMORROW = RACES_BASE_DIR / "tomorrow"
+
+DST_TODAY = ROOT / "data" / "player_index_today.json"
+DST_TOMORROW = ROOT / "data" / "player_index_tomorrow.json"
 
 VENUE_NAME_TO_JCD = {
     "桐生": "01",
@@ -80,10 +84,6 @@ def is_valid_venue_name(value):
 
 def extract_path_hints(path: Path):
     stem = path.stem.strip()
-
-    # 例:
-    # 10_7R.json -> jcd=10
-    # 三国_7R.json -> venue=三国
     parts = stem.split("_")
     head = parts[0].strip() if parts else ""
 
@@ -224,18 +224,14 @@ def extract_race_title(data: dict):
     ).strip()
 
 
-def main():
+def build_player_index(races_dir: Path):
     player_index = []
     seen = set()
 
-    if not RACES_DIR.exists():
-        with DST.open("w", encoding="utf-8") as f:
-            json.dump([], f, ensure_ascii=False, indent=2)
-        print(f"written: {DST}")
-        print("players: 0")
-        return
+    if not races_dir.exists():
+      return []
 
-    for path in sorted(RACES_DIR.glob("*.json")):
+    for path in sorted(races_dir.glob("*.json")):
         try:
             data = load_json(path)
         except Exception:
@@ -286,12 +282,25 @@ def main():
     player_index.sort(
         key=lambda x: (x["name"], x["venue"], x["race"], x["lane"] or 99)
     )
+    return player_index
 
-    with DST.open("w", encoding="utf-8") as f:
-        json.dump(player_index, f, ensure_ascii=False, indent=2)
 
-    print(f"written: {DST}")
-    print(f"players: {len(player_index)}")
+def write_index(path: Path, rows):
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(rows, f, ensure_ascii=False, indent=2)
+
+
+def main():
+    today_rows = build_player_index(RACES_DIR_TODAY)
+    tomorrow_rows = build_player_index(RACES_DIR_TOMORROW)
+
+    write_index(DST_TODAY, today_rows)
+    write_index(DST_TOMORROW, tomorrow_rows)
+
+    print(f"written: {DST_TODAY}")
+    print(f"players_today: {len(today_rows)}")
+    print(f"written: {DST_TOMORROW}")
+    print(f"players_tomorrow: {len(tomorrow_rows)}")
 
 
 if __name__ == "__main__":
