@@ -7,15 +7,17 @@
 # - 開催グレード推定（SG / G1 / G2 / G3 / 一般）
 # - 「開設○周年記念」先頭一致のみG1扱い
 # - 「福岡県知事杯争奪 福岡都市圏開設36周年記念競走」のような一般開催を誤ってG1にしない
-# - 舟番行パース強化
-#   - 1行崩れに強い
-#   - 次行/次々行/3行先連結の再試行を強化
-#   - 17100.00156 -> 17 100.00 156 の特殊連結に対応
-#   - 級(A1/A2/B1/B2)位置を基準に前後分割する保険追加
-#   - 数値8個を「前から読む」保険追加
+# - 舟番行パースを再構成
+#   - 級(A1/A2/B1/B2)までを前半として抽出
+#   - 級の後ろは
+#       全国勝率 / 全国2率 / 当地勝率 / 当地2率 /
+#       モーターNO / モーター2率 / ボートNO / ボート2率 / note
+#     の順で読む
+#   - 50.00122 -> 50.00 / 122
+#   - 17100.00156 -> 17 / 100.00 / 156
+#   に対応
+# - 次行/次々行/3行先連結の再試行
 # - パース失敗時のDEBUGログ追加
-#   - prefix / tail / head のどこで落ちたか出す
-#   - 行本体と次行も出す
 
 import json
 import os
@@ -64,23 +66,7 @@ RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
-
-FLOAT = r"[0-9]+\.[0-9]{1,2}"
-FLOATP = rf"{FLOAT}%?"
-
-RE_TAIL = re.compile(
-    rf"({FLOATP})\s+({FLOATP})\s+"
-    rf"({FLOATP})\s+({FLOATP})\s+"
-    rf"(\d{{1,3}})\s+({FLOATP})\s*"
-    rf"(\d{{1,3}})\s+({FLOATP})\s*(.*)$"
-)
-
 RE_GRADE = re.compile(r"(A1|A2|B1|B2)\s*$")
-RE_AGE_BRANCH_WEIGHT = re.compile(rf"(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*$")
-
-RE_FRONT_CORE = re.compile(
-    rf"^\s*([1-6])\s+(\d{{4}})\s*(.+?)\s*(\d{{1,2}})\s*({BRANCH_PATTERN})\s*(\d{{2}})\s*(A1|A2|B1|B2)\s+(.*)$"
-)
 
 SG_WORDS = [
     "ボートレースクラシック",
@@ -354,66 +340,8 @@ def _to_int(x: str) -> Optional[int]:
     except Exception:
         return None
 
-def _deglue_numbers(s: str) -> str:
-    """
-    数値連結を分割する。
-    主に以下を想定:
-    - 30.00156      -> 30.00 156
-    - 17100.00156   -> 17 100.00 156
-    """
-    s = norm(s)
-
-    # motor_no + motor_2 + boat_no が全部連結しているケース
-    for _ in range(6):
-        s2 = re.sub(
-            r"(?<!\d)(\d{1,3})(\d{1,3}\.\d{2})(\d{2,3})(?=\s|$)",
-            r"\1 \2 \3",
-            s
-        )
-        if s2 == s:
-            break
-        s = s2
-
-    # float + int 連結
-    for _ in range(8):
-        s2 = re.sub(r"(\d+\.\d{1,2})(\d{2,3})(?=\s|$)", r"\1 \2", s)
-        if s2 == s:
-            break
-        s = s2
-
-    return s
-
 def _normalize_boat_line(s: str) -> str:
-    s = _deglue_numbers(s)
-    s = re.sub(r"\s+", " ", s).strip()
-    return s
-
-def _extract_numeric_tokens(s: str) -> List[str]:
-    return re.findall(r"\d+\.\d{1,2}|\d{1,3}", s)
-
-def _parse_head_part(head: str) -> Optional[Tuple[str, int, str, int, str]]:
-    mg = RE_GRADE.search(head)
-    if not mg:
-        return None
-    grade = mg.group(1)
-    head2 = head[:mg.start()].strip()
-
-    mm = RE_AGE_BRANCH_WEIGHT.search(head2)
-    if not mm:
-        return None
-
-    age = _to_int(mm.group(1))
-    branch = mm.group(2)
-    weight = _to_int(mm.group(3))
-    if age is None or weight is None:
-        return None
-
-    name_raw = head2[:mm.start()].strip()
-    name = re.sub(r"\s+", "", name_raw or "")
-    if not name:
-        return None
-
-    return name, int(age), branch, int(weight), grade
+    return norm(s)
 
 def _build_boat_dict(
     *,
@@ -453,102 +381,88 @@ def _build_boat_dict(
         "note": note,
     }
 
-def _parse_tail_by_regex(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
-    mt = RE_TAIL.search(rest_all)
-    if not mt:
-        return None
+def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str]]:
+    """
+    級の後ろ:
+      全国勝率 / 全国2率 / 当地勝率 / 当地2率 /
+      モーターNO / モーター2率 / ボートNO / ボート2率 / note
+    を読む。
 
-    nat_win = _to_float(mt.group(1))
-    nat_2 = _to_float(mt.group(2))
-    loc_win = _to_float(mt.group(3))
-    loc_2 = _to_float(mt.group(4))
-    motor_no = _to_int(mt.group(5))
-    motor_2 = _to_float(mt.group(6))
-    boat_no = _to_int(mt.group(7))
-    boat_2 = _to_float(mt.group(8))
-    note = (mt.group(9) or "").strip()
+    例:
+      4.26 19.74 3.59 13.79 17100.00156 27.27              8
+      5.88 44.71 4.76 24.14 25 50.00122 46.15             10
+      6.76 48.81 6.53 50.65 27 47.06128 36.36             12
+    """
+    s = _normalize_boat_line(tail)
 
-    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
-        return None
-
-    head = rest_all[:mt.start()].strip()
-    return (
-        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
-        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+    m4 = re.match(
+        r"^\s*"
+        r"([0-9]+\.[0-9]{1,2})\s+"
+        r"([0-9]+\.[0-9]{1,2})\s+"
+        r"([0-9]+\.[0-9]{1,2})\s+"
+        r"([0-9]+\.[0-9]{1,2})\s+"
+        r"(.*)$",
+        s,
     )
-
-def _parse_tail_by_grade_order(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
-    """
-    級(A1/A2/B1/B2)の位置で前後を切る。
-    後半は前から8個の数値を読む。
-    """
-    s = _normalize_boat_line(rest_all)
-
-    mg = RE_GRADE.search(s)
-    if not mg:
+    if not m4:
         return None
 
-    head = s[:mg.end()].strip()
-    tail = s[mg.end():].strip()
+    nat_win = _to_float(m4.group(1))
+    nat_2 = _to_float(m4.group(2))
+    loc_win = _to_float(m4.group(3))
+    loc_2 = _to_float(m4.group(4))
+    rest = m4.group(5).strip()
 
-    nums = _extract_numeric_tokens(tail)
-    if len(nums) < 8:
+    if None in (nat_win, nat_2, loc_win, loc_2):
         return None
 
-    nat_win = _to_float(nums[0])
-    nat_2 = _to_float(nums[1])
-    loc_win = _to_float(nums[2])
-    loc_2 = _to_float(nums[3])
-    motor_no = _to_int(nums[4])
-    motor_2 = _to_float(nums[5])
-    boat_no = _to_int(nums[6])
-    boat_2 = _to_float(nums[7])
-
-    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
-        return None
-
-    note = ""
-    return (
-        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
-        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+    # 末尾ブロック:
+    # motor_no + motor_2 + boat_no + boat_2 + note
+    #
+    # motor_no と motor_2 がくっつく / motor_2 と boat_no がくっつくの両方に対応
+    #
+    # 例:
+    #   17100.00156 27.27 8
+    #   25 50.00122 46.15 10
+    #   27 47.06128 36.36 12
+    #   41 26.79 27 40.40 3 32
+    m_tail = re.match(
+        r"^\s*"
+        r"(\d{1,3})\s*"            # motor_no
+        r"(\d{1,3}\.\d{2})\s*"     # motor_2
+        r"(\d{2,3})\s+"            # boat_no
+        r"([0-9]+\.[0-9]{1,2})"    # boat_2
+        r"(.*)$",
+        rest,
     )
-
-def _parse_tail_by_split(rest_all: str) -> Optional[Tuple[float, float, float, float, int, float, int, float, str, str]]:
-    """
-    RE_TAILで落ちた行用の保険。
-    後ろから数値8個を拾う。
-    """
-    s = _normalize_boat_line(rest_all)
-    matches = list(re.finditer(r"\d+\.\d{1,2}|\d{1,3}", s))
-    if len(matches) < 8:
+    if not m_tail:
         return None
 
-    last8 = matches[-8:]
-    vals = [m.group(0) for m in last8]
+    motor_no = _to_int(m_tail.group(1))
+    motor_2 = _to_float(m_tail.group(2))
+    boat_no = _to_int(m_tail.group(3))
+    boat_2 = _to_float(m_tail.group(4))
+    note = norm(m_tail.group(5) or "")
 
-    nat_win = _to_float(vals[0])
-    nat_2 = _to_float(vals[1])
-    loc_win = _to_float(vals[2])
-    loc_2 = _to_float(vals[3])
-    motor_no = _to_int(vals[4])
-    motor_2 = _to_float(vals[5])
-    boat_no = _to_int(vals[6])
-    boat_2 = _to_float(vals[7])
-
-    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
+    if None in (motor_no, motor_2, boat_no, boat_2):
         return None
-
-    head = s[:last8[0].start()].strip()
-    note = s[last8[-1].end():].strip()
 
     return (
-        float(nat_win), float(nat_2), float(loc_win), float(loc_2),
-        int(motor_no), float(motor_2), int(boat_no), float(boat_2), note, head
+        float(nat_win),
+        float(nat_2),
+        float(loc_win),
+        float(loc_2),
+        int(motor_no),
+        float(motor_2),
+        int(boat_no),
+        float(boat_2),
+        note,
     )
 
 def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     original_line = line
     line = _normalize_boat_line(line)
+
     mp = RE_BOAT_PREFIX.match(line)
     if not mp:
         return None
@@ -556,26 +470,45 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     waku = _to_int(mp.group(1))
     regno = _to_int(mp.group(2))
     rest_all = (mp.group(3) or "").strip()
+
     if not waku or not regno or not rest_all:
         print("PARSE_FAIL_STAGE=prefix", repr(original_line))
         return None
 
-    parsed_tail = _parse_tail_by_regex(rest_all)
-    if not parsed_tail:
-        parsed_tail = _parse_tail_by_grade_order(rest_all)
-    if not parsed_tail:
-        parsed_tail = _parse_tail_by_split(rest_all)
-    if not parsed_tail:
-        print("PARSE_FAIL_STAGE=tail", repr(original_line), "REST=", repr(rest_all))
-        return None
+    # 級の位置で前半/後半を分割
+    mg = re.search(r"(A1|A2|B1|B2)\s+", rest_all)
+    if not mg:
+        # 行末ぴったりで終わってるケースも拾う
+        mg = re.search(r"(A1|A2|B1|B2)", rest_all)
+        if not mg:
+            print("PARSE_FAIL_STAGE=grade", repr(original_line), "REST=", repr(rest_all))
+            return None
 
-    nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note, head = parsed_tail
-    parsed_head = _parse_head_part(head)
-    if not parsed_head:
+    grade = mg.group(1)
+    head = rest_all[:mg.start()].strip()
+    tail = rest_all[mg.end():].strip()
+
+    # head = 名前 + 年齢 + 支部 + 体重
+    mh = re.search(rf"(.+?)(\d{{1,2}})({BRANCH_PATTERN})(\d{{2}})$", head)
+    if not mh:
         print("PARSE_FAIL_STAGE=head", repr(original_line), "HEAD=", repr(head))
         return None
 
-    name, age, branch, weight, grade = parsed_head
+    name = re.sub(r"\s+", "", mh.group(1) or "")
+    age = _to_int(mh.group(2))
+    branch = mh.group(3)
+    weight = _to_int(mh.group(4))
+
+    if not name or age is None or weight is None:
+        print("PARSE_FAIL_STAGE=head_values", repr(original_line), "HEAD=", repr(head))
+        return None
+
+    parsed_tail = _parse_stats_tail(tail)
+    if not parsed_tail:
+        print("PARSE_FAIL_STAGE=tail", repr(original_line), "TAIL=", repr(tail))
+        return None
+
+    nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note = parsed_tail
 
     return _build_boat_dict(
         waku=int(waku),
@@ -596,64 +529,8 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
         note=note,
     )
 
-def _parse_boat_line_fallback(line: str) -> Optional[Dict[str, Any]]:
-    """
-    front側から強めに取る保険。
-    mainで落ちた行だけ使う。
-    """
-    line = _normalize_boat_line(line)
-    fm = RE_FRONT_CORE.match(line)
-    if not fm:
-        return None
-
-    waku = _to_int(fm.group(1))
-    regno = _to_int(fm.group(2))
-    name = re.sub(r"\s+", "", fm.group(3) or "")
-    age = _to_int(fm.group(4))
-    branch = fm.group(5)
-    weight = _to_int(fm.group(6))
-    grade = fm.group(7)
-    tail = (fm.group(8) or "").strip()
-    if None in (waku, regno, age, weight) or not name:
-        return None
-
-    nums = _extract_numeric_tokens(tail)
-    if len(nums) < 8:
-        return None
-
-    nat_win = _to_float(nums[0])
-    nat_2 = _to_float(nums[1])
-    loc_win = _to_float(nums[2])
-    loc_2 = _to_float(nums[3])
-    motor_no = _to_int(nums[4])
-    motor_2 = _to_float(nums[5])
-    boat_no = _to_int(nums[6])
-    boat_2 = _to_float(nums[7])
-
-    if None in (nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2):
-        return None
-
-    return _build_boat_dict(
-        waku=int(waku),
-        regno=int(regno),
-        name=name,
-        age=int(age),
-        branch=branch,
-        weight=int(weight),
-        grade=grade,
-        nat_win=float(nat_win),
-        nat_2=float(nat_2),
-        loc_win=float(loc_win),
-        loc_2=float(loc_2),
-        motor_no=int(motor_no),
-        motor_2=float(motor_2),
-        boat_no=int(boat_no),
-        boat_2=float(boat_2),
-        note="",
-    )
-
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
-    return _parse_boat_line_main(line) or _parse_boat_line_fallback(line)
+    return _parse_boat_line_main(line)
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     m = {int(b.get("waku")): b for b in boats if b.get("waku") is not None}
