@@ -211,24 +211,31 @@ def _detect_grade_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> s
         if v:
             texts.append(str(v))
 
-    for r in races[:3]:
+    for r in races[:12]:
         for key in ["name", "title"]:
             v = r.get(key)
             if v:
                 texts.append(str(v))
 
     joined = " / ".join(texts)
-    upper = joined.upper()
 
-    if "PG1" in upper:
-        return "G1"
-    if re.search(r"\bSG\b", upper):
+    normalized = (
+        joined.replace("Ｇ", "G")
+              .replace("Ⅰ", "I")
+              .replace("Ⅱ", "II")
+              .replace("Ⅲ", "III")
+              .upper()
+    )
+
+    if "SG" in normalized:
         return "SG"
-    if re.search(r"\bG1\b", upper):
+    if "PG1" in normalized or "PGI" in normalized:
         return "G1"
-    if re.search(r"\bG2\b", upper):
+    if "G1" in normalized or "GI" in normalized:
+        return "G1"
+    if "G2" in normalized or "GII" in normalized:
         return "G2"
-    if re.search(r"\bG3\b", upper):
+    if "G3" in normalized or "GIII" in normalized:
         return "G3"
 
     return "一般"
@@ -464,7 +471,6 @@ def main():
             path = os.path.join(slot_dir, f"{_safe_name(venue_name)}.json")
             _write_json(path, payload)
 
-            # 互換用は today 優先
             if venue_name not in compat_venue_payloads or slot == "today":
                 compat_venue_payloads[venue_name] = payload
 
