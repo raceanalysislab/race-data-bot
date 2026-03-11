@@ -1,0 +1,41 @@
+name: Sync site data to race-analysis
+
+on:
+  workflow_run:
+    workflows: ["fetch"]
+    types:
+      - completed
+
+jobs:
+  sync:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bot repo
+        uses: actions/checkout@v4
+
+      - name: Clone race-analysis repo
+        run: |
+          git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/raceanalysislab/race-analysis.git site_repo
+
+      - name: Prepare destination folders
+        run: |
+          mkdir -p site_repo/data
+          rm -rf site_repo/data/site
+          mkdir -p site_repo/data/site
+
+      - name: Copy generated files
+        run: |
+          cp -R data/site/. site_repo/data/site/
+          cp data/player_index_today.json site_repo/data/player_index_today.json
+          cp data/player_index_tomorrow.json site_repo/data/player_index_tomorrow.json
+
+      - name: Commit and push
+        run: |
+          cd site_repo
+          git config user.name "race-data-bot"
+          git config user.email "bot@github.local"
+          git add data
+          git commit -m "auto: sync generated site data" || echo "No changes to commit"
+          git push origin HEAD
