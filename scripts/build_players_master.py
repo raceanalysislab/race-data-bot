@@ -6,18 +6,19 @@ OUT = pathlib.Path("data/master/players_master.json")
 
 players = {}
 
+def clean_name(s: str) -> str:
+    return s.replace("　", "").strip()
+
 with open(SRC, "r", encoding="cp932", errors="ignore") as f:
     for line in f:
-
-        if len(line) < 30:
+        if len(line) < 40:
             continue
 
         reg = line[0:4].strip()
-
         if not reg.isdigit():
             continue
 
-        name = line[4:16].strip()
+        name = clean_name(line[4:12])
 
         players[reg] = {
             "reg": reg,
