@@ -17,9 +17,9 @@ jobs:
 
       - name: Download racer master
         run: |
-          curl -L https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH -o LIST.LZH
+          curl -L "https://www.boatrace.jp/owpc/pc/extra/data/racer/fan2510.lzh" -o fan2510.lzh
 
       - name: Extract LZH
         run: |
-          lhasa -x LIST.LZH
+          lhasa -x fan2510.lzh
           ls -la
