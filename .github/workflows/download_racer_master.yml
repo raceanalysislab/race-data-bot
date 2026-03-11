@@ -4,14 +4,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  download:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download LIST.LZH
-        run: |
-          curl -L "https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH" -o LIST.LZH
+      - uses: actions/checkout@v4
 
-      - name: Show downloaded file
-        run: |
-          ls -lh LIST.LZH
+      - name: Install lhasa
+        run: sudo apt-get install -y lhasa
+
+      - name: Download racer master
+        run: curl -L https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH -o LIST.LZH
+
+      - name: Extract
+        run: lhasa x LIST.LZH
+
+      - name: Show files
+        run: ls
