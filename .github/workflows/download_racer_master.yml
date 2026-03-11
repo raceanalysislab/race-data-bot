@@ -1,7 +1,7 @@
 name: Download Racer Master
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   download:
@@ -11,3 +11,7 @@ jobs:
       - name: Download LIST.LZH
         run: |
           curl -L "https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH" -o LIST.LZH
+
+      - name: Show downloaded file
+        run: |
+          ls -lh LIST.LZH
