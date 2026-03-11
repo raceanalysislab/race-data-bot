@@ -11,13 +11,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install lhasa
-        run: sudo apt-get install -y lhasa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lhasa
 
       - name: Download racer master
-        run: curl -L https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH -o LIST.LZH
+        run: |
+          curl -L https://www.boatrace.jp/owpc/pc/extra/data/racer/LIST.LZH -o LIST.LZH
 
-      - name: Extract
-        run: lhasa x LIST.LZH
-
-      - name: Show files
-        run: ls
+      - name: Extract LZH
+        run: |
+          lhasa x LIST.LZH
+          ls -l
