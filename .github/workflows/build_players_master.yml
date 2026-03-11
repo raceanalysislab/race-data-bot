@@ -1,0 +1,35 @@
+name: Build Players Master
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Extract fan2510.lzh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lhasa
+          cd data/master/raw
+          lhasa -x fan2510.lzh
+
+      - name: Build players master
+        run: |
+          python scripts/build_players_master.py
+
+      - name: Commit players master
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/master/players_master.json data/master/raw/fan2510.txt
+          git commit -m "Build players master" || echo "No changes"
+          git push
