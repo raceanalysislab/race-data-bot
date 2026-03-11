@@ -1,5 +1,6 @@
 import json
 import pathlib
+import re
 
 SRC = pathlib.Path("data/master/raw/fan2510.txt")
 OUT = pathlib.Path("data/master/players_master.json")
@@ -9,26 +10,18 @@ players = {}
 with open(SRC, "r", encoding="cp932", errors="ignore") as f:
     for line in f:
 
-        if len(line) < 100:
+        line = line.strip()
+
+        m = re.match(r"^(\d{4})\s+([^\s]+)", line)
+        if not m:
             continue
 
-        reg = line[0:4].strip()
-
-        if not reg.isdigit():
-            continue
-
-        name = line[4:20].strip()
-
-        nat_win = line[20:26].strip()
-        nat_2 = line[26:32].strip()
-        nat_3 = line[32:38].strip()
+        reg = m.group(1)
+        name = m.group(2)
 
         players[reg] = {
             "reg": reg,
-            "name": name,
-            "nat_win": nat_win,
-            "nat_2": nat_2,
-            "nat_3": nat_3
+            "name": name
         }
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
