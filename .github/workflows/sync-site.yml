@@ -2,7 +2,7 @@ name: Sync site data to race-analysis
 
 on:
   workflow_run:
-    workflows: ["fetch"]
+    workflows: ["Fetch Race Data"]
     types:
       - completed
 
