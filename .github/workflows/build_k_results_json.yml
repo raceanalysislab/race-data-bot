@@ -1,10 +1,11 @@
-name: Build K Results JSON
+name: Build K Results
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
+    needs: Update k results
     runs-on: ubuntu-latest
 
     steps:
