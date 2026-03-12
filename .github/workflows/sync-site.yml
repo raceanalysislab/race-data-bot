@@ -23,6 +23,13 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Check required source files
+        run: |
+          ls -la data || true
+          ls -la data/site || true
+          ls -la data/site/races || true
+          ls -la data/master || true
+
       - name: Build player index
         run: |
           python scripts/build_player_index.py
@@ -40,9 +47,11 @@ jobs:
       - name: Copy generated files
         run: |
           cp -R data/site/. site_repo/data/site/
+
           if [ -f data/player_index_today.json ]; then
             cp data/player_index_today.json site_repo/data/player_index_today.json
           fi
+
           if [ -f data/player_index_tomorrow.json ]; then
             cp data/player_index_tomorrow.json site_repo/data/player_index_tomorrow.json
           fi
