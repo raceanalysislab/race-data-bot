@@ -167,21 +167,27 @@ def _detect_first_race_time(races: List[Dict[str, Any]]) -> Optional[str]:
 
 def _detect_card_band(first_time: Optional[str]) -> Tuple[str, str]:
     if not first_time:
-        return "day", "day"
+        return "normal", "normal"
 
     hm = _parse_hhmm(first_time)
     if not hm:
-        return "day", "day"
+        return "normal", "normal"
 
     mins = _minutes(*hm)
 
-    if mins >= _minutes(17, 0):
-        return "evening", "night"
+    if _minutes(8, 0) <= mins <= _minutes(9, 59):
+        return "morning", "morning"
 
-    if mins >= _minutes(15, 0):
+    if _minutes(10, 0) <= mins <= _minutes(12, 59):
+        return "day", "day"
+
+    if _minutes(15, 0) <= mins <= _minutes(16, 59):
         return "evening", "evening"
 
-    return "day", "day"
+    if _minutes(17, 0) <= mins <= _minutes(18, 59):
+        return "night", "night"
+
+    return "normal", "normal"
 
 
 def _detect_next_race(races: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[str]]:
