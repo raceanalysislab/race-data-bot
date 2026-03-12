@@ -721,7 +721,7 @@ def cleanup_old_outputs(current_out_path: str) -> None:
         return
 
     for name in os.listdir("data"):
-        if not re.match(r"^mbrace_races_(today|tomorrow|\d{4}-\d{2}-\d{2})\.json$", name):
+        if not re.match(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$", name):
             continue
 
         path = os.path.join("data", name)
