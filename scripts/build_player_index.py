@@ -112,20 +112,14 @@ def extract_boats(race_root: dict):
         boats = pick(race_obj, "boats", "entries", default=[])
         if isinstance(boats, list):
             return boats
+
     boats = pick(race_root, "boats", "entries", default=[])
     return boats if isinstance(boats, list) else []
 
 
 def extract_race_no(data: dict, path: Path):
     race_no = normalize_race_no(
-        pick(
-            data,
-            "race_no",
-            "race",
-            "race_number",
-            "number",
-            default=""
-        )
+        pick(data, "race_no", "race", "race_number", "number", default="")
     )
     if race_no:
         return race_no
@@ -133,14 +127,7 @@ def extract_race_no(data: dict, path: Path):
     race_obj = pick(data, "race", default={})
     if isinstance(race_obj, dict):
         race_no = normalize_race_no(
-            pick(
-                race_obj,
-                "race_no",
-                "race",
-                "race_number",
-                "number",
-                default=""
-            )
+            pick(race_obj, "race_no", "race", "race_number", "number", default="")
         )
         if race_no:
             return race_no
@@ -186,6 +173,7 @@ def extract_jcd(data: dict, path: Path, venue_name: str):
         return hinted_jcd
 
     race_obj = pick(data, "race", default={})
+
     jcd = normalize_jcd(pick(data, "jcd", default=""), venue_name)
     if jcd:
         return jcd
@@ -201,15 +189,11 @@ def extract_jcd(data: dict, path: Path, venue_name: str):
 def extract_day_label(data: dict):
     race_obj = pick(data, "race", default={})
     if isinstance(race_obj, dict):
-        day_label = str(
-            pick(race_obj, "day_label", "day", default="")
-        ).strip()
+        day_label = str(pick(race_obj, "day_label", "day", default="")).strip()
         if day_label:
             return day_label
 
-    return str(
-        pick(data, "day_label", "day", default="")
-    ).strip()
+    return str(pick(data, "day_label", "day", default="")).strip()
 
 
 def extract_race_title(data: dict):
@@ -221,9 +205,7 @@ def extract_race_title(data: dict):
         if race_title:
             return race_title
 
-    return str(
-        pick(data, "race_title", "title", "race_name", default="")
-    ).strip()
+    return str(pick(data, "race_title", "title", "race_name", default="")).strip()
 
 
 def load_merged_players():
@@ -256,7 +238,6 @@ def build_player_index(races_dir: Path, merged_players: dict):
         jcd = extract_jcd(data, path, venue_name)
         race_title = extract_race_title(data)
         day_label = extract_day_label(data)
-
         boats = extract_boats(data)
 
         for boat in boats:
