@@ -1,7 +1,6 @@
 # scripts/build_race_json.py
-# data/mbrace_races_today.json / data/mbrace_races_tomorrow.json
-# → data/site/races/today/{jcd}_{rno}R.json
-# → data/site/races/tomorrow/{jcd}_{rno}R.json
+# data/mbrace_races_today.json / data/mbrace_races_tomorrow.json / data/mbrace_races_YYYY-MM-DD.json
+# → data/site/races/YYYY-MM-DD/{jcd}_{rno}R.json
 # 互換：会場名ファイルも同時に出す
 # 追加：
 #   data/master/merged_players.json を読み込み、
@@ -12,11 +11,7 @@ import os
 import re
 from typing import Any, Dict, List, Tuple
 
-SRC_SPECS: List[Tuple[str, str]] = [
-    ("data/mbrace_races_today.json", "today"),
-    ("data/mbrace_races_tomorrow.json", "tomorrow"),
-]
-
+SRC_DIR = "data"
 OUT_BASE = "data/site/races"
 MERGED_PLAYERS_PATH = "data/master/merged_players.json"
 
@@ -28,6 +23,8 @@ VENUE_TO_JCD = {
     "宮島": "17", "徳山": "18", "下関": "19", "若松": "20",
     "芦屋": "21", "福岡": "22", "唐津": "23", "大村": "24",
 }
+
+RE_SRC = re.compile(r"^mbrace_races_(today|tomorrow|\d{4}-\d{2}-\d{2})\.json$")
 
 
 def safe_name(s: str) -> str:
@@ -45,19 +42,6 @@ def _write_json(path: str, obj: Dict[str, Any]) -> None:
 def _load_json(path: str) -> Dict[str, Any]:
     with open(path, encoding="utf-8") as f:
         return json.load(f)
-
-
-def _clear_json_files(dir_path: str) -> None:
-    if not os.path.isdir(dir_path):
-        os.makedirs(dir_path, exist_ok=True)
-        return
-
-    for name in os.listdir(dir_path):
-        if name.lower().endswith(".json"):
-            try:
-                os.remove(os.path.join(dir_path, name))
-            except Exception:
-                pass
 
 
 def _load_merged_players() -> Dict[str, Any]:
@@ -112,15 +96,52 @@ def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any]) -> D
     return out
 
 
-def build_one(src_path: str, slot: str, merged_players: Dict[str, Any]) -> Tuple[int, int]:
-    out_dir = os.path.join(OUT_BASE, slot)
-    _clear_json_files(out_dir)
+def _collect_sources() -> List[str]:
+    if not os.path.isdir(SRC_DIR):
+        return []
 
+    files: List[str] = []
+    for name in os.listdir(SRC_DIR):
+        if RE_SRC.match(name):
+            files.append(os.path.join(SRC_DIR, name))
+
+    files.sort()
+    return files
+
+
+def _clear_out_base() -> None:
+    if not os.path.isdir(OUT_BASE):
+        os.makedirs(OUT_BASE, exist_ok=True)
+        return
+
+    for name in os.listdir(OUT_BASE):
+        path = os.path.join(OUT_BASE, name)
+        if os.path.isdir(path):
+            try:
+                for root, dirs, files in os.walk(path, topdown=False):
+                    for fn in files:
+                        os.remove(os.path.join(root, fn))
+                    for dn in dirs:
+                        os.rmdir(os.path.join(root, dn))
+                os.rmdir(path)
+            except Exception:
+                pass
+
+
+def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int]:
     if not os.path.exists(src_path):
         print(f"skip: {src_path} not found")
         return 0, 0
 
     data = _load_json(src_path)
+    top_date = str(data.get("date") or "").strip()
+
+    if not top_date:
+        print(f"skip: no top date in {src_path}")
+        return 0, 0
+
+    out_dir = os.path.join(OUT_BASE, top_date)
+    os.makedirs(out_dir, exist_ok=True)
 
     venues: List[Dict[str, Any]] = data.get("venues") or []
     created = 0
@@ -128,7 +149,7 @@ def build_one(src_path: str, slot: str, merged_players: Dict[str, Any]) -> Tuple
 
     for v in venues:
         venue_name = str(v.get("venue") or "").strip()
-        date = v.get("date") or data.get("date") or ""
+        date = str(v.get("date") or top_date).strip()
         day = v.get("day")
         total_days = v.get("total_days")
         day_label = v.get("day_label")
@@ -136,9 +157,7 @@ def build_one(src_path: str, slot: str, merged_players: Dict[str, Any]) -> Tuple
         grade_label = v.get("grade_label") or ""
         races = v.get("races") or []
 
-        jcd = VENUE_TO_JCD.get(venue_name, "")
-        if not jcd:
-            jcd = "00"
+        jcd = VENUE_TO_JCD.get(venue_name, "") or "00"
 
         for race in races:
             rno = race.get("rno")
@@ -151,10 +170,9 @@ def build_one(src_path: str, slot: str, merged_players: Dict[str, Any]) -> Tuple
             merged_race = _merge_race_stats(race, merged_players)
 
             out: Dict[str, Any] = {
-                "slot": slot,
+                "date": date,
                 "venue": venue_name,
                 "jcd": jcd if jcd != "00" else None,
-                "date": date,
                 "day": day,
                 "total_days": total_days,
                 "day_label": day_label,
@@ -173,8 +191,8 @@ def build_one(src_path: str, slot: str, merged_players: Dict[str, Any]) -> Tuple
             if legacy_path != stable_path:
                 _write_json(legacy_path, out)
 
-    print(f"slot: {slot}")
     print(f"source: {src_path}")
+    print(f"date: {top_date}")
     print(f"created: {created} race json files")
     if skipped:
         print(f"skipped: {skipped}")
@@ -186,12 +204,16 @@ def main():
     total_created = 0
     total_skipped = 0
 
-    os.makedirs(OUT_BASE, exist_ok=True)
     merged_players = _load_merged_players()
     print("merged_players:", len(merged_players))
 
-    for src_path, slot in SRC_SPECS:
-        created, skipped = build_one(src_path, slot, merged_players)
+    src_files = _collect_sources()
+    print("source_files:", len(src_files))
+
+    _clear_out_base()
+
+    for src_path in src_files:
+        created, skipped = build_one(src_path, merged_players)
         total_created += created
         total_skipped += skipped
 
