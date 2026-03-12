@@ -5,11 +5,13 @@ on:
     workflows: ["Build Race JSON"]
     types:
       - completed
+  schedule:
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
   sync:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -29,8 +31,12 @@ jobs:
       - name: Copy generated files
         run: |
           cp -R data/site/. site_repo/data/site/
-          cp data/player_index_today.json site_repo/data/player_index_today.json
-          cp data/player_index_tomorrow.json site_repo/data/player_index_tomorrow.json
+          if [ -f data/player_index_today.json ]; then
+            cp data/player_index_today.json site_repo/data/player_index_today.json
+          fi
+          if [ -f data/player_index_tomorrow.json ]; then
+            cp data/player_index_tomorrow.json site_repo/data/player_index_tomorrow.json
+          fi
 
       - name: Commit and push
         run: |
