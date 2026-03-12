@@ -14,6 +14,15 @@ RE_RESULT_ROW = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+"
 )
 
+VALID_KIMARITE = {
+    "逃げ",
+    "差し",
+    "まくり",
+    "まくり差し",
+    "抜き",
+    "恵まれ",
+}
+
 
 def norm_space(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "")).strip()
@@ -141,7 +150,23 @@ def normalize_course(value: int) -> int:
     return int(value)
 
 
-def parse_race_label(line: str, rno: int) -> str:
+def extract_kimarite_nearby(block: List[str], header_idx: int) -> str:
+    start = max(0, header_idx - 6)
+    end = min(len(block), header_idx + 20)
+
+    for i in range(start, end):
+        s = norm_space(block[i])
+        if s in VALID_KIMARITE:
+            return s
+
+        for k in VALID_KIMARITE:
+            if k in s:
+                return k
+
+    return ""
+
+
+def parse_race_title(line: str, rno: int) -> str:
     s = line.rstrip()
     m = re.match(rf"^\s*{rno}R\s+(.+?)\s+H1800m", s)
     if m:
@@ -160,7 +185,7 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
     current_race: Optional[Dict[str, Any]] = None
     in_result_table = False
 
-    for line in block:
+    for idx, line in enumerate(block):
         race_head = RE_RACE_HEADER.match(line)
         if race_head and "H1800m" in line:
             if current_race:
@@ -169,7 +194,8 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
             rno = int(race_head.group(1))
             current_race = {
                 "rno": rno,
-                "label": parse_race_label(line, rno),
+                "race_title": parse_race_title(line, rno),
+                "label": extract_kimarite_nearby(block, idx),
                 "results": []
             }
             in_result_table = False
