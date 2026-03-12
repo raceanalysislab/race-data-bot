@@ -3,8 +3,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RACES_BASE_DIR = ROOT / "data" / "site" / "races"
-RACES_DIR_TODAY = RACES_BASE_DIR / "today"
-RACES_DIR_TOMORROW = RACES_BASE_DIR / "tomorrow"
 
 DST_TODAY = ROOT / "data" / "player_index_today.json"
 DST_TOMORROW = ROOT / "data" / "player_index_tomorrow.json"
@@ -112,7 +110,6 @@ def extract_boats(race_root: dict):
         boats = pick(race_obj, "boats", "entries", default=[])
         if isinstance(boats, list):
             return boats
-
     boats = pick(race_root, "boats", "entries", default=[])
     return boats if isinstance(boats, list) else []
 
@@ -173,7 +170,6 @@ def extract_jcd(data: dict, path: Path, venue_name: str):
         return hinted_jcd
 
     race_obj = pick(data, "race", default={})
-
     jcd = normalize_jcd(pick(data, "jcd", default=""), venue_name)
     if jcd:
         return jcd
@@ -214,6 +210,16 @@ def load_merged_players():
     return load_json(MERGED_PLAYERS_PATH)
 
 
+def get_date_dirs():
+    if not RACES_BASE_DIR.exists():
+        return []
+
+    dirs = [p for p in RACES_BASE_DIR.iterdir() if p.is_dir()]
+    dirs = [p for p in dirs if p.name[:4].isdigit() and "-" in p.name]
+    dirs.sort(key=lambda p: p.name)
+    return dirs
+
+
 def build_player_index(races_dir: Path, merged_players: dict):
     player_index = []
     seen = set()
@@ -238,6 +244,7 @@ def build_player_index(races_dir: Path, merged_players: dict):
         jcd = extract_jcd(data, path, venue_name)
         race_title = extract_race_title(data)
         day_label = extract_day_label(data)
+
         boats = extract_boats(data)
 
         for boat in boats:
@@ -268,19 +275,15 @@ def build_player_index(races_dir: Path, merged_players: dict):
                 "lane": int(lane) if str(lane).isdigit() else "",
                 "race_title": race_title,
                 "day_label": day_label,
-
                 "avg_st": master.get("avg_st"),
                 "st_count": master.get("st_count"),
-
                 "starts": master.get("starts", 0),
                 "wins": master.get("wins", 0),
                 "top2": master.get("top2", 0),
                 "top3": master.get("top3", 0),
-
                 "win_rate": master.get("win_rate", 0),
                 "top2_rate": master.get("top2_rate", 0),
                 "top3_rate": master.get("top3_rate", 0),
-
                 "course_stats": master.get("course_stats", {})
             })
 
@@ -297,13 +300,22 @@ def write_index(path: Path, rows):
 
 def main():
     merged_players = load_merged_players()
+    date_dirs = get_date_dirs()
 
-    today_rows = build_player_index(RACES_DIR_TODAY, merged_players)
-    tomorrow_rows = build_player_index(RACES_DIR_TOMORROW, merged_players)
+    today_rows = []
+    tomorrow_rows = []
+
+    if len(date_dirs) >= 1:
+        today_rows = build_player_index(date_dirs[-1], merged_players)
+
+    if len(date_dirs) >= 2:
+        tomorrow_rows = build_player_index(date_dirs[-2], merged_players)
 
     write_index(DST_TODAY, today_rows)
     write_index(DST_TOMORROW, tomorrow_rows)
 
+    print(f"base_dir: {RACES_BASE_DIR}")
+    print(f"date_dirs: {[p.name for p in date_dirs]}")
     print(f"written: {DST_TODAY}")
     print(f"players_today: {len(today_rows)}")
     print(f"written: {DST_TOMORROW}")
