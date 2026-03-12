@@ -21,10 +21,10 @@ with open(SRC, "r", encoding="cp932", errors="ignore") as f:
         name = clean_name(line[4:12])
 
         # 全国3連率（fanデータ位置）
-        nat_3 = line[36:41].strip()
+        nat_3_raw = line[36:41].strip()
 
         try:
-            nat_3 = float(nat_3)
+            nat_3 = round(int(nat_3_raw) / 1000, 2)
         except:
             nat_3 = None
 
