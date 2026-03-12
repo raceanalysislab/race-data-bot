@@ -1,27 +1,3 @@
-# scripts/build_site_json.py
-# mbrace_races_today.json / mbrace_races_tomorrow.json を正として site 用 JSON を生成する
-#
-# 出力:
-# - data/site/venues_today.json
-# - data/site/venues_tomorrow.json
-# - data/site/venues/today/<会場>.json
-# - data/site/venues/tomorrow/<会場>.json
-#
-# 互換:
-# - data/site/venues.json には today を優先、なければ tomorrow を出す
-# - data/site/venues/<会場>.json には today を優先、なければ tomorrow を出す
-#
-# 追加:
-# - grade_label
-# - first_race_time
-# - card_band
-# - card_tone
-# - race_times
-#
-# 追加仕様:
-# - 本当の優勝戦のときだけ day_label を「最終日」に上書き
-# - 準優勝戦 / 紹介 / インタビュー / トライアル等は除外
-
 import json
 import os
 import re
@@ -32,25 +8,34 @@ from typing import Any, Dict, List, Optional, Tuple
 JST = timezone(timedelta(hours=9))
 
 
+def _extract_date_from_filename(path: str) -> Optional[str]:
+    name = os.path.basename(path)
+    m = re.match(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$", name)
+    if not m:
+        return None
+    return m.group(1)
+
+
 def _resolve_src_specs():
-    today = "data/mbrace_races_today.json"
-    tomorrow = "data/mbrace_races_tomorrow.json"
+    files = sorted(glob.glob("data/mbrace_races_*.json"))
+    dated_files = []
+
+    for path in files:
+        date_str = _extract_date_from_filename(path)
+        if date_str:
+            dated_files.append((date_str, path))
+
+    dated_files.sort(key=lambda x: x[0])
 
     specs = []
 
-    if os.path.exists(today):
-        specs.append((today, "today"))
-    if os.path.exists(tomorrow):
-        specs.append((tomorrow, "tomorrow"))
+    if len(dated_files) >= 1:
+        specs.append((dated_files[-1][1], "today"))
 
-    if specs:
-        return specs
+    if len(dated_files) >= 2:
+        specs.append((dated_files[-2][1], "tomorrow"))
 
-    files = sorted(glob.glob("data/mbrace_races_*.json"))
-    if files:
-        return [(files[-1], "today")]
-
-    return []
+    return specs
 
 
 SRC_SPECS = _resolve_src_specs()
