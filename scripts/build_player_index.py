@@ -9,6 +9,8 @@ RACES_DIR_TOMORROW = RACES_BASE_DIR / "tomorrow"
 DST_TODAY = ROOT / "data" / "player_index_today.json"
 DST_TOMORROW = ROOT / "data" / "player_index_tomorrow.json"
 
+MERGED_PLAYERS_PATH = ROOT / "data" / "master" / "merged_players.json"
+
 VENUE_NAME_TO_JCD = {
     "桐生": "01",
     "戸田": "02",
@@ -224,12 +226,18 @@ def extract_race_title(data: dict):
     ).strip()
 
 
-def build_player_index(races_dir: Path):
+def load_merged_players():
+    if not MERGED_PLAYERS_PATH.exists():
+        return {}
+    return load_json(MERGED_PLAYERS_PATH)
+
+
+def build_player_index(races_dir: Path, merged_players: dict):
     player_index = []
     seen = set()
 
     if not races_dir.exists():
-      return []
+        return []
 
     for path in sorted(races_dir.glob("*.json")):
         try:
@@ -268,6 +276,8 @@ def build_player_index(races_dir: Path):
                 continue
             seen.add(unique_key)
 
+            master = merged_players.get(reg_no, {})
+
             player_index.append({
                 "reg_no": reg_no,
                 "name": name,
@@ -277,6 +287,20 @@ def build_player_index(races_dir: Path):
                 "lane": int(lane) if str(lane).isdigit() else "",
                 "race_title": race_title,
                 "day_label": day_label,
+
+                "avg_st": master.get("avg_st"),
+                "st_count": master.get("st_count"),
+
+                "starts": master.get("starts", 0),
+                "wins": master.get("wins", 0),
+                "top2": master.get("top2", 0),
+                "top3": master.get("top3", 0),
+
+                "win_rate": master.get("win_rate", 0),
+                "top2_rate": master.get("top2_rate", 0),
+                "top3_rate": master.get("top3_rate", 0),
+
+                "course_stats": master.get("course_stats", {})
             })
 
     player_index.sort(
@@ -291,8 +315,10 @@ def write_index(path: Path, rows):
 
 
 def main():
-    today_rows = build_player_index(RACES_DIR_TODAY)
-    tomorrow_rows = build_player_index(RACES_DIR_TOMORROW)
+    merged_players = load_merged_players()
+
+    today_rows = build_player_index(RACES_DIR_TODAY, merged_players)
+    tomorrow_rows = build_player_index(RACES_DIR_TOMORROW, merged_players)
 
     write_index(DST_TODAY, today_rows)
     write_index(DST_TOMORROW, tomorrow_rows)
