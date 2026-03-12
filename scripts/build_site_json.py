@@ -211,6 +211,54 @@ def _detect_next_race(races: List[Dict[str, Any]]) -> Tuple[Optional[int], Optio
     return None, None
 
 
+def _is_true_final_race_text(text: str) -> bool:
+    s = _normalize_text(text)
+    if not s:
+        return False
+
+    exclude_keywords = [
+        "準優",
+        "紹介",
+        "インタビュー",
+        "トライアル",
+        "出場選手",
+        "表彰",
+        "戦線",
+    ]
+    if any(k in s for k in exclude_keywords):
+        return False
+
+    return "優勝戦" in s
+
+
+def _is_final_day_by_races(races: List[Dict[str, Any]]) -> bool:
+    for r in races:
+        name = r.get("name")
+        title = r.get("title")
+
+        if _is_true_final_race_text(name) or _is_true_final_race_text(title):
+            return True
+
+    return False
+
+
+def _resolve_day_label(venue: Dict[str, Any], races: List[Dict[str, Any]]) -> str:
+    if _is_final_day_by_races(races):
+        return "最終日"
+
+    day_label = str(venue.get("day_label") or "").strip()
+    if day_label:
+        return day_label
+
+    day = venue.get("day")
+    if isinstance(day, int):
+        if day == 1:
+            return "初日"
+        return f"{day}日目"
+
+    return ""
+
+
 def _build_venue_entry(venue: Dict[str, Any], slot: str) -> Dict[str, Any]:
     name = venue.get("venue")
     races = venue.get("races", [])
@@ -220,6 +268,7 @@ def _build_venue_entry(venue: Dict[str, Any], slot: str) -> Dict[str, Any]:
 
     card_band, card_tone = _detect_card_band(first_race_time)
     next_race, next_display = _detect_next_race(race_times)
+    day_label = _resolve_day_label(venue, races)
 
     entry = {
         "slot": slot,
@@ -230,7 +279,7 @@ def _build_venue_entry(venue: Dict[str, Any], slot: str) -> Dict[str, Any]:
         "next_display": next_display,
         "day": venue.get("day"),
         "total_days": venue.get("total_days"),
-        "day_label": venue.get("day_label"),
+        "day_label": day_label,
         "grade_label": _normalize_grade_label(venue.get("grade_label")),
         "event_title": venue.get("event_title"),
         "first_race_time": first_race_time,
