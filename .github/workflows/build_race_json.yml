@@ -27,7 +27,7 @@ jobs:
         run: |
           python scripts/build_site_json.py
 
-      - name: Build race json
+      - name: Run build race json
         run: |
           python scripts/build_race_json.py
 
