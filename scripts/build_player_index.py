@@ -306,10 +306,10 @@ def main():
     tomorrow_rows = []
 
     if len(date_dirs) >= 1:
-        today_rows = build_player_index(date_dirs[-1], merged_players)
+        today_rows = build_player_index(date_dirs[0], merged_players)
 
     if len(date_dirs) >= 2:
-        tomorrow_rows = build_player_index(date_dirs[-2], merged_players)
+        tomorrow_rows = build_player_index(date_dirs[1], merged_players)
 
     write_index(DST_TODAY, today_rows)
     write_index(DST_TOMORROW, tomorrow_rows)
