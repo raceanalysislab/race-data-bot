@@ -14,8 +14,10 @@ RE_RESULT_ROW = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+"
 )
 
+
 def norm_space(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "")).strip()
+
 
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
@@ -27,28 +29,63 @@ def read_text_auto(path: str) -> List[str]:
     with open(path, "r", encoding="cp932", errors="ignore") as f:
         return [x.rstrip("\n") for x in f]
 
+
+def _find_latest_k_txt() -> Optional[str]:
+    search_dirs = [
+        os.path.join("data", "extract"),
+        os.path.join("data"),
+    ]
+
+    cands: List[str] = []
+
+    for base in search_dirs:
+        if not os.path.isdir(base):
+            continue
+
+        for root, _, files in os.walk(base):
+            for fn in files:
+                if re.match(r"^k\d{6}\.txt$", fn, re.IGNORECASE):
+                    cands.append(os.path.join(root, fn))
+
+    if not cands:
+        return None
+
+    cands.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+    return cands[0]
+
+
 def infer_txt_path() -> str:
     p = os.path.join("data", "source_final_url_k.txt")
+
     if os.path.exists(p):
         try:
-            url = open(p, "r", encoding="utf-8", errors="ignore").read().strip()
-            m = re.search(r"/k(\d{6})\.lzh", url)
+            with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                url = f.read().strip()
+
+            m = re.search(r"/k(\d{6})\.lzh", url, re.IGNORECASE)
             if m:
                 yymmdd = m.group(1)
-                guess = os.path.join("data", "extract", f"k{yymmdd}.txt")
-                if os.path.exists(guess):
-                    return guess
+
+                guesses = [
+                    os.path.join("data", "extract", f"k{yymmdd}.txt"),
+                    os.path.join("data", f"k{yymmdd}.txt"),
+                ]
+
+                for guess in guesses:
+                    if os.path.exists(guess):
+                        return guess
         except Exception:
             pass
 
-    exdir = os.path.join("data", "extract")
-    if os.path.isdir(exdir):
-        cands = [fn for fn in os.listdir(exdir) if re.match(r"^k\d{6}\.txt$", fn, re.IGNORECASE)]
-        if cands:
-            cands.sort()
-            return os.path.join(exdir, cands[-1])
+    latest = _find_latest_k_txt()
+    if latest:
+        return latest
 
-    return os.path.join("data", "extract", "k260311.txt")
+    raise FileNotFoundError(
+        "k結果txtが見つかりません。"
+        " data/source_final_url_k.txt または data/extract/k******.txt を確認してください。"
+    )
+
 
 def split_blocks(lines: List[str]) -> List[List[str]]:
     blocks: List[List[str]] = []
@@ -72,17 +109,19 @@ def split_blocks(lines: List[str]) -> List[List[str]]:
 
     return [b for b in blocks if b]
 
+
 def parse_venue(block: List[str]) -> str:
-    for line in block[:5]:
+    for line in block[:8]:
         s = norm_space(line)
         if "［成績］" in s:
             return s.split("［成績］", 1)[0].replace(" ", "")
     return ""
 
+
 def parse_date(block: List[str]) -> str:
     year = datetime.now(JST).year
 
-    for line in block[:20]:
+    for line in block[:30]:
         m = RE_DATE.search(line)
         if m:
             mm, dd = m.groups()
@@ -90,20 +129,28 @@ def parse_date(block: List[str]) -> str:
 
     return ""
 
+
 def normalize_finish(raw: str) -> Any:
     raw = raw.strip()
     if raw.isdigit():
         return int(raw)
     return raw
 
+
+def normalize_course(value: int) -> int:
+    return int(value)
+
+
 def parse_race_label(line: str, rno: int) -> str:
     s = line.rstrip()
     m = re.match(rf"^\s*{rno}R\s+(.+?)\s+H1800m", s)
     if m:
         return norm_space(m.group(1))
+
     s2 = re.sub(rf"^\s*{rno}R\s+", "", s)
     s2 = re.sub(r"\s+H1800m.*$", "", s2)
     return norm_space(s2)
+
 
 def parse_block(block: List[str]) -> Dict[str, Any]:
     venue = parse_venue(block)
@@ -147,12 +194,17 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
                     "reg": reg,
                     "name": name,
                     "boat": boat_no,
-                    "course": boat_no,
+                    "course": normalize_course(boat_no),
                     "finish": normalize_finish(finish_raw)
                 })
                 continue
 
-            if line.strip() == "" or line.strip().startswith("単勝") or "レース不成立" in line:
+            if (
+                line.strip() == ""
+                or line.strip().startswith("単勝")
+                or "レース不成立" in line
+                or "払戻金" in line
+            ):
                 in_result_table = False
 
     if current_race:
@@ -164,12 +216,13 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
         "races": races
     }
 
+
 def main():
     txt_path = infer_txt_path()
     lines = read_text_auto(txt_path)
     blocks = split_blocks(lines)
 
-    out_blocks = []
+    out_blocks: List[Dict[str, Any]] = []
     for block in blocks:
         parsed = parse_block(block)
         if parsed["venue"] and parsed["races"]:
@@ -190,6 +243,7 @@ def main():
     print("txt:", txt_path)
     print("out:", out_path)
     print("venues:", len(out_blocks))
+
 
 if __name__ == "__main__":
     main()
