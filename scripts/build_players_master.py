@@ -11,7 +11,7 @@ def clean_name(s: str) -> str:
 
 with open(SRC, "r", encoding="cp932", errors="ignore") as f:
     for line in f:
-        if len(line) < 40:
+        if len(line) < 60:
             continue
 
         reg = line[0:4].strip()
@@ -20,9 +20,18 @@ with open(SRC, "r", encoding="cp932", errors="ignore") as f:
 
         name = clean_name(line[4:12])
 
+        # 全国3連率（fanデータ位置）
+        nat_3 = line[36:41].strip()
+
+        try:
+            nat_3 = float(nat_3)
+        except:
+            nat_3 = None
+
         players[reg] = {
             "reg": reg,
-            "name": name
+            "name": name,
+            "nat_3": nat_3
         }
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
