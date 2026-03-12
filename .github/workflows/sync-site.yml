@@ -28,11 +28,9 @@ jobs:
           ls -la data || true
           ls -la data/site || true
           ls -la data/site/races || true
+          ls -la data/site/races/today || true
+          ls -la data/site/races/tomorrow || true
           ls -la data/master || true
-
-      - name: Build player index
-        run: |
-          python scripts/build_player_index.py
 
       - name: Clone race-analysis repo
         run: |
@@ -44,10 +42,16 @@ jobs:
           rm -rf site_repo/data/site
           mkdir -p site_repo/data/site
 
-      - name: Copy generated files
+      - name: Copy generated site files first
         run: |
           cp -R data/site/. site_repo/data/site/
 
+      - name: Build player index
+        run: |
+          python scripts/build_player_index.py
+
+      - name: Copy player index files
+        run: |
           if [ -f data/player_index_today.json ]; then
             cp data/player_index_today.json site_repo/data/player_index_today.json
           fi
