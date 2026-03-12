@@ -3,12 +3,16 @@ name: Build Race JSON
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -19,10 +23,10 @@ jobs:
         run: |
           python scripts/build_race_json.py
 
-      - name: Commit race json
+      - name: Commit generated site json
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/site/races
+          git add data/site/races data/site/venues
           git commit -m "build race json" || echo "no change"
           git push
