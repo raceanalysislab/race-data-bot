@@ -18,6 +18,15 @@ jobs:
       - name: Checkout bot repo
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build player index
+        run: |
+          python scripts/build_player_index.py
+
       - name: Clone race-analysis repo
         run: |
           git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/raceanalysislab/race-analysis.git site_repo
