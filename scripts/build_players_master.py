@@ -20,7 +20,13 @@ with open(SRC, "r", encoding="cp932", errors="ignore") as f:
 
         name = clean_name(line[4:12])
 
-        # 全国3連率（fanデータ位置）
+        # デバッグ（桁確認）
+        if reg == "3024":
+            print(line)
+            print("26:31 =", repr(line[26:31]))
+            print("31:36 =", repr(line[31:36]))
+            print("36:41 =", repr(line[36:41]))
+
         nat_3_raw = line[36:41].strip()
 
         try:
