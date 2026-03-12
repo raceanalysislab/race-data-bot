@@ -79,7 +79,7 @@ def ensure_local_box(player: dict, venue: str):
 
 def ensure_course_box(player: dict, course: str):
     if course not in player["course_stats"]:
-        player["course_stats"][course] = empty_rate_box()
+        player["course_stats"][course] = empty_course_box()
     return player["course_stats"][course]
 
 
@@ -105,6 +105,8 @@ def ensure_rival_box(player: dict, own_course: str, rival_course: str):
 def add_kimarite(counter_box: dict, kimarite: str):
     if not kimarite:
         return
+    if "kimarite_wins" not in counter_box:
+        counter_box["kimarite_wins"] = {}
     counter_box["kimarite_wins"][kimarite] = counter_box["kimarite_wins"].get(kimarite, 0) + 1
 
 
@@ -132,7 +134,7 @@ def finalize_all(players: dict):
         for course_box in player["course_stats"].values():
             finalize_rate_box(course_box)
 
-        for own_course, rivals in player["course_rival_stats"].items():
+        for rivals in player["course_rival_stats"].values():
             for rival_box in rivals.values():
                 finalize_rate_box(rival_box)
 
@@ -200,7 +202,6 @@ def main():
                 continue
 
             used_races += 1
-
             kimarite = extract_kimarite_from_race(race)
 
             normalized_results = []
@@ -229,7 +230,6 @@ def main():
             if not normalized_results:
                 continue
 
-            # 1) 選手自身の当地成績 / コース成績
             for row in normalized_results:
                 reg = row["reg"]
                 name = row["name"]
@@ -262,9 +262,8 @@ def main():
                     style_box = ensure_course_win_style_box(player, course)
                     style_box["wins"] += 1
                     if kimarite:
-                        style_box["kimarite_wins"][kimarite] = style_box["kimarite_wins"].get(kimarite, 0) + 1
+                        add_kimarite(style_box, kimarite)
 
-            # 2) 対象選手があるコースにいる時、他コースがどう絡むか
             for base in normalized_results:
                 base_reg = base["reg"]
                 base_name = base["name"]
