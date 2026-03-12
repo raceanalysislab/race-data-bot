@@ -23,13 +23,13 @@ jobs:
         run: |
           python scripts/parse_mbrace_txt.py
 
-      - name: Build site json
-        run: |
-          python scripts/build_site_json.py
-
       - name: Run build race json
         run: |
           python scripts/build_race_json.py
+
+      - name: Build site json
+        run: |
+          python scripts/build_site_json.py
 
       - name: Commit generated site json
         run: |
