@@ -41,13 +41,14 @@ RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
+# 単体の「グランプリ」「メモリアル」「ダービー」は誤爆しやすいので使わない
 SG_WORDS = [
     "ボートレースクラシック",
     "ボートレースオールスター",
     "グランドチャンピオン",
     "オーシャンカップ",
-    "メモリアル",
-    "ダービー",
+    "ボートレースメモリアル",
+    "ボートレースダービー",
     "チャレンジカップ",
     "グランプリシリーズ",
     "クイーンズクライマックス",
@@ -86,6 +87,12 @@ def norm(s: str) -> str:
 
 def compact(s: str) -> str:
     return norm(s).replace(" ", "")
+
+
+COMPACT_SG_WORDS = [compact(w) for w in SG_WORDS]
+COMPACT_G2_WORDS = [compact(w) for w in G2_WORDS]
+COMPACT_G1_WORDS = [compact(w) for w in G1_WORDS]
+COMPACT_G3_WORDS = [compact(w) for w in G3_WORDS]
 
 
 def read_text_auto(path: str) -> List[str]:
@@ -300,22 +307,22 @@ def detect_grade_from_title(title: str) -> str:
     if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
         return "G3"
 
-    if any(w in raw for w in map(compact, SG_WORDS)):
+    if any(w in raw for w in COMPACT_SG_WORDS):
         return "SG"
 
-    if any(w in raw for w in map(compact, G2_WORDS)):
+    if any(w in raw for w in COMPACT_G2_WORDS):
         return "G2"
 
     if re.match(r"^開設[0-9]+周年記念", raw):
         return "G1"
 
-    if any(w in raw for w in map(compact, G1_WORDS)):
+    if any(w in raw for w in COMPACT_G1_WORDS):
         if "周年記念" in raw:
             pass
         else:
             return "G1"
 
-    if any(w in raw for w in map(compact, G3_WORDS)):
+    if any(w in raw for w in COMPACT_G3_WORDS):
         return "G3"
 
     return "一般"
