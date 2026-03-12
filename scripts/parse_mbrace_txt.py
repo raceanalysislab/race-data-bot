@@ -66,6 +66,7 @@ G1_WORDS = [
     "ダイヤモンドカップ",
     "モーターボート大賞",
     "周年記念",
+    "周年記念競走",
 ]
 
 G3_WORDS = [
@@ -74,9 +75,41 @@ G3_WORDS = [
     "イースタンヤング",
     "ウエスタンヤング",
     "マスターズリーグ",
-    "オールレディース",
     "シャボン玉石けん杯",
 ]
+
+# よくある正式大会名・寄せたいタイトル
+G1_EXACT_WORDS = [
+    "開設",
+    "周年記念",
+    "地区選手権",
+    "ダイヤモンドカップ",
+    "モーターボート大賞",
+    "BBCトーナメント",
+]
+
+G2_EXACT_WORDS = [
+    "レディースオールスター",
+    "モーターボート誕生祭",
+    "全国ボートレース甲子園",
+    "レディースチャレンジカップ",
+]
+
+G3_EXACT_WORDS = [
+    "オールレディース",
+    "企業杯",
+    "イースタンヤング",
+    "ウエスタンヤング",
+    "マスターズリーグ",
+]
+
+RE_G1_ANNIV = re.compile(r"^開設\d+周年記念")
+RE_G1_ANNIV_ANY = re.compile(r"(開設\d+周年記念|^\d+周年記念|周年記念競走|周年記念)")
+RE_G1_DISTRICT = re.compile(r"地区選手権")
+RE_G3_COMPANY = re.compile(r"企業杯")
+RE_G3_LADIES = re.compile(r"オールレディース")
+RE_G3_YOUNG = re.compile(r"(イースタンヤング|ウエスタンヤング)")
+RE_G3_MASTERS = re.compile(r"マスターズリーグ")
 
 
 def norm(s: str) -> str:
@@ -93,6 +126,9 @@ COMPACT_SG_WORDS = [compact(w) for w in SG_WORDS]
 COMPACT_G2_WORDS = [compact(w) for w in G2_WORDS]
 COMPACT_G1_WORDS = [compact(w) for w in G1_WORDS]
 COMPACT_G3_WORDS = [compact(w) for w in G3_WORDS]
+COMPACT_G1_EXACT_WORDS = [compact(w) for w in G1_EXACT_WORDS]
+COMPACT_G2_EXACT_WORDS = [compact(w) for w in G2_EXACT_WORDS]
+COMPACT_G3_EXACT_WORDS = [compact(w) for w in G3_EXACT_WORDS]
 
 
 def read_text_auto(path: str) -> List[str]:
@@ -298,6 +334,7 @@ def detect_grade_from_title(title: str) -> str:
     if not raw:
         return "一般"
 
+    # 明示表記を最優先
     if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
         return "SG"
     if re.search(r"(^|[^A-Z])(G1|GI)([^A-Z]|$)", upper):
@@ -307,21 +344,35 @@ def detect_grade_from_title(title: str) -> str:
     if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
         return "G3"
 
+    # 正式SG名
     if any(w in raw for w in COMPACT_SG_WORDS):
         return "SG"
 
+    # 正式G2名
     if any(w in raw for w in COMPACT_G2_WORDS):
         return "G2"
 
-    if re.match(r"^開設[0-9]+周年記念", raw):
+    # G1 周年記念・地区選手権系を先に強めに判定
+    if RE_G1_ANNIV.match(raw):
+        return "G1"
+    if RE_G1_DISTRICT.search(raw):
+        return "G1"
+    if RE_G1_ANNIV_ANY.search(raw):
         return "G1"
 
-    if any(w in raw for w in COMPACT_G1_WORDS):
-        if "周年記念" in raw:
-            pass
-        else:
-            return "G1"
+    # G3の典型語
+    if RE_G3_LADIES.search(raw):
+        return "G3"
+    if RE_G3_COMPANY.search(raw):
+        return "G3"
+    if RE_G3_YOUNG.search(raw):
+        return "G3"
+    if RE_G3_MASTERS.search(raw):
+        return "G3"
 
+    # 保険
+    if any(w in raw for w in COMPACT_G1_WORDS):
+        return "G1"
     if any(w in raw for w in COMPACT_G3_WORDS):
         return "G3"
 
