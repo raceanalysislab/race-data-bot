@@ -5,6 +5,7 @@ on:
 
 jobs:
   build:
+    needs: Update k results
     runs-on: ubuntu-latest
 
     steps:
