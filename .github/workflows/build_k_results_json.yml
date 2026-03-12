@@ -1,0 +1,28 @@
+name: Build K Results JSON
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run parser
+        run: python scripts/parse_k_results_txt.py
+
+      - name: Commit result
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/k_results_parsed.json
+          git commit -m "update k results json" || echo "no changes"
+          git push
