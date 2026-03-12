@@ -69,10 +69,14 @@ jobs:
         run: |
           python scripts/parse_mbrace_txt.py
 
+      - name: Check parsed mbrace json
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
+        run: |
+          ls -la data/mbrace_races_*.json
+
       - name: Build site json
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
-          test -f data/mbrace_races_today.json
           python scripts/build_site_json.py
 
       - name: Build race json
@@ -86,6 +90,9 @@ jobs:
           echo "----- data -----"
           ls -la data || true
 
+          echo "----- parsed mbrace json -----"
+          ls -la data/mbrace_races_*.json || true
+
           echo "----- data/site -----"
           ls -la data/site || true
 
@@ -95,11 +102,11 @@ jobs:
           echo "----- data/site/races -----"
           ls -la data/site/races || true
 
-          echo "----- site venues.json (head) -----"
-          head -n 60 data/site/venues.json || true
+          echo "----- site venues dir -----"
+          find data/site/venues -maxdepth 1 -type f | sort || true
 
-          echo "----- mbrace_races_today.json (head) -----"
-          head -n 30 data/mbrace_races_today.json || true
+          echo "----- site races dir -----"
+          find data/site/races -maxdepth 2 -type f | sort | head -n 200 || true
 
       - name: Commit fetched data to bot repo
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
