@@ -19,7 +19,15 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run build race json
+      - name: Parse mbrace txt
+        run: |
+          python scripts/parse_mbrace_txt.py
+
+      - name: Build site json
+        run: |
+          python scripts/build_site_json.py
+
+      - name: Build race json
         run: |
           python scripts/build_race_json.py
 
@@ -27,6 +35,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/site/races data/site/venues
+          git add data
           git commit -m "build race json" || echo "no change"
           git push
