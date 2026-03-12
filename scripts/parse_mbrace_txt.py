@@ -65,8 +65,6 @@ G1_WORDS = [
     "地区選手権",
     "ダイヤモンドカップ",
     "モーターボート大賞",
-    "周年記念",
-    "周年記念競走",
 ]
 
 G3_WORDS = [
@@ -80,8 +78,6 @@ G3_WORDS = [
 
 # よくある正式大会名・寄せたいタイトル
 G1_EXACT_WORDS = [
-    "開設",
-    "周年記念",
     "地区選手権",
     "ダイヤモンドカップ",
     "モーターボート大賞",
@@ -104,7 +100,7 @@ G3_EXACT_WORDS = [
 ]
 
 RE_G1_ANNIV = re.compile(r"^開設\d+周年記念")
-RE_G1_ANNIV_ANY = re.compile(r"(開設\d+周年記念|^\d+周年記念|周年記念競走|周年記念)")
+RE_G1_ANNIV_ANY = re.compile(r"^(開設\d+周年記念|\d+周年記念)")
 RE_G1_DISTRICT = re.compile(r"地区選手権")
 RE_G3_COMPANY = re.compile(r"企業杯")
 RE_G3_LADIES = re.compile(r"オールレディース")
@@ -352,12 +348,14 @@ def detect_grade_from_title(title: str) -> str:
     if any(w in raw for w in COMPACT_G2_WORDS):
         return "G2"
 
-    # G1 周年記念・地区選手権系を先に強めに判定
+    # G1 周年記念・地区選手権系
+    # 「福岡都市圏開設36周年記念競走」みたいな一般戦に誤爆しないよう、
+    # G1周年はタイトル先頭のときだけ採用
     if RE_G1_ANNIV.match(raw):
         return "G1"
     if RE_G1_DISTRICT.search(raw):
         return "G1"
-    if RE_G1_ANNIV_ANY.search(raw):
+    if RE_G1_ANNIV_ANY.match(raw):
         return "G1"
 
     # G3の典型語
