@@ -1,9 +1,8 @@
 # scripts/parse_mbrace_txt.py
 # mbrace番組表txt（STARTB...FINALB / xxBBGN...xxBEND 想定）→ 会場ごとにパースしてJSON化
 # 出力:
-#   data/mbrace_races_today.json
-#   data/mbrace_races_tomorrow.json
-#   （それ以外の日付は data/mbrace_races_YYYY-MM-DD.json）
+#   data/mbrace_races_YYYY-MM-DD.json
+# today / tomorrow 方式は廃止し、日付ファイル方式に統一
 
 import json
 import os
@@ -654,29 +653,27 @@ def classify_race(race: Dict[str, Any]) -> List[str]:
     return tags
 
 
-def decide_slot(date_str: str) -> str:
-    today = datetime.now(JST).date()
-    tomorrow = today + timedelta(days=1)
-
-    try:
-        target = datetime.strptime(date_str, "%Y-%m-%d").date()
-    except Exception:
-        return "unknown"
-
-    if target == today:
-        return "today"
-    if target == tomorrow:
-        return "tomorrow"
-    return "other"
-
-
-def build_output_path(date_str: str, slot: str) -> str:
-    if slot == "today":
-        return os.path.join("data", "mbrace_races_today.json")
-    if slot == "tomorrow":
-        return os.path.join("data", "mbrace_races_tomorrow.json")
+def build_output_path(date_str: str) -> str:
     safe_date = date_str if date_str else "unknown"
     return os.path.join("data", f"mbrace_races_{safe_date}.json")
+
+
+def cleanup_old_outputs(current_out_path: str) -> None:
+    if not os.path.isdir("data"):
+        return
+
+    for name in os.listdir("data"):
+        if not re.match(r"^mbrace_races_(today|tomorrow|\d{4}-\d{2}-\d{2})\.json$", name):
+            continue
+
+        path = os.path.join("data", name)
+        if os.path.abspath(path) == os.path.abspath(current_out_path):
+            continue
+
+        try:
+            os.remove(path)
+        except Exception:
+            pass
 
 
 def main():
@@ -722,13 +719,11 @@ def main():
         venues_out.append(venue_payload)
 
     top_date = venues_out[0]["date"] if venues_out else ""
-    slot = decide_slot(top_date)
-    out_path = build_output_path(top_date, slot)
+    out_path = build_output_path(top_date)
 
     payload: Dict[str, Any] = {
         "source": os.path.basename(txt_path),
         "date": top_date,
-        "data_slot": slot,
         "parsed_at": datetime.now(JST).isoformat(),
         "venue_count": len(venues_out),
         "venues": venues_out,
@@ -739,8 +734,9 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
+    cleanup_old_outputs(out_path)
+
     print("txt:", txt_path)
-    print("slot:", slot)
     print("out:", out_path)
     print("venues:", len(venues_out))
     if venues_out:
