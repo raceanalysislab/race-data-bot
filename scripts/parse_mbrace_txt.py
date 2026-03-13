@@ -100,8 +100,8 @@ G3_EXACT_WORDS = [
     "マスターズリーグ",
 ]
 
-RE_G1_ANNIV = re.compile(r"^開設\d+周年記念")
-RE_G1_ANNIV_ANY = re.compile(r"(開設\d+周年記念|\d+周年記念)")
+RE_G1_ANNIV_HEAD = re.compile(r"^開設\d+周年記念")
+RE_G1_CITY_ANNIV = re.compile(r"[^\s]*市制\d+周年記念")
 RE_G1_DISTRICT = re.compile(r"地区選手権")
 RE_G3_COMPANY = re.compile(r"企業杯")
 RE_G3_LADIES = re.compile(r"オールレディース")
@@ -329,21 +329,20 @@ def _contains_any(raw: str, words: List[str]) -> bool:
 
 
 def _looks_like_g1_anniversary(raw: str) -> bool:
-    if not RE_G1_ANNIV_ANY.search(raw):
-        return False
-
-    # 典型的なG1周年記念
-    if RE_G1_ANNIV.match(raw):
+    # 典型的なG1: 先頭から「開設○周年記念」
+    if RE_G1_ANNIV_HEAD.match(raw):
         return True
 
-    # 例: 尼崎市制110周年記念 尼崎センプルカップ
-    # 「周年記念」だけでは一般戦もあるので、カップ/杯/既知のG1名とセットでG1扱い
-    if "周年記念" in raw:
-        if "カップ" in raw or "杯" in raw:
-            return True
-        if _contains_any(raw, COMPACT_G1_EXACT_WORDS):
-            return True
+    # 例: 尼崎市制110周年記念尼崎センプルカップ
+    if RE_G1_CITY_ANNIV.search(raw):
+        return True
 
+    # G1固有の大会名が含まれていればG1
+    if _contains_any(raw, COMPACT_G1_EXACT_WORDS):
+        return True
+
+    # それ以外の「○周年記念」は一般戦も多いのでここではG1にしない
+    # 例: 福岡県知事杯争奪 福岡都市圏開設36周年記念競走 → 一般
     return False
 
 
