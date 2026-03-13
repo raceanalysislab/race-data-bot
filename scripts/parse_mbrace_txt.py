@@ -82,6 +82,7 @@ G1_EXACT_WORDS = [
     "ダイヤモンドカップ",
     "モーターボート大賞",
     "BBCトーナメント",
+    "センプルカップ",
 ]
 
 G2_EXACT_WORDS = [
@@ -100,7 +101,7 @@ G3_EXACT_WORDS = [
 ]
 
 RE_G1_ANNIV = re.compile(r"^開設\d+周年記念")
-RE_G1_ANNIV_ANY = re.compile(r"^(開設\d+周年記念|\d+周年記念)")
+RE_G1_ANNIV_ANY = re.compile(r"(開設\d+周年記念|\d+周年記念)")
 RE_G1_DISTRICT = re.compile(r"地区選手権")
 RE_G3_COMPANY = re.compile(r"企業杯")
 RE_G3_LADIES = re.compile(r"オールレディース")
@@ -323,6 +324,29 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
+def _contains_any(raw: str, words: List[str]) -> bool:
+    return any(w in raw for w in words)
+
+
+def _looks_like_g1_anniversary(raw: str) -> bool:
+    if not RE_G1_ANNIV_ANY.search(raw):
+        return False
+
+    # 典型的なG1周年記念
+    if RE_G1_ANNIV.match(raw):
+        return True
+
+    # 例: 尼崎市制110周年記念 尼崎センプルカップ
+    # 「周年記念」だけでは一般戦もあるので、カップ/杯/既知のG1名とセットでG1扱い
+    if "周年記念" in raw:
+        if "カップ" in raw or "杯" in raw:
+            return True
+        if _contains_any(raw, COMPACT_G1_EXACT_WORDS):
+            return True
+
+    return False
+
+
 def detect_grade_from_title(title: str) -> str:
     raw = compact(title)
     upper = raw.upper()
@@ -341,21 +365,17 @@ def detect_grade_from_title(title: str) -> str:
         return "G3"
 
     # 正式SG名
-    if any(w in raw for w in COMPACT_SG_WORDS):
+    if _contains_any(raw, COMPACT_SG_WORDS):
         return "SG"
 
     # 正式G2名
-    if any(w in raw for w in COMPACT_G2_WORDS):
+    if _contains_any(raw, COMPACT_G2_WORDS):
         return "G2"
 
     # G1 周年記念・地区選手権系
-    # 「福岡都市圏開設36周年記念競走」みたいな一般戦に誤爆しないよう、
-    # G1周年はタイトル先頭のときだけ採用
-    if RE_G1_ANNIV.match(raw):
-        return "G1"
     if RE_G1_DISTRICT.search(raw):
         return "G1"
-    if RE_G1_ANNIV_ANY.match(raw):
+    if _looks_like_g1_anniversary(raw):
         return "G1"
 
     # G3の典型語
@@ -369,9 +389,9 @@ def detect_grade_from_title(title: str) -> str:
         return "G3"
 
     # 保険
-    if any(w in raw for w in COMPACT_G1_WORDS):
+    if _contains_any(raw, COMPACT_G1_WORDS):
         return "G1"
-    if any(w in raw for w in COMPACT_G3_WORDS):
+    if _contains_any(raw, COMPACT_G3_WORDS):
         return "G3"
 
     return "一般"
