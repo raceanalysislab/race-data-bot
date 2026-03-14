@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-14T11:24:50.961234+09:00",
+  "generated_at": "2026-03-14T11:33:27.650234+09:00",
   "source_dir": "data/extract",
   "source_file_count": 9,
-  "title_count": 29,
+  "title_count": 30,
   "titles": [
     {
       "title_key": "BP梅田開設19周年記念令和スピードレーサー選抜戦",
@@ -27,7 +27,7 @@
         "2026-03-09"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -71,7 +71,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 3,
       "notes": ""
     },
     {
@@ -121,7 +121,7 @@
         "2026-03-11"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 6,
       "notes": ""
     },
     {
@@ -151,7 +151,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 6,
       "notes": ""
     },
     {
@@ -175,7 +175,7 @@
         "2026-03-08"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 3,
       "notes": ""
     },
     {
@@ -203,7 +203,7 @@
         "2026-03-14"
       ],
       "grade_label": "G3",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 5,
       "notes": ""
     },
     {
@@ -233,7 +233,7 @@
         "2026-03-12"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 6,
       "notes": ""
     },
     {
@@ -261,7 +261,7 @@
         "2026-03-11"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 5,
       "notes": ""
     },
     {
@@ -291,7 +291,29 @@
         "2026-03-13"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 6,
+      "notes": ""
+    },
+    {
+      "title_key": "ミッドナイトレース西",
+      "sample_titles": [
+        "ミッドナイトレース西"
+      ],
+      "venues": [
+        "若松"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 2,
+      "sample_files": [
+        "b260306.txt",
+        "b260307.txt"
+      ],
+      "sample_dates": [
+        "2026-03-06",
+        "2026-03-07"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": 2,
       "notes": ""
     },
     {
@@ -313,7 +335,7 @@
         "2026-03-07"
       ],
       "grade_label": "G1",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 2,
       "notes": ""
     },
     {
@@ -337,7 +359,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 3,
       "notes": ""
     },
     {
@@ -363,7 +385,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -431,7 +453,7 @@
         "2026-03-14"
       ],
       "grade_label": "G3",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 5,
       "notes": ""
     },
     {
@@ -457,36 +479,7 @@
         "2026-03-11"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "番 登番 名 齢 部 重別 勝率 2率 勝率 2率 NO 2率 NO 2率 123456見",
-      "sample_titles": [
-        "番 登番 名 齢 部 重別 勝率 2率 勝率 2率 NO 2率 NO 2率 123456見"
-      ],
-      "venues": [
-        "江戸川",
-        "若松"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 6,
-      "sample_files": [
-        "b260306.txt",
-        "b260307.txt",
-        "b260308.txt",
-        "b260309.txt",
-        "b260310.txt"
-      ],
-      "sample_dates": [
-        "2026-03-06",
-        "2026-03-07",
-        "2026-03-08",
-        "2026-03-09",
-        "2026-03-10"
-      ],
-      "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -514,7 +507,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 5,
       "notes": ""
     },
     {
@@ -540,7 +533,7 @@
         "2026-03-09"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -561,6 +554,32 @@
       ],
       "grade_label": "一般",
       "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "第25回関東日刊紙ボ",
+      "sample_titles": [
+        "第25回関東日刊紙ボ"
+      ],
+      "venues": [
+        "江戸川"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 4,
+      "sample_files": [
+        "b260307.txt",
+        "b260308.txt",
+        "b260309.txt",
+        "b260310.txt"
+      ],
+      "sample_dates": [
+        "2026-03-07",
+        "2026-03-08",
+        "2026-03-09",
+        "2026-03-10"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -592,7 +611,7 @@
         "2026-03-12"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 7,
       "notes": ""
     },
     {
@@ -618,7 +637,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 4,
       "notes": ""
     },
     {
@@ -641,8 +660,8 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "SG",
-      "confirmed_total_days": null,
+      "grade_label": "一般",
+      "confirmed_total_days": 3,
       "notes": ""
     },
     {
@@ -666,7 +685,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 3,
       "notes": ""
     },
     {
@@ -696,7 +715,7 @@
         "2026-03-13"
       ],
       "grade_label": "G1",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 6,
       "notes": ""
     },
     {
@@ -740,7 +759,7 @@
         "2026-03-14"
       ],
       "grade_label": "一般",
-      "confirmed_total_days": null,
+      "confirmed_total_days": 3,
       "notes": ""
     }
   ],
