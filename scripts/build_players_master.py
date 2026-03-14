@@ -1,196 +1,22 @@
 import json
 import pathlib
 
-SRC = pathlib.Path("data/master/raw/fan2510.txt")
-K_RESULTS = pathlib.Path("data/k_results_parsed.json")
 NAME_MASTER = pathlib.Path("data/master/players_name_master.json")
-FIX = pathlib.Path("data/master/players_name_fix.json")
+K_RESULTS = pathlib.Path("data/k_results_parsed.json")
 OUT = pathlib.Path("data/master/players_master.json")
 
 players = {}
 
 
-def clean_name(s: str) -> str:
-    return str(s or "").replace("　", "").replace(" ", "").strip()
-
-
-NAME_SPLIT_OVERRIDES = {
-    "宮之原輝紀": ("宮之原", "輝紀"),
-    "大橋純一郎": ("大橋", "純一郎"),
-    "渡邉真奈美": ("渡邉", "真奈美"),
-    "木下虎之輔": ("木下", "虎之輔"),
-    "宇佐見淳": ("宇佐見", "淳"),
-    "青木幸太郎": ("青木", "幸太郎"),
-    "中嶋健一郎": ("中嶋", "健一郎"),
-    "岩崎芳美": ("岩崎", "芳美"),
-    "笠野友紀恵": ("笠野", "友紀恵"),
-    "石井裕美": ("石井", "裕美"),
-    "西澤日花里": ("西澤", "日花里"),
-    "佐々木裕美": ("佐々木", "裕美"),
-    "寺田夢生": ("寺田", "夢生"),
-    "櫻葉新心": ("櫻葉", "新心"),
-    "川崎智稔": ("川崎", "智稔"),
-    "間庭菜摘": ("間庭", "菜摘"),
-    "中村駿平": ("中村", "駿平"),
-    "鐘ヶ江真司": ("鐘ヶ江", "真司"),
-}
-
-LASTNAME_HINTS = sorted({
-    "宮之原", "宇佐見", "佐々木", "渡邉", "中嶋", "櫻葉",
-    "西澤", "笠野", "岩崎", "川崎", "間庭", "中村",
-    "鐘ヶ江", "鳥飼", "奥村", "梶山", "深川", "里岡", "岩永",
-    "長尾", "柏野", "荻野", "根岸", "大町", "大井", "上村", "落合",
-    "眞田", "仲口", "木村", "土屋", "山崎", "小川", "高橋", "大橋",
-    "木下", "青木", "中島", "吉村", "水摩", "石井", "寺田", "富山",
-    "西島", "高田", "山口", "山本", "田中", "中野", "中田", "中川",
-    "岡田", "岡本", "松本", "松井", "近藤", "加藤", "佐藤", "伊藤",
-    "斎藤", "後藤", "前田", "武田", "池田", "村田", "森田", "岡村",
-    "今村", "平田", "柴田", "藤田", "藤原", "福田", "浜田", "原田",
-    "岩田", "古賀", "古川", "安田", "野田", "本田", "荒井", "三浦",
-    "丸岡", "丸野", "西村", "東本", "東口", "南野", "北川", "北村",
-    "白井", "黒井", "堀本", "坂本", "川北", "川上", "川下", "河合",
-    "河野", "上田", "下田", "金子", "森野", "若林", "竹井", "竹田", "森"
-}, key=len, reverse=True)
-
-LASTNAME_SET = set(LASTNAME_HINTS)
-
-
-def split_name(name: str):
-    name = clean_name(name)
-
-    if not name:
-        return "", ""
-
-    if name in NAME_SPLIT_OVERRIDES:
-        return NAME_SPLIT_OVERRIDES[name]
-
-    for last in LASTNAME_HINTS:
-        if name.startswith(last) and len(name) > len(last):
-            return last, name[len(last):]
-
-    n = len(name)
-
-    if n == 1:
-        return name, ""
-
-    if n == 2:
-        return name[:1], name[1:]
-
-    if n == 3:
-        head2 = name[:2]
-        if head2 in LASTNAME_SET:
-            return head2, name[2:]
-        return name[:1], name[1:]
-
-    if n == 4:
-        return name[:2], name[2:]
-
-    if n == 5:
-        return name[:2], name[2:]
-
-    if n == 6:
-        return name[:3], name[3:]
-
-    return name[:-2], name[-2:]
-
-
-def load_json(path: pathlib.Path, default):
+def load_json(path, default):
     if not path.exists():
         return default
-
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_name_fix():
-    if not FIX.exists():
-        return {}, {}
-
-    data = load_json(FIX, {})
-    if not isinstance(data, dict):
-        return {}, {}
-
-    reg_fix = {}
-    name_fix = {}
-
-    for key, row in data.items():
-        if not isinstance(row, dict):
-            continue
-
-        key_str = clean_name(key)
-        if not key_str:
-            continue
-
-        sei = clean_name(row.get("sei", ""))
-        mei = clean_name(row.get("mei", ""))
-
-        if not sei and not mei:
-            continue
-
-        payload = {"sei": sei, "mei": mei}
-
-        if key_str.isdigit():
-            reg_fix[key_str] = payload
-        else:
-            name_fix[key_str] = payload
-
-    return reg_fix, name_fix
-
-
-def build_name_master_from_fan():
-    result = {}
-
-    with open(SRC, "r", encoding="cp932", errors="ignore") as f:
-        for line in f:
-            if len(line) < 40:
-                continue
-
-            reg = line[0:4].strip()
-            if not reg.isdigit():
-                continue
-
-            name = clean_name(line[4:12])
-            sei, mei = split_name(name)
-
-            result[reg] = {
-                "reg": reg,
-                "name": name,
-                "sei": sei,
-                "mei": mei,
-            }
-
-    return result
-
-
-def ensure_name_master():
-    if NAME_MASTER.exists():
-        data = load_json(NAME_MASTER, {})
-        if isinstance(data, dict) and data:
-            return data
-
-    name_master = build_name_master_from_fan()
-
-    reg_fix, name_fix = load_name_fix()
-
-    for reg, row in name_master.items():
-        name_key = clean_name(row["name"])
-        if name_key in name_fix:
-            row["sei"] = name_fix[name_key]["sei"]
-            row["mei"] = name_fix[name_key]["mei"]
-
-    for reg, fix_row in reg_fix.items():
-        if reg in name_master:
-            name_master[reg]["sei"] = fix_row["sei"]
-            name_master[reg]["mei"] = fix_row["mei"]
-
-    NAME_MASTER.parent.mkdir(parents=True, exist_ok=True)
-    with open(NAME_MASTER, "w", encoding="utf-8") as f:
-        json.dump(name_master, f, ensure_ascii=False, indent=2)
-
-    return name_master
-
-
-name_master = ensure_name_master()
+# 名前DB読み込み
+name_master = load_json(NAME_MASTER, {})
 
 for reg, row in name_master.items():
     players[reg] = {
@@ -205,12 +31,15 @@ for reg, row in name_master.items():
         "courses": {str(i): {"starts": 0, "wins": 0} for i in range(1, 7)}
     }
 
+
+# 成績計算
 if K_RESULTS.exists():
     data = load_json(K_RESULTS, {})
 
     for venue in data.get("venues", []):
         for race in venue.get("races", []):
             for r in race.get("results", []):
+
                 reg = str(r.get("reg", "")).strip()
                 if reg not in players:
                     continue
@@ -222,6 +51,7 @@ if K_RESULTS.exists():
                 p["starts"] += 1
 
                 if isinstance(finish, int):
+
                     if finish == 1:
                         p["wins"] += 1
 
@@ -233,10 +63,14 @@ if K_RESULTS.exists():
 
                     if course in p["courses"]:
                         p["courses"][course]["starts"] += 1
+
                         if finish == 1:
                             p["courses"][course]["wins"] += 1
 
+
+# 勝率計算
 for reg, p in players.items():
+
     starts = p["starts"]
 
     if starts > 0:
@@ -248,10 +82,11 @@ for reg, p in players.items():
         p["top2_rate"] = 0
         p["top3_rate"] = 0
 
+
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(players, f, ensure_ascii=False, indent=2)
 
-print("players_name_master loaded:", len(name_master))
-print("players_master built:", len(players))
+print("players loaded:", len(players))
+print("players_master built")
