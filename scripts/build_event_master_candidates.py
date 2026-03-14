@@ -2,10 +2,6 @@
 # data/extract/b*.txt を走査して、開催タイトル候補を集約
 # 出力:
 #   data/event_master_candidates.json
-#
-# 目的:
-# - 過去番組表から event_title / venue / total_days を一覧化
-# - ここから手動で grade master / total_days master を作る
 
 import json
 import os
@@ -54,7 +50,6 @@ SG_WORDS = [
     "チャレンジカップ",
     "グランプリシリーズ",
     "クイーンズクライマックス",
-    "グランプリ",
 ]
 
 G2_WORDS = [
@@ -108,6 +103,7 @@ NOISE_PATTERNS = [
     r"^内容については主催者発行のものと照合して下さい$",
     r"^\*{3}番組表\*{3}$",
     r"^-+$",
+    r"^番登番名齢部重別勝率2率勝率2率NO2率NO2率123456見$",
 ]
 NOISE_RES = [re.compile(p) for p in NOISE_PATTERNS]
 
@@ -334,6 +330,8 @@ def is_noise_title(cand: str) -> bool:
         return True
     if "今節成績" in n:
         return True
+    if "登番名齢部重別" in n:
+        return True
 
     return False
 
@@ -439,7 +437,12 @@ def main():
         sample_dates = sorted({r["date"] for r in rows if r.get("date")})[:20]
 
         auto_grade = detect_grade_from_title(key)
-        confirmed_total_days = total_days_values[0] if len(total_days_values) == 1 else None
+
+        inferred_total_days = None
+        if len(total_days_values) == 1:
+            inferred_total_days = total_days_values[0]
+        elif len(total_days_values) == 0 and len(rows) >= 2:
+            inferred_total_days = len(rows)
 
         titles_out.append({
             "title_key": key,
@@ -450,7 +453,7 @@ def main():
             "sample_files": sample_files,
             "sample_dates": sample_dates,
             "grade_label": auto_grade,
-            "confirmed_total_days": confirmed_total_days,
+            "confirmed_total_days": inferred_total_days,
             "notes": "",
         })
 
