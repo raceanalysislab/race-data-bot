@@ -100,18 +100,20 @@ def split_name(name: str):
 
 def load_name_fix():
     if not FIX.exists():
-        return {}
+        return {}, {}
 
     with open(FIX, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     if not isinstance(data, dict):
-        return {}
+        return {}, {}
 
-    cleaned = {}
-    for reg, row in data.items():
-        reg_key = str(reg).strip()
-        if not reg_key:
+    reg_fix = {}
+    name_fix = {}
+
+    for key, row in data.items():
+        key_str = clean_name(str(key))
+        if not key_str or not isinstance(row, dict):
             continue
 
         sei = clean_name(str(row.get("sei", "")))
@@ -120,12 +122,17 @@ def load_name_fix():
         if not sei and not mei:
             continue
 
-        cleaned[reg_key] = {
+        payload = {
             "sei": sei,
             "mei": mei,
         }
 
-    return cleaned
+        if key_str.isdigit():
+            reg_fix[key_str] = payload
+        else:
+            name_fix[key_str] = payload
+
+    return reg_fix, name_fix
 
 
 # fanマスター（名前）
@@ -154,8 +161,17 @@ with open(SRC, "r", encoding="cp932", errors="ignore") as f:
         }
 
 # 手動修正を最後に上書き
-name_fix = load_name_fix()
-for reg, fix_row in name_fix.items():
+reg_fix, name_fix = load_name_fix()
+
+# まず名前fix
+for reg, p in players.items():
+    name_key = clean_name(p["name"])
+    if name_key in name_fix:
+        p["sei"] = name_fix[name_key]["sei"]
+        p["mei"] = name_fix[name_key]["mei"]
+
+# 次に登録番号fix（最優先）
+for reg, fix_row in reg_fix.items():
     if reg not in players:
         continue
     players[reg]["sei"] = fix_row["sei"]
@@ -214,4 +230,5 @@ with open(OUT, "w", encoding="utf-8") as f:
     json.dump(players, f, ensure_ascii=False, indent=2)
 
 print("players_master built:", len(players))
-print("name fixes applied:", len(name_fix))
+print("name fixes applied (by name):", len(name_fix))
+print("name fixes applied (by reg):", len(reg_fix))
