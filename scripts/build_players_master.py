@@ -3,6 +3,7 @@ import pathlib
 
 SRC = pathlib.Path("data/master/raw/fan2510.txt")
 K_RESULTS = pathlib.Path("data/k_results_parsed.json")
+NAME_MASTER = pathlib.Path("data/master/players_name_master.json")
 FIX = pathlib.Path("data/master/players_name_fix.json")
 OUT = pathlib.Path("data/master/players_master.json")
 
@@ -10,7 +11,7 @@ players = {}
 
 
 def clean_name(s: str) -> str:
-    return s.replace("　", "").replace(" ", "").strip()
+    return str(s or "").replace("　", "").replace(" ", "").strip()
 
 
 NAME_SPLIT_OVERRIDES = {
@@ -37,23 +38,18 @@ NAME_SPLIT_OVERRIDES = {
 LASTNAME_HINTS = sorted({
     "宮之原", "宇佐見", "佐々木", "渡邉", "中嶋", "櫻葉",
     "西澤", "笠野", "岩崎", "川崎", "間庭", "中村",
-    "鐘ヶ江",
-    "鳥飼", "奥村", "梶山", "深川", "里岡", "岩永",
-    "長尾", "柏野", "荻野", "根岸", "大町", "大井",
-    "上村", "落合", "眞田", "仲口", "木村", "土屋",
-    "山崎", "小川", "高橋", "大橋", "木下", "青木",
-    "中島", "吉村", "水摩", "石井", "寺田", "富山",
-    "西島", "高田", "山口", "山本", "田中", "中野",
-    "中田", "中川", "岡田", "岡本", "松本", "松井",
-    "近藤", "加藤", "佐藤", "伊藤", "斎藤", "後藤",
-    "前田", "武田", "池田", "村田", "森田", "岡村",
-    "今村", "平田", "柴田", "藤田", "藤原", "福田",
-    "浜田", "原田", "岩田", "古賀", "古川", "安田",
-    "野田", "本田", "荒井", "三浦", "丸岡", "丸野",
-    "西村", "東本", "東口", "南野", "北川", "北村",
-    "白井", "黒井", "堀本", "坂本", "川北", "川上",
-    "川下", "河合", "河野", "上田", "下田", "金子",
-    "森野", "若林", "竹井", "竹田", "森"
+    "鐘ヶ江", "鳥飼", "奥村", "梶山", "深川", "里岡", "岩永",
+    "長尾", "柏野", "荻野", "根岸", "大町", "大井", "上村", "落合",
+    "眞田", "仲口", "木村", "土屋", "山崎", "小川", "高橋", "大橋",
+    "木下", "青木", "中島", "吉村", "水摩", "石井", "寺田", "富山",
+    "西島", "高田", "山口", "山本", "田中", "中野", "中田", "中川",
+    "岡田", "岡本", "松本", "松井", "近藤", "加藤", "佐藤", "伊藤",
+    "斎藤", "後藤", "前田", "武田", "池田", "村田", "森田", "岡村",
+    "今村", "平田", "柴田", "藤田", "藤原", "福田", "浜田", "原田",
+    "岩田", "古賀", "古川", "安田", "野田", "本田", "荒井", "三浦",
+    "丸岡", "丸野", "西村", "東本", "東口", "南野", "北川", "北村",
+    "白井", "黒井", "堀本", "坂本", "川北", "川上", "川下", "河合",
+    "河野", "上田", "下田", "金子", "森野", "若林", "竹井", "竹田", "森"
 }, key=len, reverse=True)
 
 LASTNAME_SET = set(LASTNAME_HINTS)
@@ -98,13 +94,19 @@ def split_name(name: str):
     return name[:-2], name[-2:]
 
 
+def load_json(path: pathlib.Path, default):
+    if not path.exists():
+        return default
+
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def load_name_fix():
     if not FIX.exists():
         return {}, {}
 
-    with open(FIX, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
+    data = load_json(FIX, {})
     if not isinstance(data, dict):
         return {}, {}
 
@@ -112,20 +114,20 @@ def load_name_fix():
     name_fix = {}
 
     for key, row in data.items():
-        key_str = clean_name(str(key))
-        if not key_str or not isinstance(row, dict):
+        if not isinstance(row, dict):
             continue
 
-        sei = clean_name(str(row.get("sei", "")))
-        mei = clean_name(str(row.get("mei", "")))
+        key_str = clean_name(key)
+        if not key_str:
+            continue
+
+        sei = clean_name(row.get("sei", ""))
+        mei = clean_name(row.get("mei", ""))
 
         if not sei and not mei:
             continue
 
-        payload = {
-            "sei": sei,
-            "mei": mei,
-        }
+        payload = {"sei": sei, "mei": mei}
 
         if key_str.isdigit():
             reg_fix[key_str] = payload
@@ -135,62 +137,86 @@ def load_name_fix():
     return reg_fix, name_fix
 
 
-# fanマスター（名前）
-with open(SRC, "r", encoding="cp932", errors="ignore") as f:
-    for line in f:
-        if len(line) < 40:
-            continue
+def build_name_master_from_fan():
+    result = {}
 
-        reg = line[0:4].strip()
-        if not reg.isdigit():
-            continue
+    with open(SRC, "r", encoding="cp932", errors="ignore") as f:
+        for line in f:
+            if len(line) < 40:
+                continue
 
-        name = clean_name(line[4:12])
-        sei, mei = split_name(name)
+            reg = line[0:4].strip()
+            if not reg.isdigit():
+                continue
 
-        players[reg] = {
-            "reg": reg,
-            "name": name,
-            "sei": sei,
-            "mei": mei,
-            "starts": 0,
-            "wins": 0,
-            "top2": 0,
-            "top3": 0,
-            "courses": {str(i): {"starts": 0, "wins": 0} for i in range(1, 7)}
-        }
+            name = clean_name(line[4:12])
+            sei, mei = split_name(name)
 
-# 手動修正を最後に上書き
-reg_fix, name_fix = load_name_fix()
+            result[reg] = {
+                "reg": reg,
+                "name": name,
+                "sei": sei,
+                "mei": mei,
+            }
 
-# まず名前fix
-for reg, p in players.items():
-    name_key = clean_name(p["name"])
-    if name_key in name_fix:
-        p["sei"] = name_fix[name_key]["sei"]
-        p["mei"] = name_fix[name_key]["mei"]
+    return result
 
-# 次に登録番号fix（最優先）
-for reg, fix_row in reg_fix.items():
-    if reg not in players:
-        continue
-    players[reg]["sei"] = fix_row["sei"]
-    players[reg]["mei"] = fix_row["mei"]
 
-# k結果から成績作る
+def ensure_name_master():
+    if NAME_MASTER.exists():
+        data = load_json(NAME_MASTER, {})
+        if isinstance(data, dict) and data:
+            return data
+
+    name_master = build_name_master_from_fan()
+
+    reg_fix, name_fix = load_name_fix()
+
+    for reg, row in name_master.items():
+        name_key = clean_name(row["name"])
+        if name_key in name_fix:
+            row["sei"] = name_fix[name_key]["sei"]
+            row["mei"] = name_fix[name_key]["mei"]
+
+    for reg, fix_row in reg_fix.items():
+        if reg in name_master:
+            name_master[reg]["sei"] = fix_row["sei"]
+            name_master[reg]["mei"] = fix_row["mei"]
+
+    NAME_MASTER.parent.mkdir(parents=True, exist_ok=True)
+    with open(NAME_MASTER, "w", encoding="utf-8") as f:
+        json.dump(name_master, f, ensure_ascii=False, indent=2)
+
+    return name_master
+
+
+name_master = ensure_name_master()
+
+for reg, row in name_master.items():
+    players[reg] = {
+        "reg": reg,
+        "name": row["name"],
+        "sei": row["sei"],
+        "mei": row["mei"],
+        "starts": 0,
+        "wins": 0,
+        "top2": 0,
+        "top3": 0,
+        "courses": {str(i): {"starts": 0, "wins": 0} for i in range(1, 7)}
+    }
+
 if K_RESULTS.exists():
-    with open(K_RESULTS, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    data = load_json(K_RESULTS, {})
 
-    for venue in data["venues"]:
-        for race in venue["races"]:
-            for r in race["results"]:
-                reg = str(r["reg"])
+    for venue in data.get("venues", []):
+        for race in venue.get("races", []):
+            for r in race.get("results", []):
+                reg = str(r.get("reg", "")).strip()
                 if reg not in players:
                     continue
 
-                finish = r["finish"]
-                course = str(r["course"])
+                finish = r.get("finish")
+                course = str(r.get("course", "")).strip()
 
                 p = players[reg]
                 p["starts"] += 1
@@ -207,11 +233,9 @@ if K_RESULTS.exists():
 
                     if course in p["courses"]:
                         p["courses"][course]["starts"] += 1
-
                         if finish == 1:
                             p["courses"][course]["wins"] += 1
 
-# 最終率計算
 for reg, p in players.items():
     starts = p["starts"]
 
@@ -229,6 +253,5 @@ OUT.parent.mkdir(parents=True, exist_ok=True)
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(players, f, ensure_ascii=False, indent=2)
 
+print("players_name_master loaded:", len(name_master))
 print("players_master built:", len(players))
-print("name fixes applied (by name):", len(name_fix))
-print("name fixes applied (by reg):", len(reg_fix))
