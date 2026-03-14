@@ -57,6 +57,8 @@ LASTNAME_HINTS = sorted({
     "森野", "若林", "竹井", "竹田", "森", "畑"
 }, key=len, reverse=True)
 
+LASTNAME_SET = set(LASTNAME_HINTS)
+
 
 def split_name(name: str):
     name = clean_name(name)
@@ -75,14 +77,22 @@ def split_name(name: str):
 
     if n == 1:
         return name, ""
+
     if n == 2:
         return name[:1], name[1:]
+
     if n == 3:
+        head2 = name[:2]
+        if head2 in LASTNAME_SET:
+            return head2, name[2:]
         return name[:1], name[1:]
+
     if n == 4:
         return name[:2], name[2:]
+
     if n == 5:
         return name[:2], name[2:]
+
     if n == 6:
         return name[:3], name[3:]
 
