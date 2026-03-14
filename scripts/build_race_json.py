@@ -246,9 +246,11 @@ def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int, 
             if legacy_path != stable_path:
                 _write_json(legacy_path, out)
 
+    venue_count = len(venue_cards)
+
     venues_payload: Dict[str, Any] = {
         "date": top_date,
-        "venue_count": len(venue_cards),
+        "venue_count": venue_count,
         "venues": venue_cards,
     }
     venues_out_path = os.path.join(OUT_VENUES_BASE, f"{top_date}.json")
@@ -257,11 +259,11 @@ def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int, 
     print(f"source: {src_path}")
     print(f"date: {top_date}")
     print(f"created_races: {created}")
-    print(f"created_venues: 1")
+    print(f"created_venues: {venue_count}")
     if skipped:
         print(f"skipped: {skipped}")
 
-    return created, skipped, 1
+    return created, skipped, venue_count
 
 
 def main():
@@ -279,10 +281,10 @@ def main():
     _clear_dir_tree(OUT_VENUES_BASE)
 
     for src_path in src_files:
-      created, skipped, venues_created = build_one(src_path, merged_players)
-      total_created += created
-      total_skipped += skipped
-      total_venues += venues_created
+        created, skipped, venues_created = build_one(src_path, merged_players)
+        total_created += created
+        total_skipped += skipped
+        total_venues += venues_created
 
     print("done")
     print("total_created_races:", total_created)
