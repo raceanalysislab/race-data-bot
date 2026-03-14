@@ -441,8 +441,6 @@ def main():
         inferred_total_days = None
         if len(total_days_values) == 1:
             inferred_total_days = total_days_values[0]
-        elif len(total_days_values) == 0 and len(rows) >= 2:
-            inferred_total_days = len(rows)
 
         titles_out.append({
             "title_key": key,
