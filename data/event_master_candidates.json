@@ -1,13 +1,103 @@
 {
-  "generated_at": "2026-03-14T09:58:13.908072+09:00",
+  "generated_at": "2026-03-14T11:24:50.961234+09:00",
   "source_dir": "data/extract",
   "source_file_count": 9,
   "title_count": 29,
   "titles": [
     {
-      "title_key": "にっぽん未来プロジェクト競走ｉｎ宮島",
+      "title_key": "BP梅田開設19周年記念令和スピードレーサー選抜戦",
       "sample_titles": [
-        "にっぽん未来プロジェクト競走ｉｎ宮島"
+        "BP梅田開設19周年記念令和スピードレーサー選抜戦"
+      ],
+      "venues": [
+        "住之江"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 4,
+      "sample_files": [
+        "b260306.txt",
+        "b260307.txt",
+        "b260308.txt",
+        "b260309.txt"
+      ],
+      "sample_dates": [
+        "2026-03-06",
+        "2026-03-07",
+        "2026-03-08",
+        "2026-03-09"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "BTS勝山開設32周年記念",
+      "sample_titles": [
+        "BTS勝山開設32周年記念"
+      ],
+      "venues": [
+        "芦屋"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 1,
+      "sample_files": [
+        "b260306.txt"
+      ],
+      "sample_dates": [
+        "2026-03-06"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "DaiichiーTVファイティングカップ",
+      "sample_titles": [
+        "DaiichiーTVファイティングカップ"
+      ],
+      "venues": [
+        "浜名湖"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 3,
+      "sample_files": [
+        "b260312.txt",
+        "b260313.txt",
+        "b260314.txt"
+      ],
+      "sample_dates": [
+        "2026-03-12",
+        "2026-03-13",
+        "2026-03-14"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "MNBR下関11th 日本財団会長杯",
+      "sample_titles": [
+        "MNBR下関11th 日本財団会長杯"
+      ],
+      "venues": [
+        "下関"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 1,
+      "sample_files": [
+        "b260314.txt"
+      ],
+      "sample_dates": [
+        "2026-03-14"
+      ],
+      "grade_label": "一般",
+      "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "にっぽん未来プロジェクト競走in宮島",
+      "sample_titles": [
+        "にっぽん未来プロジェクト競走in宮島"
       ],
       "venues": [
         "宮島"
@@ -30,14 +120,14 @@
         "2026-03-10",
         "2026-03-11"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
     {
-      "title_key": "にっぽん未来プロジェクト競走ｉｎ平和島",
+      "title_key": "にっぽん未来プロジェクト競走in平和島",
       "sample_titles": [
-        "にっぽん未来プロジェクト競走ｉｎ平和島"
+        "にっぽん未来プロジェクト競走in平和島"
       ],
       "venues": [
         "平和島"
@@ -60,7 +150,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -84,7 +174,7 @@
         "2026-03-07",
         "2026-03-08"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -112,14 +202,14 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "G3",
       "confirmed_total_days": null,
       "notes": ""
     },
     {
-      "title_key": "スカパー！・ＪＬＣ杯戸田ルーキーシリーズ第5戦",
+      "title_key": "スカパー！・JLC杯戸田ルーキーシリーズ第5戦",
       "sample_titles": [
-        "スカパー！・ＪＬＣ杯戸田ルーキーシリーズ第5戦"
+        "スカパー！・JLC杯戸田ルーキーシリーズ第5戦"
       ],
       "venues": [
         "戸田"
@@ -142,7 +232,7 @@
         "2026-03-11",
         "2026-03-12"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -170,7 +260,7 @@
         "2026-03-10",
         "2026-03-11"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -200,7 +290,7 @@
         "2026-03-12",
         "2026-03-13"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -222,7 +312,7 @@
         "2026-03-06",
         "2026-03-07"
       ],
-      "grade_label": "",
+      "grade_label": "G1",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -246,7 +336,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -272,7 +362,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -292,14 +382,14 @@
       "sample_dates": [
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "G1",
       "confirmed_total_days": null,
       "notes": ""
     },
     {
-      "title_key": "愛知バス杯争奪 ＡＢＣツアーカップ",
+      "title_key": "愛知バス杯争奪 ABCツアーカップ",
       "sample_titles": [
-        "愛知バス杯争奪 ＡＢＣツアーカップ"
+        "愛知バス杯争奪 ABCツアーカップ"
       ],
       "venues": [
         "蒲郡"
@@ -312,7 +402,7 @@
       "sample_dates": [
         "2026-03-06"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -340,14 +430,14 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "G3",
       "confirmed_total_days": null,
       "notes": ""
     },
     {
-      "title_key": "春到来！ ＢＯＡＴＢｏｙカップ 2026",
+      "title_key": "春到来！ BOATBoyカップ 2026",
       "sample_titles": [
-        "春到来！ ＢＯＡＴＢｏｙカップ 2026"
+        "春到来！ BOATBoyカップ 2026"
       ],
       "venues": [
         "尼崎"
@@ -366,7 +456,36 @@
         "2026-03-10",
         "2026-03-11"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
+      "confirmed_total_days": null,
+      "notes": ""
+    },
+    {
+      "title_key": "番 登番 名 齢 部 重別 勝率 2率 勝率 2率 NO 2率 NO 2率 123456見",
+      "sample_titles": [
+        "番 登番 名 齢 部 重別 勝率 2率 勝率 2率 NO 2率 NO 2率 123456見"
+      ],
+      "venues": [
+        "江戸川",
+        "若松"
+      ],
+      "total_days_candidates": [],
+      "occurrences": 6,
+      "sample_files": [
+        "b260306.txt",
+        "b260307.txt",
+        "b260308.txt",
+        "b260309.txt",
+        "b260310.txt"
+      ],
+      "sample_dates": [
+        "2026-03-06",
+        "2026-03-07",
+        "2026-03-08",
+        "2026-03-09",
+        "2026-03-10"
+      ],
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -394,7 +513,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -420,7 +539,7 @@
         "2026-03-08",
         "2026-03-09"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -440,7 +559,7 @@
       "sample_dates": [
         "2026-03-06"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -472,14 +591,14 @@
         "2026-03-11",
         "2026-03-12"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
     {
-      "title_key": "第5回ＰａｙＰａｙ銀行賞",
+      "title_key": "第5回PayPay銀行賞",
       "sample_titles": [
-        "第5回ＰａｙＰａｙ銀行賞"
+        "第5回PayPay銀行賞"
       ],
       "venues": [
         "児島"
@@ -498,36 +617,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "艇 選手 選手 年 支 体級 全国 当地 モーター ボート 今節成績 早",
-      "sample_titles": [
-        "艇 選手 選手 年 支 体級 全国 当地 モーター ボート 今節成績 早"
-      ],
-      "venues": [
-        "江戸川",
-        "若松"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 6,
-      "sample_files": [
-        "b260306.txt",
-        "b260307.txt",
-        "b260308.txt",
-        "b260309.txt",
-        "b260310.txt"
-      ],
-      "sample_dates": [
-        "2026-03-06",
-        "2026-03-07",
-        "2026-03-08",
-        "2026-03-09",
-        "2026-03-10"
-      ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -551,7 +641,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "SG",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -575,7 +665,7 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -605,7 +695,7 @@
         "2026-03-12",
         "2026-03-13"
       ],
-      "grade_label": "",
+      "grade_label": "G1",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -625,7 +715,7 @@
       "sample_dates": [
         "2026-03-06"
       ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     },
@@ -649,99 +739,10 @@
         "2026-03-13",
         "2026-03-14"
       ],
-      "grade_label": "",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "ＢＰ梅田開設19周年記念令和スピードレーサー選抜戦",
-      "sample_titles": [
-        "ＢＰ梅田開設19周年記念令和スピードレーサー選抜戦"
-      ],
-      "venues": [
-        "住之江"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 4,
-      "sample_files": [
-        "b260306.txt",
-        "b260307.txt",
-        "b260308.txt",
-        "b260309.txt"
-      ],
-      "sample_dates": [
-        "2026-03-06",
-        "2026-03-07",
-        "2026-03-08",
-        "2026-03-09"
-      ],
-      "grade_label": "",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "ＢＴＳ勝山開設32周年記念",
-      "sample_titles": [
-        "ＢＴＳ勝山開設32周年記念"
-      ],
-      "venues": [
-        "芦屋"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 1,
-      "sample_files": [
-        "b260306.txt"
-      ],
-      "sample_dates": [
-        "2026-03-06"
-      ],
-      "grade_label": "",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "ＤａｉｉｃｈｉーＴＶファイティングカップ",
-      "sample_titles": [
-        "ＤａｉｉｃｈｉーＴＶファイティングカップ"
-      ],
-      "venues": [
-        "浜名湖"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 3,
-      "sample_files": [
-        "b260312.txt",
-        "b260313.txt",
-        "b260314.txt"
-      ],
-      "sample_dates": [
-        "2026-03-12",
-        "2026-03-13",
-        "2026-03-14"
-      ],
-      "grade_label": "",
-      "confirmed_total_days": null,
-      "notes": ""
-    },
-    {
-      "title_key": "ＭＮＢR下関11ｔｈ 日本財団会長杯",
-      "sample_titles": [
-        "ＭＮＢR下関11ｔｈ 日本財団会長杯"
-      ],
-      "venues": [
-        "下関"
-      ],
-      "total_days_candidates": [],
-      "occurrences": 1,
-      "sample_files": [
-        "b260314.txt"
-      ],
-      "sample_dates": [
-        "2026-03-14"
-      ],
-      "grade_label": "",
+      "grade_label": "一般",
       "confirmed_total_days": null,
       "notes": ""
     }
-  ]
+  ],
+  "errors": []
 }
