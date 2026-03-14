@@ -134,11 +134,16 @@ def load_event_master() -> Dict[str, Dict[str, Any]]:
     except Exception:
         return {}
 
-    out: Dict[str, Dict[str, Any]] = {}
-    if not isinstance(raw, dict):
-        return out
+    if isinstance(raw, dict) and isinstance(raw.get("events"), dict):
+        raw_events = raw.get("events") or {}
+    elif isinstance(raw, dict):
+        raw_events = raw
+    else:
+        return {}
 
-    for k, v in raw.items():
+    out: Dict[str, Dict[str, Any]] = {}
+
+    for k, v in raw_events.items():
         key = norm(str(k))
         if not key:
             continue
@@ -159,6 +164,7 @@ def load_event_master() -> Dict[str, Dict[str, Any]]:
             "grade": grade,
             "total_days": total_days,
         }
+
     return out
 
 
@@ -405,14 +411,12 @@ def detect_grade_from_title(title: str) -> str:
     if not raw:
         return "一般"
 
-    # まず event_master 優先
     master_hit = lookup_event_master(title)
     if master_hit:
         grade = str(master_hit.get("grade") or "").strip()
         if grade:
             return grade
 
-    # 明示表記を最優先
     if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
         return "SG"
     if re.search(r"(^|[^A-Z])(G1|GI)([^A-Z]|$)", upper):
