@@ -1,118 +1,339 @@
 {
-  "にっぽん未来プロジェクト競走ｉｎ宮島": {
-    "grade": "一般",
-    "total_days": null
+  "_meta": {
+    "generated_at": "2026-03-14T12:12:51.744028+09:00",
+    "source": "data/event_master_candidates.json",
+    "title_count": 30
   },
-  "にっぽん未来プロジェクト競走ｉｎ平和島": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "びわこヴィーナス！第6回酒処京都新京極スタンド杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "シャボン玉石けん杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "スカパー！・ＪＬＣ杯戸田ルーキーシリーズ第5戦": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "スポーツライブ＋杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "トランスワードトロフィー2026": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "児島キングカップ開設73周年記念競走": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "報知新聞社杯争奪第48回びわこ王座決定戦": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "多摩川巧者決定戦！第21回澤乃井カップ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "尼崎市制110周年記念 尼崎センプルカップ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "愛知バス杯争奪 ＡＢＣツアーカップ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "日刊スポーツ杯争奪徳山オールレディース": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "春到来！ ＢＯＡＴＢｏｙカップ 2026": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "福岡県知事杯争奪 福岡都市圏開設36周年記念競走": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "第10回楽天銀行賞": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "第24回府中市長杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "第32回桐生タイムス杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "第5回ＰａｙＰａｙ銀行賞": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "艇 選手 選手 年 支 体級 全国 当地 モーター ボート 今節成績 早": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "蒲郡商工会議所会頭杯争奪 ガマゴリうどんグランプリ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "西スポ杯争奪芦屋カップ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "開設73周年記念 海の王者決定戦": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "高塚清一記念 第8回 名人集合 マクール杯": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "鳴門のいも屋杯競走": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "ＢＰ梅田開設19周年記念令和スピードレーサー選抜戦": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "ＢＴＳ勝山開設32周年記念": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "ＤａｉｉｃｈｉーＴＶファイティングカップ": {
-    "grade": "一般",
-    "total_days": null
-  },
-  "ＭＮＢR下関11ｔｈ 日本財団会長杯": {
-    "grade": "一般",
-    "total_days": null
+  "events": {
+    "BP梅田開設19周年記念令和スピードレーサー選抜戦": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "BP梅田開設19周年記念令和スピードレーサー選抜戦"
+      ],
+      "venues": [
+        "住之江"
+      ]
+    },
+    "BTS勝山開設32周年記念": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "BTS勝山開設32周年記念"
+      ],
+      "venues": [
+        "芦屋"
+      ]
+    },
+    "DaiichiーTVファイティングカップ": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "DaiichiーTVファイティングカップ"
+      ],
+      "venues": [
+        "浜名湖"
+      ]
+    },
+    "MNBR下関11th 日本財団会長杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "MNBR下関11th 日本財団会長杯"
+      ],
+      "venues": [
+        "下関"
+      ]
+    },
+    "にっぽん未来プロジェクト競走in宮島": {
+      "grade": "一般",
+      "total_days": 6,
+      "notes": "",
+      "sample_titles": [
+        "にっぽん未来プロジェクト競走in宮島"
+      ],
+      "venues": [
+        "宮島"
+      ]
+    },
+    "にっぽん未来プロジェクト競走in平和島": {
+      "grade": "一般",
+      "total_days": 6,
+      "notes": "",
+      "sample_titles": [
+        "にっぽん未来プロジェクト競走in平和島"
+      ],
+      "venues": [
+        "平和島"
+      ]
+    },
+    "びわこヴィーナス！第6回酒処京都新京極スタンド杯": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "びわこヴィーナス！第6回酒処京都新京極スタンド杯"
+      ],
+      "venues": [
+        "びわこ"
+      ]
+    },
+    "シャボン玉石けん杯": {
+      "grade": "G3",
+      "total_days": 5,
+      "notes": "",
+      "sample_titles": [
+        "シャボン玉石けん杯"
+      ],
+      "venues": [
+        "若松"
+      ]
+    },
+    "スカパー！・JLC杯戸田ルーキーシリーズ第5戦": {
+      "grade": "一般",
+      "total_days": 6,
+      "notes": "",
+      "sample_titles": [
+        "スカパー！・JLC杯戸田ルーキーシリーズ第5戦"
+      ],
+      "venues": [
+        "戸田"
+      ]
+    },
+    "スポーツライブ＋杯": {
+      "grade": "一般",
+      "total_days": 5,
+      "notes": "",
+      "sample_titles": [
+        "スポーツライブ＋杯"
+      ],
+      "venues": [
+        "三国"
+      ]
+    },
+    "トランスワードトロフィー2026": {
+      "grade": "一般",
+      "total_days": 6,
+      "notes": "",
+      "sample_titles": [
+        "トランスワードトロフィー2026"
+      ],
+      "venues": [
+        "常滑"
+      ]
+    },
+    "ミッドナイトレース西": {
+      "grade": "一般",
+      "total_days": 2,
+      "notes": "",
+      "sample_titles": [
+        "ミッドナイトレース西"
+      ],
+      "venues": [
+        "若松"
+      ]
+    },
+    "児島キングカップ開設73周年記念競走": {
+      "grade": "G1",
+      "total_days": 2,
+      "notes": "",
+      "sample_titles": [
+        "児島キングカップ開設73周年記念競走"
+      ],
+      "venues": [
+        "児島"
+      ]
+    },
+    "報知新聞社杯争奪第48回びわこ王座決定戦": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "報知新聞社杯争奪第48回びわこ王座決定戦"
+      ],
+      "venues": [
+        "びわこ"
+      ]
+    },
+    "多摩川巧者決定戦！第21回澤乃井カップ": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "多摩川巧者決定戦！第21回澤乃井カップ"
+      ],
+      "venues": [
+        "多摩川"
+      ]
+    },
+    "尼崎市制110周年記念 尼崎センプルカップ": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "尼崎市制110周年記念 尼崎センプルカップ"
+      ],
+      "venues": [
+        "尼崎"
+      ]
+    },
+    "愛知バス杯争奪 ABCツアーカップ": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "愛知バス杯争奪 ABCツアーカップ"
+      ],
+      "venues": [
+        "蒲郡"
+      ]
+    },
+    "日刊スポーツ杯争奪徳山オールレディース": {
+      "grade": "G3",
+      "total_days": 5,
+      "notes": "",
+      "sample_titles": [
+        "日刊スポーツ杯争奪徳山オールレディース"
+      ],
+      "venues": [
+        "徳山"
+      ]
+    },
+    "春到来！ BOATBoyカップ 2026": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "春到来！ BOATBoyカップ 2026"
+      ],
+      "venues": [
+        "尼崎"
+      ]
+    },
+    "福岡県知事杯争奪 福岡都市圏開設36周年記念競走": {
+      "grade": "一般",
+      "total_days": 5,
+      "notes": "",
+      "sample_titles": [
+        "福岡県知事杯争奪 福岡都市圏開設36周年記念競走"
+      ],
+      "venues": [
+        "福岡"
+      ]
+    },
+    "第10回楽天銀行賞": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "第10回楽天銀行賞"
+      ],
+      "venues": [
+        "唐津"
+      ]
+    },
+    "第24回府中市長杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "第24回府中市長杯"
+      ],
+      "venues": [
+        "平和島"
+      ]
+    },
+    "第25回関東日刊紙ボ": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "第25回関東日刊紙ボ"
+      ],
+      "venues": [
+        "江戸川"
+      ]
+    },
+    "第32回桐生タイムス杯": {
+      "grade": "一般",
+      "total_days": 7,
+      "notes": "",
+      "sample_titles": [
+        "第32回桐生タイムス杯"
+      ],
+      "venues": [
+        "桐生"
+      ]
+    },
+    "第5回PayPay銀行賞": {
+      "grade": "一般",
+      "total_days": 4,
+      "notes": "",
+      "sample_titles": [
+        "第5回PayPay銀行賞"
+      ],
+      "venues": [
+        "児島"
+      ]
+    },
+    "蒲郡商工会議所会頭杯争奪 ガマゴリうどんグランプリ": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "蒲郡商工会議所会頭杯争奪 ガマゴリうどんグランプリ"
+      ],
+      "venues": [
+        "蒲郡"
+      ]
+    },
+    "西スポ杯争奪芦屋カップ": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "西スポ杯争奪芦屋カップ"
+      ],
+      "venues": [
+        "芦屋"
+      ]
+    },
+    "開設73周年記念 海の王者決定戦": {
+      "grade": "G1",
+      "total_days": 6,
+      "notes": "",
+      "sample_titles": [
+        "開設73周年記念 海の王者決定戦"
+      ],
+      "venues": [
+        "大村"
+      ]
+    },
+    "高塚清一記念 第8回 名人集合 マクール杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "高塚清一記念 第8回 名人集合 マクール杯"
+      ],
+      "venues": [
+        "浜名湖"
+      ]
+    },
+    "鳴門のいも屋杯競走": {
+      "grade": "一般",
+      "total_days": 3,
+      "notes": "",
+      "sample_titles": [
+        "鳴門のいも屋杯競走"
+      ],
+      "venues": [
+        "鳴門"
+      ]
+    }
   }
 }
