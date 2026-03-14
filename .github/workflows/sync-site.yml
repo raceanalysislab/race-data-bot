@@ -41,10 +41,17 @@ jobs:
           mkdir -p site_repo/data
           rm -rf site_repo/data/site
           mkdir -p site_repo/data/site
+          mkdir -p site_repo/data/master
 
       - name: Copy generated site files first
         run: |
           cp -R data/site/. site_repo/data/site/
+
+      - name: Copy players master
+        run: |
+          if [ -f data/master/players_master.json ]; then
+            cp data/master/players_master.json site_repo/data/master/players_master.json
+          fi
 
       - name: Build player index
         run: |
