@@ -6,6 +6,7 @@
 # 追加：
 #   data/master/merged_players.json を読み込み、
 #   各艇に avg_st / st_count を付与する
+#   各艇の name を正式名で上書きする
 
 import json
 import os
@@ -72,6 +73,10 @@ def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any]) -> D
     mp = merged_players.get(reg_key)
     if not isinstance(mp, dict):
         return out
+
+    master_name = str(mp.get("name") or "").strip()
+    if master_name:
+        out["name"] = master_name
 
     avg_st = mp.get("avg_st")
     st_count = mp.get("st_count")
