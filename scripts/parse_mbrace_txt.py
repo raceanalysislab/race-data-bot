@@ -18,6 +18,18 @@ TRANS = str.maketrans({
     "Ｒ": "R", "Ｈ": "H", "ｍ": "m", "：": ":", "　": " ",
     "％": "%", "－": "-", "―": "-", "−": "-",
     "Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III",
+    "ａ": "a", "ｂ": "b", "ｃ": "c", "ｄ": "d", "ｅ": "e",
+    "ｆ": "f", "ｇ": "g", "ｈ": "h", "ｉ": "i", "ｊ": "j",
+    "ｋ": "k", "ｌ": "l", "ｍ": "m", "ｎ": "n", "ｏ": "o",
+    "ｐ": "p", "ｑ": "q", "ｒ": "r", "ｓ": "s", "ｔ": "t",
+    "ｕ": "u", "ｖ": "v", "ｗ": "w", "ｘ": "x", "ｙ": "y",
+    "ｚ": "z",
+    "Ａ": "A", "Ｂ": "B", "Ｃ": "C", "Ｄ": "D", "Ｅ": "E",
+    "Ｆ": "F", "Ｇ": "G", "Ｈ": "H", "Ｉ": "I", "Ｊ": "J",
+    "Ｋ": "K", "Ｌ": "L", "Ｍ": "M", "Ｎ": "N", "Ｏ": "O",
+    "Ｐ": "P", "Ｑ": "Q", "Ｒ": "R", "Ｓ": "S", "Ｔ": "T",
+    "Ｕ": "U", "Ｖ": "V", "Ｗ": "W", "Ｘ": "X", "Ｙ": "Y",
+    "Ｚ": "Z",
 })
 
 BRANCHES = [
@@ -76,28 +88,12 @@ G3_WORDS = [
     "シャボン玉石けん杯",
 ]
 
-# よくある正式大会名・寄せたいタイトル
 G1_EXACT_WORDS = [
     "地区選手権",
     "ダイヤモンドカップ",
     "モーターボート大賞",
     "BBCトーナメント",
     "センプルカップ",
-]
-
-G2_EXACT_WORDS = [
-    "レディースオールスター",
-    "モーターボート誕生祭",
-    "全国ボートレース甲子園",
-    "レディースチャレンジカップ",
-]
-
-G3_EXACT_WORDS = [
-    "オールレディース",
-    "企業杯",
-    "イースタンヤング",
-    "ウエスタンヤング",
-    "マスターズリーグ",
 ]
 
 RE_G1_ANNIV_HEAD = re.compile(r"^開設\d+周年記念")
@@ -107,6 +103,8 @@ RE_G3_COMPANY = re.compile(r"企業杯")
 RE_G3_LADIES = re.compile(r"オールレディース")
 RE_G3_YOUNG = re.compile(r"(イースタンヤング|ウエスタンヤング)")
 RE_G3_MASTERS = re.compile(r"マスターズリーグ")
+
+EVENT_MASTER_PATH = os.path.join("data", "event_master.json")
 
 
 def norm(s: str) -> str:
@@ -124,8 +122,70 @@ COMPACT_G2_WORDS = [compact(w) for w in G2_WORDS]
 COMPACT_G1_WORDS = [compact(w) for w in G1_WORDS]
 COMPACT_G3_WORDS = [compact(w) for w in G3_WORDS]
 COMPACT_G1_EXACT_WORDS = [compact(w) for w in G1_EXACT_WORDS]
-COMPACT_G2_EXACT_WORDS = [compact(w) for w in G2_EXACT_WORDS]
-COMPACT_G3_EXACT_WORDS = [compact(w) for w in G3_EXACT_WORDS]
+
+
+def load_event_master() -> Dict[str, Dict[str, Any]]:
+    if not os.path.exists(EVENT_MASTER_PATH):
+        return {}
+
+    try:
+        with open(EVENT_MASTER_PATH, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+    except Exception:
+        return {}
+
+    out: Dict[str, Dict[str, Any]] = {}
+    if not isinstance(raw, dict):
+        return out
+
+    for k, v in raw.items():
+        key = norm(str(k))
+        if not key:
+            continue
+
+        if isinstance(v, dict):
+            grade = str(v.get("grade") or "一般").strip() or "一般"
+            total_days = v.get("total_days")
+        else:
+            grade = "一般"
+            total_days = None
+
+        try:
+            total_days = int(total_days) if total_days is not None else None
+        except Exception:
+            total_days = None
+
+        out[key] = {
+            "grade": grade,
+            "total_days": total_days,
+        }
+    return out
+
+
+EVENT_MASTER = load_event_master()
+EVENT_MASTER_KEYS = sorted(EVENT_MASTER.keys(), key=len, reverse=True)
+EVENT_MASTER_COMPACT_MAP = {compact(k): k for k in EVENT_MASTER_KEYS}
+
+
+def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
+    t_norm = norm(title)
+    t_compact = compact(title)
+
+    if not t_norm:
+        return None
+
+    if t_norm in EVENT_MASTER:
+        return EVENT_MASTER[t_norm]
+
+    if t_compact in EVENT_MASTER_COMPACT_MAP:
+        base_key = EVENT_MASTER_COMPACT_MAP[t_compact]
+        return EVENT_MASTER.get(base_key)
+
+    for ck, original_key in EVENT_MASTER_COMPACT_MAP.items():
+        if ck and ck in t_compact:
+            return EVENT_MASTER.get(original_key)
+
+    return None
 
 
 def read_text_auto(path: str) -> List[str]:
@@ -329,20 +389,12 @@ def _contains_any(raw: str, words: List[str]) -> bool:
 
 
 def _looks_like_g1_anniversary(raw: str) -> bool:
-    # 典型的なG1: 先頭から「開設○周年記念」
     if RE_G1_ANNIV_HEAD.match(raw):
         return True
-
-    # 例: 尼崎市制110周年記念尼崎センプルカップ
     if RE_G1_CITY_ANNIV.search(raw):
         return True
-
-    # G1固有の大会名が含まれていればG1
     if _contains_any(raw, COMPACT_G1_EXACT_WORDS):
         return True
-
-    # それ以外の「○周年記念」は一般戦も多いのでここではG1にしない
-    # 例: 福岡県知事杯争奪 福岡都市圏開設36周年記念競走 → 一般
     return False
 
 
@@ -352,6 +404,13 @@ def detect_grade_from_title(title: str) -> str:
 
     if not raw:
         return "一般"
+
+    # まず event_master 優先
+    master_hit = lookup_event_master(title)
+    if master_hit:
+        grade = str(master_hit.get("grade") or "").strip()
+        if grade:
+            return grade
 
     # 明示表記を最優先
     if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
@@ -363,21 +422,16 @@ def detect_grade_from_title(title: str) -> str:
     if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
         return "G3"
 
-    # 正式SG名
     if _contains_any(raw, COMPACT_SG_WORDS):
         return "SG"
-
-    # 正式G2名
     if _contains_any(raw, COMPACT_G2_WORDS):
         return "G2"
 
-    # G1 周年記念・地区選手権系
     if RE_G1_DISTRICT.search(raw):
         return "G1"
     if _looks_like_g1_anniversary(raw):
         return "G1"
 
-    # G3の典型語
     if RE_G3_LADIES.search(raw):
         return "G3"
     if RE_G3_COMPANY.search(raw):
@@ -387,13 +441,27 @@ def detect_grade_from_title(title: str) -> str:
     if RE_G3_MASTERS.search(raw):
         return "G3"
 
-    # 保険
     if _contains_any(raw, COMPACT_G1_WORDS):
         return "G1"
     if _contains_any(raw, COMPACT_G3_WORDS):
         return "G3"
 
     return "一般"
+
+
+def resolve_total_days(event_title: str, parsed_total_days: Optional[int]) -> Optional[int]:
+    if parsed_total_days is not None:
+        return parsed_total_days
+
+    master_hit = lookup_event_master(event_title)
+    if master_hit:
+        td = master_hit.get("total_days")
+        try:
+            return int(td) if td is not None else None
+        except Exception:
+            return None
+
+    return None
 
 
 def _to_float(x: str) -> Optional[float]:
@@ -762,9 +830,10 @@ def main():
     for b in blocks:
         venue = parse_venue(b)
         ymd = parse_date(b)
-        current_day, total_days = parse_day_info(b)
-        day_label = format_day_label(current_day, total_days)
+        current_day, parsed_total_days = parse_day_info(b)
         event_title = parse_event_title(b)
+        total_days = resolve_total_days(event_title, parsed_total_days)
+        day_label = format_day_label(current_day, total_days)
         grade_label = detect_grade_from_title(event_title)
         races = parse_races(b)
 
@@ -814,6 +883,7 @@ def main():
     print("txt:", txt_path)
     print("out:", out_path)
     print("venues:", len(venues_out))
+    print("event_master_loaded:", len(EVENT_MASTER))
     if venues_out:
         print(
             "first_venue:",
