@@ -3,14 +3,16 @@ import pathlib
 
 SRC = pathlib.Path("data/master/raw/fan2510.txt")
 K_RESULTS = pathlib.Path("data/k_results_parsed.json")
+FIX = pathlib.Path("data/master/players_name_fix.json")
 OUT = pathlib.Path("data/master/players_master.json")
 
 players = {}
 
+
 def clean_name(s: str) -> str:
     return s.replace("　", "").replace(" ", "").strip()
 
-# ここに誤判定した名前だけ後から追加していく
+
 NAME_SPLIT_OVERRIDES = {
     "宮之原輝紀": ("宮之原", "輝紀"),
     "大橋純一郎": ("大橋", "純一郎"),
@@ -30,12 +32,13 @@ NAME_SPLIT_OVERRIDES = {
     "間庭菜摘": ("間庭", "菜摘"),
     "中村駿平": ("中村", "駿平"),
     "畑竜生": ("畑", "竜生"),
+    "鐘ヶ江真司": ("鐘ヶ江", "真司"),
 }
 
-# 先頭一致で使う名字ヒント
 LASTNAME_HINTS = sorted({
     "宮之原", "宇佐見", "佐々木", "渡邉", "中嶋", "櫻葉",
     "西澤", "笠野", "岩崎", "川崎", "間庭", "中村",
+    "鐘ヶ江",
     "鳥飼", "奥村", "梶山", "深川", "里岡", "岩永",
     "長尾", "柏野", "荻野", "根岸", "大町", "大井",
     "上村", "落合", "眞田", "仲口", "木村", "土屋",
@@ -54,6 +57,7 @@ LASTNAME_HINTS = sorted({
     "森野", "若林", "竹井", "竹田", "森", "畑"
 }, key=len, reverse=True)
 
+
 def split_name(name: str):
     name = clean_name(name)
 
@@ -67,7 +71,6 @@ def split_name(name: str):
         if name.startswith(last) and len(name) > len(last):
             return last, name[len(last):]
 
-    # ヒントに無い場合の素直なフォールバック
     n = len(name)
 
     if n == 1:
@@ -84,6 +87,37 @@ def split_name(name: str):
         return name[:3], name[3:]
 
     return name[:-2], name[-2:]
+
+
+def load_name_fix():
+    if not FIX.exists():
+        return {}
+
+    with open(FIX, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    if not isinstance(data, dict):
+        return {}
+
+    cleaned = {}
+    for reg, row in data.items():
+        reg_key = str(reg).strip()
+        if not reg_key:
+            continue
+
+        sei = clean_name(str(row.get("sei", "")))
+        mei = clean_name(str(row.get("mei", "")))
+
+        if not sei and not mei:
+            continue
+
+        cleaned[reg_key] = {
+            "sei": sei,
+            "mei": mei,
+        }
+
+    return cleaned
+
 
 # fanマスター（名前）
 with open(SRC, "r", encoding="cp932", errors="ignore") as f:
@@ -109,6 +143,14 @@ with open(SRC, "r", encoding="cp932", errors="ignore") as f:
             "top3": 0,
             "courses": {str(i): {"starts": 0, "wins": 0} for i in range(1, 7)}
         }
+
+# 手動修正を最後に上書き
+name_fix = load_name_fix()
+for reg, fix_row in name_fix.items():
+    if reg not in players:
+        continue
+    players[reg]["sei"] = fix_row["sei"]
+    players[reg]["mei"] = fix_row["mei"]
 
 # k結果から成績作る
 if K_RESULTS.exists():
@@ -163,3 +205,4 @@ with open(OUT, "w", encoding="utf-8") as f:
     json.dump(players, f, ensure_ascii=False, indent=2)
 
 print("players_master built:", len(players))
+print("name fixes applied:", len(name_fix))
