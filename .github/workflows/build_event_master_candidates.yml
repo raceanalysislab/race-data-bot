@@ -16,10 +16,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run event master candidate builder
+      - name: Run script
         run: python scripts/build_event_master_candidates.py
 
-      - name: Commit generated candidates
+      - name: Commit result
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
