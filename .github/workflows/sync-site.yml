@@ -53,6 +53,12 @@ jobs:
             cp data/master/players_master.json site_repo/data/master/players_master.json
           fi
 
+      - name: Copy players name master
+        run: |
+          if [ -f data/master/players_name_master.json ]; then
+            cp data/master/players_name_master.json site_repo/data/master/players_name_master.json
+          fi
+
       - name: Build player index
         run: |
           python scripts/build_player_index.py
