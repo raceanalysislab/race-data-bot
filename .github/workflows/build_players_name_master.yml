@@ -1,0 +1,29 @@
+name: Build Players Name Master
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build players name master
+        run: |
+          python scripts/build_players_name_master.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "race-data-bot"
+          git config user.email "bot@github.local"
+          git add data/master/players_name_master.json
+          git commit -m "build: players_name_master" || echo "No changes"
+          git push
