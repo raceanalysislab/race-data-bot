@@ -66,6 +66,24 @@ def compact(s: str) -> str:
     return norm(s).replace(" ", "")
 
 
+def normalize_event_title(s: str) -> str:
+    s = norm(s)
+
+    # グレード文字列による推測はしないが、照合ノイズは除去
+    s = re.sub(r"\bSG\b", "", s)
+    s = re.sub(r"\bG[123]\b", "", s)
+
+    # 第○回は年で変わるため照合対象から除外
+    s = re.sub(r"第\s*\d+\s*回", "", s)
+
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def compact_event_title(s: str) -> str:
+    return normalize_event_title(s).replace(" ", "")
+
+
 def load_event_master() -> Dict[str, Dict[str, Any]]:
     if not os.path.exists(EVENT_MASTER_PATH):
         return {}
@@ -86,54 +104,50 @@ def load_event_master() -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
 
     for k, v in raw_events.items():
-        key = norm(str(k))
-        if not key:
+        key_norm = normalize_event_title(str(k))
+        key_compact = compact_event_title(str(k))
+        if not key_norm or not key_compact:
             continue
 
         if isinstance(v, dict):
             grade = str(v.get("grade") or "一般").strip() or "一般"
             total_days = v.get("total_days")
+            notes = str(v.get("notes") or "").strip()
+            sample_titles = v.get("sample_titles") if isinstance(v.get("sample_titles"), list) else []
+            venues = v.get("venues") if isinstance(v.get("venues"), list) else []
         else:
             grade = "一般"
             total_days = None
+            notes = ""
+            sample_titles = []
+            venues = []
 
         try:
             total_days = int(total_days) if total_days is not None else None
         except Exception:
             total_days = None
 
-        out[key] = {
+        out[key_compact] = {
+            "title": key_norm,
             "grade": grade,
             "total_days": total_days,
+            "notes": notes,
+            "sample_titles": sample_titles,
+            "venues": venues,
         }
 
     return out
 
 
 EVENT_MASTER = load_event_master()
-EVENT_MASTER_KEYS = sorted(EVENT_MASTER.keys(), key=len, reverse=True)
-EVENT_MASTER_COMPACT_MAP = {compact(k): k for k in EVENT_MASTER_KEYS}
 
 
 def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
-    t_norm = norm(title)
-    t_compact = compact(title)
-
-    if not t_norm:
+    # 完全一致のみ。部分一致は禁止。
+    t_compact = compact_event_title(title)
+    if not t_compact:
         return None
-
-    if t_norm in EVENT_MASTER:
-        return EVENT_MASTER[t_norm]
-
-    if t_compact in EVENT_MASTER_COMPACT_MAP:
-        base_key = EVENT_MASTER_COMPACT_MAP[t_compact]
-        return EVENT_MASTER.get(base_key)
-
-    for ck, original_key in EVENT_MASTER_COMPACT_MAP.items():
-        if ck and ck in t_compact:
-            return EVENT_MASTER.get(original_key)
-
-    return None
+    return EVENT_MASTER.get(t_compact)
 
 
 def read_text_auto(path: str) -> List[str]:
@@ -332,13 +346,12 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
-def detect_grade_from_title(title: str) -> str:
+def resolve_grade(title: str) -> str:
     master_hit = lookup_event_master(title)
     if master_hit:
         grade = str(master_hit.get("grade") or "").strip()
         if grade:
             return grade
-
     return "一般"
 
 
@@ -725,9 +738,10 @@ def main():
         ymd = parse_date(b)
         current_day, parsed_total_days = parse_day_info(b)
         event_title = parse_event_title(b)
+        event_title_norm = normalize_event_title(event_title)
         total_days = resolve_total_days(event_title, parsed_total_days)
         day_label = format_day_label(current_day, total_days)
-        grade_label = detect_grade_from_title(event_title)
+        grade_label = resolve_grade(event_title)
         races = parse_races(b)
 
         if not venue or not races:
@@ -743,6 +757,7 @@ def main():
             "venue": venue,
             "date": ymd,
             "event_title": event_title,
+            "event_title_norm": event_title_norm,
             "grade_label": grade_label,
         }
         if current_day is not None:
@@ -789,6 +804,8 @@ def main():
             venues_out[0].get("grade_label"),
             "title:",
             venues_out[0].get("event_title"),
+            "title_norm:",
+            venues_out[0].get("event_title_norm"),
         )
         print("first_venue_races:", len(venues_out[0]["races"]))
     if warnings:
