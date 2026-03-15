@@ -1,17 +1,14 @@
 {
   "date": "2026-03-16",
-  "checked_at": "2026-03-16T02:58:45.273752+09:00",
+  "checked_at": "2026-03-16T04:42:58.658455+09:00",
   "blocked": false,
   "held_places": [
     "多摩川",
     "蒲郡",
     "びわこ",
     "尼崎",
-    "鳴門",
-    "徳山",
     "下関",
-    "芦屋",
-    "福岡"
+    "芦屋"
   ],
   "venues": [
     {
@@ -330,7 +327,7 @@
     {
       "name": "鳴門",
       "jcd": "14",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -366,7 +363,7 @@
     {
       "name": "徳山",
       "jcd": "18",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -500,7 +497,7 @@
     {
       "name": "福岡",
       "jcd": "22",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
