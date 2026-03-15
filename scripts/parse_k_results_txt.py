@@ -173,6 +173,16 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
+def normalize_event_title(title: str) -> str:
+    s = norm_space(title)
+
+    s = re.sub(r"第\s*\d+\s*回", "", s)
+    s = re.sub(r"\bSG\b", "", s)
+    s = re.sub(r"\bG[123]\b", "", s)
+
+    return s.strip()
+
+
 def normalize_finish(raw: str) -> Any:
     raw = raw.strip()
     if raw.isdigit():
@@ -215,6 +225,7 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
     venue = parse_venue(block)
     date = parse_date(block)
     event_title = parse_event_title(block)
+    event_title_norm = normalize_event_title(event_title)
 
     races: List[Dict[str, Any]] = []
     current_race: Optional[Dict[str, Any]] = None
@@ -275,6 +286,7 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
         "venue": venue,
         "date": date,
         "event_title": event_title,
+        "event_title_norm": event_title_norm,
         "races": races
     }
 
