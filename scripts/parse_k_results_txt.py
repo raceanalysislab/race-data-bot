@@ -139,6 +139,40 @@ def parse_date(block: List[str]) -> str:
     return ""
 
 
+def parse_event_title(block: List[str]) -> str:
+    for idx, line in enumerate(block):
+        s = norm_space(line)
+
+        if "競走成績" in s:
+            for j in range(idx + 1, min(idx + 8, len(block))):
+                t = norm_space(block[j])
+
+                if not t:
+                    continue
+
+                if "第 " in t and "日" in t:
+                    continue
+                if re.search(r"\d{4}/\s*\d{1,2}/\d{1,2}", t):
+                    continue
+                if "ボートレース" in t and len(t) <= 12:
+                    continue
+                if "内容については主催者発行のものと照合して下さい" in t:
+                    continue
+                if "払戻金" in t:
+                    continue
+
+                return t
+
+    for line in block[:8]:
+        s = norm_space(line)
+        if "［成績］" in s:
+            m = re.search(r"［成績］\s+\d{1,2}/\d{1,2}\s+(.+?)\s+第\s*\d+日", s)
+            if m:
+                return norm_space(m.group(1))
+
+    return ""
+
+
 def normalize_finish(raw: str) -> Any:
     raw = raw.strip()
     if raw.isdigit():
@@ -180,6 +214,7 @@ def parse_race_title(line: str, rno: int) -> str:
 def parse_block(block: List[str]) -> Dict[str, Any]:
     venue = parse_venue(block)
     date = parse_date(block)
+    event_title = parse_event_title(block)
 
     races: List[Dict[str, Any]] = []
     current_race: Optional[Dict[str, Any]] = None
@@ -239,6 +274,7 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
     return {
         "venue": venue,
         "date": date,
+        "event_title": event_title,
         "races": races
     }
 
