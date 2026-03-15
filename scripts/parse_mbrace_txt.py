@@ -53,57 +53,6 @@ RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
 
-# 単体の「グランプリ」「メモリアル」「ダービー」は誤爆しやすいので使わない
-SG_WORDS = [
-    "ボートレースクラシック",
-    "ボートレースオールスター",
-    "グランドチャンピオン",
-    "オーシャンカップ",
-    "ボートレースメモリアル",
-    "ボートレースダービー",
-    "チャレンジカップ",
-    "グランプリシリーズ",
-    "クイーンズクライマックス",
-]
-
-G2_WORDS = [
-    "レディースオールスター",
-    "モーターボート誕生祭",
-    "全国ボートレース甲子園",
-    "レディースチャレンジカップ",
-]
-
-G1_WORDS = [
-    "地区選手権",
-    "ダイヤモンドカップ",
-    "モーターボート大賞",
-]
-
-G3_WORDS = [
-    "オールレディース",
-    "企業杯",
-    "イースタンヤング",
-    "ウエスタンヤング",
-    "マスターズリーグ",
-    "シャボン玉石けん杯",
-]
-
-G1_EXACT_WORDS = [
-    "地区選手権",
-    "ダイヤモンドカップ",
-    "モーターボート大賞",
-    "BBCトーナメント",
-    "センプルカップ",
-]
-
-RE_G1_ANNIV_HEAD = re.compile(r"^開設\d+周年記念")
-RE_G1_CITY_ANNIV = re.compile(r"[^\s]*市制\d+周年記念")
-RE_G1_DISTRICT = re.compile(r"地区選手権")
-RE_G3_COMPANY = re.compile(r"企業杯")
-RE_G3_LADIES = re.compile(r"オールレディース")
-RE_G3_YOUNG = re.compile(r"(イースタンヤング|ウエスタンヤング)")
-RE_G3_MASTERS = re.compile(r"マスターズリーグ")
-
 EVENT_MASTER_PATH = os.path.join("data", "event_master.json")
 
 
@@ -115,13 +64,6 @@ def norm(s: str) -> str:
 
 def compact(s: str) -> str:
     return norm(s).replace(" ", "")
-
-
-COMPACT_SG_WORDS = [compact(w) for w in SG_WORDS]
-COMPACT_G2_WORDS = [compact(w) for w in G2_WORDS]
-COMPACT_G1_WORDS = [compact(w) for w in G1_WORDS]
-COMPACT_G3_WORDS = [compact(w) for w in G3_WORDS]
-COMPACT_G1_EXACT_WORDS = [compact(w) for w in G1_EXACT_WORDS]
 
 
 def load_event_master() -> Dict[str, Dict[str, Any]]:
@@ -390,65 +332,12 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
-def _contains_any(raw: str, words: List[str]) -> bool:
-    return any(w in raw for w in words)
-
-
-def _looks_like_g1_anniversary(raw: str) -> bool:
-    if RE_G1_ANNIV_HEAD.match(raw):
-        return True
-    if RE_G1_CITY_ANNIV.search(raw):
-        return True
-    if _contains_any(raw, COMPACT_G1_EXACT_WORDS):
-        return True
-    return False
-
-
 def detect_grade_from_title(title: str) -> str:
-    raw = compact(title)
-    upper = raw.upper()
-
-    if not raw:
-        return "一般"
-
     master_hit = lookup_event_master(title)
     if master_hit:
         grade = str(master_hit.get("grade") or "").strip()
         if grade:
             return grade
-
-    if re.search(r"(^|[^A-Z])SG([^A-Z]|$)", upper):
-        return "SG"
-    if re.search(r"(^|[^A-Z])(G1|GI)([^A-Z]|$)", upper):
-        return "G1"
-    if re.search(r"(^|[^A-Z])(G2|GII)([^A-Z]|$)", upper):
-        return "G2"
-    if re.search(r"(^|[^A-Z])(G3|GIII)([^A-Z]|$)", upper):
-        return "G3"
-
-    if _contains_any(raw, COMPACT_SG_WORDS):
-        return "SG"
-    if _contains_any(raw, COMPACT_G2_WORDS):
-        return "G2"
-
-    if RE_G1_DISTRICT.search(raw):
-        return "G1"
-    if _looks_like_g1_anniversary(raw):
-        return "G1"
-
-    if RE_G3_LADIES.search(raw):
-        return "G3"
-    if RE_G3_COMPANY.search(raw):
-        return "G3"
-    if RE_G3_YOUNG.search(raw):
-        return "G3"
-    if RE_G3_MASTERS.search(raw):
-        return "G3"
-
-    if _contains_any(raw, COMPACT_G1_WORDS):
-        return "G1"
-    if _contains_any(raw, COMPACT_G3_WORDS):
-        return "G3"
 
     return "一般"
 
