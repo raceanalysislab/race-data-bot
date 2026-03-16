@@ -10,15 +10,17 @@
 # - 内部では 会場|開催タイトル ごとに累積を持つ
 # - ただし出力時は 同じ会場・同じ日付 の内容をマージして1ファイルにまとめる
 # - これにより event_title のブレで一部選手が消える事故を防ぐ
-# - 結果行の正規表現を緩め、列ズレでもSTを拾いやすくする
-# - さらに結果行の未一致をログ出力して、取りこぼし原因を追えるようにする
+# - ST は「展示タイム」「進入」の後ろにある値だけを拾う
+# - K0 は平均STの対象外
+# - F0.02 は 0.02 として採用
+# - 未一致行はログ出力して追跡できるようにする
 
 import json
 import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 JST = timezone(timedelta(hours=9))
 
@@ -27,11 +29,11 @@ RE_KEND = re.compile(r"^\d{2}KEND$")
 RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
 
-# 着順 / 艇 / 登番 / 名前 / ... / ST
-# 末尾条件を外して、途中に ST が出た時点で拾う
-RE_RESULT_ROW = re.compile(
-    r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+.*?([0-9]+\.[0-9]{2})"
+# 行頭の基本情報だけ先に取る
+RE_RESULT_ROW_HEAD = re.compile(
+    r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+)$"
 )
+
 RE_RESULT_ROW_CANDIDATE = re.compile(r"^([0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+")
 
 
@@ -164,6 +166,39 @@ def list_k_txt_files() -> List[str]:
     return sorted(set(candidates))
 
 
+def extract_st_from_result_line(line: str) -> Optional[float]:
+    """
+    結果行から ST を抽出する。
+    想定並び:
+      ... モーター ボート 展示(6.81) 進入(3) ST(0.19 or F0.02) ...
+    """
+
+    s = line.rstrip()
+
+    # K0行は今節平均STの対象外
+    if re.match(r"^\s*K0\s+", s):
+        return None
+
+    # 名前以降の数値列から、展示タイム→進入→ST の並びを拾う
+    # 例:
+    # 42  167  6.85   1    0.17
+    # 40  16   6.84   2   F0.21
+    m = re.search(
+        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([F]?\d+\.\d{2})\b",
+        s
+    )
+    if not m:
+        return None
+
+    st_raw = m.group(3).strip()
+    st_raw = st_raw.lstrip("F")
+
+    try:
+        return float(st_raw)
+    except Exception:
+        return None
+
+
 def main() -> None:
     paths = list_k_txt_files()
     if not paths:
@@ -180,6 +215,7 @@ def main() -> None:
     file_count = 0
     race_count = 0
     unmatched_rows = 0
+    skipped_k0_rows = 0
 
     for path in paths:
         lines = read_text_auto(path)
@@ -223,28 +259,38 @@ def main() -> None:
                     continue
 
                 if in_result_table:
-                    m = RE_RESULT_ROW.match(line)
-                    if m:
-                        reg = str(m.group(3)).strip()
-                        name = norm_space(m.group(4))
-                        st_raw = m.group(5)
+                    head = RE_RESULT_ROW_HEAD.match(line)
+                    if head:
+                        rank = str(head.group(1)).strip()
+                        reg = str(head.group(3)).strip()
+                        tail = str(head.group(4))
+                        name = ""
 
-                        try:
-                            st = float(st_raw)
-                        except Exception:
-                            st = None
+                        # 名前はモーター番号の直前までを取る
+                        name_match = re.match(r"(.+?)\s+\d+\s+\d+\s+", tail)
+                        if name_match:
+                            name = norm_space(name_match.group(1))
+                        else:
+                            name = norm_space(tail)
+
+                        if rank == "K0":
+                            skipped_k0_rows += 1
+                            continue
+
+                        st = extract_st_from_result_line(line)
 
                         if reg and st is not None:
                             day_stats[base_key][date_str][reg]["st_sum"] += st
                             day_stats[base_key][date_str][reg]["st_count"] += 1
                             if name:
                                 day_stats[base_key][date_str][reg]["name"] = name
-                        continue
+                            continue
 
-                    s = line.strip()
-                    if s and RE_RESULT_ROW_CANDIDATE.match(s):
-                        unmatched_rows += 1
-                        print("UNMATCHED_RESULT_ROW:", s)
+                        s = line.strip()
+                        if s and RE_RESULT_ROW_CANDIDATE.match(s):
+                            unmatched_rows += 1
+                            print("UNMATCHED_RESULT_ROW:", s)
+                        continue
 
                     if (
                         line.strip() == ""
@@ -327,6 +373,7 @@ def main() -> None:
     print("races:", race_count)
     print("meet_files:", written_files)
     print("unmatched_rows:", unmatched_rows)
+    print("skipped_k0_rows:", skipped_k0_rows)
     print("out_dir:", out_dir)
 
 
