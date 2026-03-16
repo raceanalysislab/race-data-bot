@@ -1,12 +1,17 @@
 name: Build Course Stats
 
 on:
+  workflow_run:
+    workflows: ["Fetch K Results"]
+    types:
+      - completed
   workflow_dispatch:
   schedule:
     - cron: "0 3 * * *"   # 毎日12:00 JST
 
 jobs:
   build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +33,5 @@ jobs:
           git config --global user.email "actions@github.com"
 
           git add data/player_course_stats.json
-
           git commit -m "update player course stats" || echo "no changes"
-
           git push
