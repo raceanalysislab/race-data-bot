@@ -1,6 +1,6 @@
 # scripts/build_meet_avg_st_from_k.py
 # extract_k 内の k******.txt を全部読んで
-# 同一開催（会場 + 開催タイトル + 日付）ごとの
+# 同一開催（会場 + 開催タイトル）ごとの
 # 選手別「今節平均ST」を作る
 #
 # 出力:
@@ -8,7 +8,7 @@
 #
 # 使い方:
 # - race-detail.js 側で
-#   venue + event_title + date をキーにして参照
+#   venue + event_title をキーにして参照
 # - 各選手 regno ごとに avg_st / count を使う
 
 import json
@@ -16,7 +16,7 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 JST = timezone(timedelta(hours=9))
 
@@ -145,7 +145,7 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # meet_key -> reg -> {st_sum, st_count, name}
+    # meet_key(会場|開催名) -> reg -> {st_sum, st_count, name}
     meet_stats: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(
         lambda: defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""})
     )
@@ -160,13 +160,13 @@ def main() -> None:
 
         for block in blocks:
             venue = parse_venue(block)
-            date_str = parse_date(block)
+            _date_str = parse_date(block)  # 読み取り自体は残す
             event_title = parse_event_title(block)
 
-            if not venue or not event_title or not date_str:
+            if not venue or not event_title:
                 continue
 
-            meet_key = f"{venue}|{event_title}|{date_str}"
+            meet_key = f"{venue}|{event_title}"
 
             current_race = None
             in_result_table = False
