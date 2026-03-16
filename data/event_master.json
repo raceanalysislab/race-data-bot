@@ -1,8 +1,9 @@
 {
   "_meta": {
-    "generated_at": "2026-03-17T08:28:17.345504+09:00",
-    "source": "data/event_master_candidates.json",
-    "title_count": 31
+    "generated_at": "2026-03-17T08:55:16.085182+09:00",
+    "source_candidates": "data/event_master_candidates.json",
+    "source_manual": "data/event_master_manual.json",
+    "title_count": 35
   },
   "events": {
     "BP梅田開設19周年記念令和スピードレーサー選抜戦": {
@@ -137,6 +138,28 @@
         "若松"
       ]
     },
+    "ルーキーシリーズ第6戦 みどり市議会議長杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "ルーキーシリーズ第6戦 みどり市議会議長杯"
+      ],
+      "venues": [
+        "桐生"
+      ]
+    },
+    "ヴィーナスシリーズ第24戦第11回マクール杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "ヴィーナスシリーズ第24戦第11回マクール杯"
+      ],
+      "venues": [
+        "宮島"
+      ]
+    },
     "児島キングカップ開設73周年記念競走": {
       "grade": "G1",
       "total_days": null,
@@ -146,6 +169,28 @@
       ],
       "venues": [
         "児島"
+      ]
+    },
+    "唐津MB大賞～スター候補チャレンジマッチ～": {
+      "grade": "G2",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "唐津MB大賞～スター候補チャレンジマッチ～"
+      ],
+      "venues": [
+        "唐津"
+      ]
+    },
+    "坂井市制20周年記念": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "坂井市制20周年記念"
+      ],
+      "venues": [
+        "三国"
       ]
     },
     "報知新聞社杯争奪第48回びわこ王座決定戦": {
@@ -190,6 +235,17 @@
       ],
       "venues": [
         "蒲郡"
+      ]
+    },
+    "新小岩ホルモン平田杯": {
+      "grade": "一般",
+      "total_days": null,
+      "notes": "",
+      "sample_titles": [
+        "新小岩ホルモン平田杯"
+      ],
+      "venues": [
+        "江戸川"
       ]
     },
     "日刊スポーツ杯争奪徳山オールレディース": {
@@ -333,17 +389,6 @@
       ],
       "venues": [
         "鳴門"
-      ]
-    },
-    "唐津MB大賞～スター候補チャレンジマッチ～": {
-      "grade": "G2",
-      "total_days": null,
-      "notes": "",
-      "sample_titles": [
-        "唐津MB大賞～スター候補チャレンジマッチ～"
-      ],
-      "venues": [
-        "唐津"
       ]
     }
   }
