@@ -53,6 +53,10 @@ jobs:
         run: |
           python scripts/fetch_mbrace.py
 
+      - name: Fetch K results
+        run: |
+          python scripts/fetch_k_results.py
+
       - name: Check extracted mbrace txt
         id: check_mbrace
         run: |
@@ -103,6 +107,12 @@ jobs:
 
           echo "----- data/site/races -----"
           ls -la data/site/races || true
+
+          echo "----- data/download_k -----"
+          ls -la data/download_k || true
+
+          echo "----- data/extract_k -----"
+          ls -la data/extract_k || true
 
           echo "----- site venues dir -----"
           find data/site/venues -maxdepth 1 -type f | sort || true
