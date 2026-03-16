@@ -10,6 +10,7 @@
 # - 内部では 会場|開催タイトル ごとに累積を持つ
 # - ただし出力時は 同じ会場・同じ日付 の内容をマージして1ファイルにまとめる
 # - これにより event_title のブレで一部選手が消える事故を防ぐ
+# - 結果行の正規表現を緩め、列ズレでもSTを拾いやすくする
 # - さらに結果行の未一致をログ出力して、取りこぼし原因を追えるようにする
 
 import json
@@ -25,8 +26,11 @@ RE_KBGN = re.compile(r"^\d{2}KBGN$")
 RE_KEND = re.compile(r"^\d{2}KEND$")
 RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
+
+# 着順 / 艇 / 登番 / 名前 / ... / ST
+# 途中列は開催やフォーマットでブレるので広く吸う
 RE_RESULT_ROW = re.compile(
-    r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+.*?\s+([0-9]+\.[0-9]{2})\s+"
+    r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+.*?([0-9]+\.[0-9]{2})(?:\s+|$)"
 )
 RE_RESULT_ROW_CANDIDATE = re.compile(r"^([0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+")
 
@@ -250,8 +254,7 @@ def main() -> None:
                     ):
                         in_result_table = False
 
-    # まず base_key ごとに日別playersを作る
-    # その後 会場+日付 でマージして最終出力
+    # base_keyごとの日別累積を作り、最後に会場+日付でマージ
     merged_outputs: Dict[str, Dict[str, Any]] = {}
 
     for base_key, dated_regs in day_stats.items():
@@ -278,7 +281,7 @@ def main() -> None:
 
             players_out = merged_outputs[output_key]["players"]
 
-            # この日付ファイルには「前日まで」の累積を入れる
+            # この日付ファイルには前日までの累積を入れる
             for reg, src in cumulative.items():
                 count = int(src["st_count"])
                 if count <= 0:
@@ -286,7 +289,6 @@ def main() -> None:
 
                 avg_st = round(src["st_sum"] / count, 2)
 
-                # すでに同じ reg があれば、count が大きい方を優先
                 prev = players_out.get(reg)
                 if (not prev) or (int(prev.get("count", 0)) < count):
                     players_out[reg] = {
@@ -295,7 +297,7 @@ def main() -> None:
                         "count": count
                     }
 
-            # その日の結果を累積へ加算（翌日以降に効く）
+            # その日の結果を翌日以降用の累積へ加算
             current_day_regs = dated_regs[date_str]
             for reg, src in current_day_regs.items():
                 cumulative[reg]["st_sum"] += float(src["st_sum"])
