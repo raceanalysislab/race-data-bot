@@ -1,14 +1,14 @@
 {
   "date": "2026-03-17",
-  "checked_at": "2026-03-17T01:54:34.121611+09:00",
+  "checked_at": "2026-03-17T04:36:23.285252+09:00",
   "blocked": false,
   "held_places": [
-    "多摩川",
     "蒲郡",
-    "びわこ",
+    "津",
     "尼崎",
     "下関",
-    "芦屋"
+    "芦屋",
+    "唐津"
   ],
   "venues": [
     {
@@ -50,7 +50,7 @@
     {
       "name": "多摩川",
       "jcd": "05",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -135,7 +135,7 @@
     {
       "name": "津",
       "jcd": "09",
-      "held": false,
+      "held": true,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -153,7 +153,7 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -408,11 +408,60 @@
     {
       "name": "唐津",
       "jcd": "23",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-03-17T10:43:00+09:00",
+      "next_display": "1R 10:43",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:43"
+        },
+        {
+          "rno": 2,
+          "time": "11:12"
+        },
+        {
+          "rno": 3,
+          "time": "11:43"
+        },
+        {
+          "rno": 4,
+          "time": "12:12"
+        },
+        {
+          "rno": 5,
+          "time": "12:41"
+        },
+        {
+          "rno": 6,
+          "time": "13:10"
+        },
+        {
+          "rno": 7,
+          "time": "13:44"
+        },
+        {
+          "rno": 8,
+          "time": "14:19"
+        },
+        {
+          "rno": 9,
+          "time": "14:54"
+        },
+        {
+          "rno": 10,
+          "time": "15:29"
+        },
+        {
+          "rno": 11,
+          "time": "16:05"
+        },
+        {
+          "rno": 12,
+          "time": "16:45"
+        }
+      ]
     },
     {
       "name": "大村",
