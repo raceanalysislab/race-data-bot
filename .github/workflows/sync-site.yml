@@ -79,6 +79,12 @@ jobs:
             cp data/player_course_stats.json site_repo/data/player_course_stats.json
           fi
 
+      - name: Copy meet avg st
+        run: |
+          if [ -f data/meet_avg_st.json ]; then
+            cp data/meet_avg_st.json site_repo/data/meet_avg_st.json
+          fi
+
       - name: Commit and push
         run: |
           cd site_repo
