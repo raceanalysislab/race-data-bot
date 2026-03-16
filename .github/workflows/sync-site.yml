@@ -73,6 +73,12 @@ jobs:
             cp data/player_index_tomorrow.json site_repo/data/player_index_tomorrow.json
           fi
 
+      - name: Copy player course stats
+        run: |
+          if [ -f data/player_course_stats.json ]; then
+            cp data/player_course_stats.json site_repo/data/player_course_stats.json
+          fi
+
       - name: Commit and push
         run: |
           cd site_repo
