@@ -1,11 +1,5 @@
 # scripts/build_event_master.py
-# event_master_candidates.json → event_master.json
-#
-# 役割:
-# - candidates の title_key を本番用 master に変換
-# - grade / total_days を確定
-# - notes 空欄のものもそのまま入れる
-# - 将来は手修正した candidates をそのまま反映できる
+# candidates + manual → event_master.json
 
 import json
 import os
@@ -14,11 +8,14 @@ from typing import Any, Dict
 
 JST = timezone(timedelta(hours=9))
 
-SRC = "data/event_master_candidates.json"
+CANDIDATES = "data/event_master_candidates.json"
+MANUAL = "data/event_master_manual.json"
 DST = "data/event_master.json"
 
 
 def load_json(path: str) -> Dict[str, Any]:
+    if not os.path.exists(path):
+        return {}
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -33,14 +30,15 @@ def to_int_or_none(v: Any):
 
 
 def main():
-    if not os.path.exists(SRC):
-        raise FileNotFoundError(f"not found: {SRC}")
+    src = load_json(CANDIDATES)
+    manual = load_json(MANUAL)
 
-    src = load_json(SRC)
     titles = src.get("titles") or []
+    manual_events = manual.get("events") or {}
 
     master: Dict[str, Dict[str, Any]] = {}
 
+    # --- ① candidates をベースに作る ---
     for row in titles:
         if not isinstance(row, dict):
             continue
@@ -64,10 +62,29 @@ def main():
             "venues": venues,
         }
 
+    # --- ② manual で上書き（最重要） ---
+    for title_key, override in manual_events.items():
+        if not isinstance(override, dict):
+            continue
+
+        if title_key not in master:
+            master[title_key] = {}
+
+        base = master[title_key]
+
+        base["grade"] = override.get("grade", base.get("grade", "一般"))
+        base["total_days"] = override.get("total_days", base.get("total_days"))
+        base["notes"] = override.get("notes", base.get("notes", ""))
+        base["sample_titles"] = override.get("sample_titles", base.get("sample_titles", []))
+        base["venues"] = override.get("venues", base.get("venues", []))
+
+        master[title_key] = base
+
     payload = {
         "_meta": {
             "generated_at": datetime.now(JST).isoformat(),
-            "source": SRC,
+            "source_candidates": CANDIDATES,
+            "source_manual": MANUAL,
             "title_count": len(master),
         },
         "events": master,
