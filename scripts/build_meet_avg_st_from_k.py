@@ -10,6 +10,7 @@
 # - 内部では 会場|開催タイトル ごとに累積を持つ
 # - ただし出力時は 同じ会場・同じ日付 の内容をマージして1ファイルにまとめる
 # - これにより event_title のブレで一部選手が消える事故を防ぐ
+# - さらに結果行の未一致をログ出力して、取りこぼし原因を追えるようにする
 
 import json
 import os
@@ -27,6 +28,7 @@ RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
 RE_RESULT_ROW = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+.*?\s+([0-9]+\.[0-9]{2})\s+"
 )
+RE_RESULT_ROW_CANDIDATE = re.compile(r"^([0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+")
 
 
 def norm_space(s: str) -> str:
@@ -173,6 +175,7 @@ def main() -> None:
 
     file_count = 0
     race_count = 0
+    unmatched_rows = 0
 
     for path in paths:
         lines = read_text_auto(path)
@@ -233,6 +236,11 @@ def main() -> None:
                             if name:
                                 day_stats[base_key][date_str][reg]["name"] = name
                         continue
+
+                    s = line.strip()
+                    if s and RE_RESULT_ROW_CANDIDATE.match(s):
+                        unmatched_rows += 1
+                        print("UNMATCHED_RESULT_ROW:", s)
 
                     if (
                         line.strip() == ""
@@ -300,7 +308,7 @@ def main() -> None:
 
     written_files = 0
 
-    for output_key, payload in merged_outputs.items():
+    for _, payload in merged_outputs.items():
         venue = payload["venue"]
         date_str = payload["date"]
         payload["player_count"] = len(payload["players"])
@@ -316,6 +324,7 @@ def main() -> None:
     print("files:", file_count)
     print("races:", race_count)
     print("meet_files:", written_files)
+    print("unmatched_rows:", unmatched_rows)
     print("out_dir:", out_dir)
 
 
