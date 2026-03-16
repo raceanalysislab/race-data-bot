@@ -13,6 +13,7 @@
 # - ST は「展示タイム」「進入」の後ろにある値だけを拾う
 # - K0 は平均STの対象外
 # - F0.02 は 0.02 として採用
+# - 日付はファイル名 kYYMMDD.txt を最優先で採用する
 # - 未一致行はログ出力して追跡できるようにする
 
 import json
@@ -26,8 +27,9 @@ JST = timezone(timedelta(hours=9))
 
 RE_KBGN = re.compile(r"^\d{2}KBGN$")
 RE_KEND = re.compile(r"^\d{2}KEND$")
-RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
+RE_DATE_IN_TEXT = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
+RE_K_FILENAME_DATE = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
 
 # 行頭の基本情報だけ先に取る
 RE_RESULT_ROW_HEAD = re.compile(
@@ -53,6 +55,7 @@ def normalize_event_title(s: str) -> str:
     s = s.replace("　", " ")
     s = re.sub(r"\s+", " ", s)
     s = s.replace("第４７回", "第47回")
+    s = s.replace("第４８回", "第48回")
     s = s.replace("第１１th", "第11th")
     s = s.replace("１１th", "11th")
     s = s.replace("　", "")
@@ -102,11 +105,27 @@ def parse_venue(block: List[str]) -> str:
     return ""
 
 
-def parse_date(block: List[str]) -> str:
+def parse_date_from_filename(path: str) -> str:
+    name = os.path.basename(path)
+    m = RE_K_FILENAME_DATE.match(name)
+    if not m:
+        return ""
+
+    yy, mm, dd = m.groups()
+    year = 2000 + int(yy)
+
+    try:
+        dt = datetime(year, int(mm), int(dd))
+        return dt.strftime("%Y-%m-%d")
+    except Exception:
+        return ""
+
+
+def parse_date_from_text(block: List[str]) -> str:
     year = datetime.now(JST).year
 
     for line in block[:30]:
-        m = RE_DATE.search(line)
+        m = RE_DATE_IN_TEXT.search(line)
         if m:
             mm, dd = m.groups()
             return f"{year:04d}-{int(mm):02d}-{int(dd):02d}"
@@ -166,22 +185,6 @@ def list_k_txt_files() -> List[str]:
     return sorted(set(candidates))
 
 
-def extract_name_from_result_line(line: str) -> str:
-    """
-    結果行から選手名だけを抜く。
-    想定:
-      01  1 4485 楠　原　　正　剛 42  167  6.85   1    0.17 ...
-    """
-    s = line.rstrip()
-    m = re.match(
-        r"^\s*(?:[0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+(.+?)\s+\d+\s+\d+\s+\d+\.\d{2}\s+[1-6]\s+",
-        s
-    )
-    if m:
-        return norm_space(m.group(1))
-    return ""
-
-
 def extract_st_from_result_line(line: str) -> Optional[float]:
     """
     結果行から ST を抽出する。
@@ -195,23 +198,29 @@ def extract_st_from_result_line(line: str) -> Optional[float]:
     if re.match(r"^\s*K0\s+", s):
         return None
 
-    # 展示タイム → 進入 → ST の並びだけを見る
-    # 例:
-    #   42  167  6.85   1    0.17
-    #   40   16  6.84   2   F0.21
+    # 名前以降の数値列から、展示タイム→進入→ST の並びを拾う
     m = re.search(
-        r"\s+\d+\s+\d+\s+\d+\.\d{2}\s+[1-6]\s+([F]?\d+\.\d{2})\b",
+        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([F]?\d+\.\d{2})\b",
         s
     )
     if not m:
         return None
 
-    st_raw = m.group(1).strip().lstrip("F")
+    st_raw = m.group(3).strip()
+    st_raw = st_raw.lstrip("F")
 
     try:
         return float(st_raw)
     except Exception:
         return None
+
+
+def extract_name_from_tail(tail: str) -> str:
+    # 名前はモーター番号2列の直前まで
+    name_match = re.match(r"(.+?)\s+\d+\s+\d+\s+", tail)
+    if name_match:
+        return norm_space(name_match.group(1))
+    return norm_space(tail)
 
 
 def main() -> None:
@@ -231,16 +240,28 @@ def main() -> None:
     race_count = 0
     unmatched_rows = 0
     skipped_k0_rows = 0
+    filename_date_used = 0
+    text_date_used = 0
 
     for path in paths:
         lines = read_text_auto(path)
         blocks = split_blocks(lines)
         file_count += 1
 
+        file_date = parse_date_from_filename(path)
+
         for block in blocks:
             venue = parse_venue(block)
-            date_str = parse_date(block)
             event_title_raw = parse_event_title(block)
+
+            # 日付はファイル名優先
+            if file_date:
+                date_str = file_date
+                filename_date_used += 1
+            else:
+                date_str = parse_date_from_text(block)
+                if date_str:
+                    text_date_used += 1
 
             if not venue or not event_title_raw or not date_str:
                 continue
@@ -278,12 +299,13 @@ def main() -> None:
                     if head:
                         rank = str(head.group(1)).strip()
                         reg = str(head.group(3)).strip()
+                        tail = str(head.group(4))
+                        name = extract_name_from_tail(tail)
 
                         if rank == "K0":
                             skipped_k0_rows += 1
                             continue
 
-                        name = extract_name_from_result_line(line)
                         st = extract_st_from_result_line(line)
 
                         if reg and st is not None:
@@ -381,6 +403,8 @@ def main() -> None:
     print("meet_files:", written_files)
     print("unmatched_rows:", unmatched_rows)
     print("skipped_k0_rows:", skipped_k0_rows)
+    print("filename_date_used:", filename_date_used)
+    print("text_date_used:", text_date_used)
     print("out_dir:", out_dir)
 
 
