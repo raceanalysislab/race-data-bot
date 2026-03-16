@@ -1,14 +1,22 @@
 # scripts/build_meet_avg_st_from_k.py
 # extract_k 内の k******.txt を全部読んで
-# 同一開催（会場 + 開催タイトル）ごとの
-# 選手別「今節平均ST」を作る
+# 同一開催（会場 + 開催タイトル）の日付ごとの
+# 選手別「今節ここまで平均ST」を作る
 #
 # 出力:
 #   data/meet_avg_st.json
 #
+# キー:
+#   会場|開催タイトル|日付
+#
+# 例:
+# - 2026-03-12 のキーには 2026-03-11 までの累積を入れる
+# - 2026-03-13 のキーには 2026-03-11〜2026-03-12 の累積を入れる
+# - 初日は過去日が無いので空になる
+#
 # 使い方:
 # - race-detail.js 側で
-#   venue + event_title をキーにして参照
+#   venue + event_title + date をキーにして参照
 # - 各選手 regno ごとに avg_st / count を使う
 
 import json
@@ -16,7 +24,7 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 JST = timezone(timedelta(hours=9))
 
@@ -145,9 +153,9 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # meet_key(会場|開催名) -> reg -> {st_sum, st_count, name}
-    meet_stats: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(
-        lambda: defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""})
+    # base_key(会場|開催名) -> date -> reg -> {st_sum, st_count, name}
+    day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}))
     )
 
     file_count = 0
@@ -160,13 +168,13 @@ def main() -> None:
 
         for block in blocks:
             venue = parse_venue(block)
-            _date_str = parse_date(block)  # 読み取り自体は残す
+            date_str = parse_date(block)
             event_title = parse_event_title(block)
 
-            if not venue or not event_title:
+            if not venue or not event_title or not date_str:
                 continue
 
-            meet_key = f"{venue}|{event_title}"
+            base_key = f"{venue}|{event_title}"
 
             current_race = None
             in_result_table = False
@@ -199,10 +207,10 @@ def main() -> None:
                             st = None
 
                         if reg and st is not None:
-                            meet_stats[meet_key][reg]["st_sum"] += st
-                            meet_stats[meet_key][reg]["st_count"] += 1
+                            day_stats[base_key][date_str][reg]["st_sum"] += st
+                            day_stats[base_key][date_str][reg]["st_count"] += 1
                             if name:
-                                meet_stats[meet_key][reg]["name"] = name
+                                day_stats[base_key][date_str][reg]["name"] = name
                         continue
 
                     if (
@@ -215,17 +223,37 @@ def main() -> None:
 
     out_meets: Dict[str, Any] = {}
 
-    for meet_key, regs in meet_stats.items():
-        out_meets[meet_key] = {}
-        for reg, src in regs.items():
-            count = int(src["st_count"])
-            avg_st = round(src["st_sum"] / count, 2) if count > 0 else None
+    for base_key, dated_regs in day_stats.items():
+        dates_sorted = sorted(dated_regs.keys())
 
-            out_meets[meet_key][reg] = {
-                "name": src["name"],
-                "avg_st": avg_st,
-                "count": count
-            }
+        cumulative: Dict[str, Dict[str, Any]] = defaultdict(
+            lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}
+        )
+
+        for date_str in dates_sorted:
+            # この日付キーには「前日まで」の累積を入れる
+            day_key = f"{base_key}|{date_str}"
+            out_meets[day_key] = {}
+
+            for reg, src in cumulative.items():
+                count = int(src["st_count"])
+                if count <= 0:
+                    continue
+
+                avg_st = round(src["st_sum"] / count, 2)
+                out_meets[day_key][reg] = {
+                    "name": src["name"],
+                    "avg_st": avg_st,
+                    "count": count
+                }
+
+            # その日の結果を累積へ加算（翌日以降に効く）
+            current_day_regs = dated_regs[date_str]
+            for reg, src in current_day_regs.items():
+                cumulative[reg]["st_sum"] += float(src["st_sum"])
+                cumulative[reg]["st_count"] += int(src["st_count"])
+                if src["name"]:
+                    cumulative[reg]["name"] = src["name"]
 
     payload = {
         "generated_at": datetime.now(JST).isoformat(),
