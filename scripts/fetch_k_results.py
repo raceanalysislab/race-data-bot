@@ -59,8 +59,9 @@ def extract_lzh(lzh_path: str):
 
 
 def collect_dates(days: int = FETCH_DAYS):
-    now = datetime.now(JST)
-    return [now - timedelta(days=i) for i in range(days)]
+    # 深夜またぎ対策で「昨日」を起点にする
+    base = datetime.now(JST) - timedelta(days=1)
+    return [base - timedelta(days=i) for i in range(days)]
 
 
 def already_done(dt: datetime) -> bool:
