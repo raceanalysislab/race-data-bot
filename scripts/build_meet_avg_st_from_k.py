@@ -12,7 +12,7 @@
 # - これにより event_title のブレで一部選手が消える事故を防ぐ
 # - ST は「展示タイム」「進入」の後ろにある値だけを拾う
 # - K0 は平均STの対象外
-# - F0.02 は 0.02 として採用
+# - F / L は平均STの対象外
 # - 未一致行はログ出力して追跡できるようにする
 # - 出力前に data/meet_avg_st 配下の既存jsonを全削除して、古いゴミファイルを残さない
 # - 年は k230315.txt → 2023-03-15 のように、まずファイル名から確定する
@@ -22,7 +22,7 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 JST = timezone(timedelta(hours=9))
 
@@ -189,33 +189,39 @@ def extract_name_from_tail(tail: str) -> str:
     return norm_space(tail)
 
 
-def extract_st_from_result_line(line: str) -> Optional[float]:
+def extract_st_from_result_line(line: str) -> Tuple[Optional[float], bool, bool]:
     """
     結果行から ST を抽出する。
+    戻り値:
+      (st, is_f, is_l)
+
     想定並び:
-      ... モーター ボート 展示(6.81) 進入(3) ST(0.19 or F0.02) ...
+      ... モーター ボート 展示(6.81) 進入(3) ST(0.19 or F0.02 or L0.12) ...
     """
 
     s = line.rstrip()
 
     # K0行は今節平均STの対象外
     if re.match(r"^\s*K0\s+", s):
-        return None
+        return None, False, False
 
     m = re.search(
-        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([F]?\d+\.\d{2})\b",
+        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([FL]?\d+\.\d{2})\b",
         s
     )
     if not m:
-        return None
+        return None, False, False
 
     st_raw = m.group(3).strip()
-    st_raw = st_raw.lstrip("F")
+    is_f = st_raw.startswith("F")
+    is_l = st_raw.startswith("L")
+
+    st_num = st_raw.lstrip("F").lstrip("L")
 
     try:
-        return float(st_raw)
+        return float(st_num), is_f, is_l
     except Exception:
-        return None
+        return None, is_f, is_l
 
 
 def clear_output_dir(out_dir: str) -> None:
@@ -247,6 +253,8 @@ def main() -> None:
     race_count = 0
     unmatched_rows = 0
     skipped_k0_rows = 0
+    skipped_f_rows = 0
+    skipped_l_rows = 0
 
     for path in paths:
         lines = read_text_auto(path)
@@ -301,7 +309,15 @@ def main() -> None:
                             skipped_k0_rows += 1
                             continue
 
-                        st = extract_st_from_result_line(line)
+                        st, is_f, is_l = extract_st_from_result_line(line)
+
+                        if is_f:
+                            skipped_f_rows += 1
+                            continue
+
+                        if is_l:
+                            skipped_l_rows += 1
+                            continue
 
                         if reg and st is not None:
                             day_stats[base_key][date_str][reg]["st_sum"] += st
@@ -398,6 +414,8 @@ def main() -> None:
     print("meet_files:", written_files)
     print("unmatched_rows:", unmatched_rows)
     print("skipped_k0_rows:", skipped_k0_rows)
+    print("skipped_f_rows:", skipped_f_rows)
+    print("skipped_l_rows:", skipped_l_rows)
     print("out_dir:", out_dir)
 
 
