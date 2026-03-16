@@ -31,6 +31,7 @@ jobs:
           ls -la data/site/races/today || true
           ls -la data/site/races/tomorrow || true
           ls -la data/master || true
+          ls -la data/meet_avg_st || true
 
       - name: Clone race-analysis repo
         run: |
@@ -42,6 +43,8 @@ jobs:
           rm -rf site_repo/data/site
           mkdir -p site_repo/data/site
           mkdir -p site_repo/data/master
+          rm -rf site_repo/data/meet_avg_st
+          mkdir -p site_repo/data/meet_avg_st
 
       - name: Copy generated site files first
         run: |
@@ -79,10 +82,10 @@ jobs:
             cp data/player_course_stats.json site_repo/data/player_course_stats.json
           fi
 
-      - name: Copy meet avg st
+      - name: Copy meet avg st files
         run: |
-          if [ -f data/meet_avg_st.json ]; then
-            cp data/meet_avg_st.json site_repo/data/meet_avg_st.json
+          if [ -d data/meet_avg_st ]; then
+            cp -R data/meet_avg_st/. site_repo/data/meet_avg_st/
           fi
 
       - name: Commit and push
