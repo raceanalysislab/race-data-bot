@@ -21,7 +21,7 @@ import json
 import os
 import re
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 
 JST = timezone(timedelta(hours=9))
@@ -30,14 +30,16 @@ RE_KBGN = re.compile(r"^\d{2}KBGN$")
 RE_KEND = re.compile(r"^\d{2}KEND$")
 RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
+RE_K_FILENAME = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
 
 # 行頭の基本情報だけ先に取る
 RE_RESULT_ROW_HEAD = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+)$"
 )
 
-RE_RESULT_ROW_CANDIDATE = re.compile(r"^([0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+")
-RE_K_FILENAME = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
+RE_RESULT_ROW_CANDIDATE = re.compile(
+    r"^([0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+"
+)
 
 
 def norm_space(s: str) -> str:
@@ -56,6 +58,7 @@ def normalize_event_title(s: str) -> str:
     s = s.replace("　", " ")
     s = re.sub(r"\s+", " ", s)
     s = s.replace("第４７回", "第47回")
+    s = s.replace("第４８回", "第48回")
     s = s.replace("第１１th", "第11th")
     s = s.replace("１１th", "11th")
     s = s.replace("　", "")
@@ -110,9 +113,7 @@ def infer_year_from_path(path: str) -> int:
     m = RE_K_FILENAME.match(name)
     if m:
         yy = int(m.group(1))
-        if yy >= 90:
-            return 1900 + yy
-        return 2000 + yy
+        return 1900 + yy if yy >= 90 else 2000 + yy
     return datetime.now(JST).year
 
 
@@ -180,6 +181,14 @@ def list_k_txt_files() -> List[str]:
     return sorted(set(candidates))
 
 
+def extract_name_from_tail(tail: str) -> str:
+    # 名前はモーター番号の直前までを取る
+    m = re.match(r"(.+?)\s+\d+\s+\d+\s+", tail)
+    if m:
+        return norm_space(m.group(1))
+    return norm_space(tail)
+
+
 def extract_st_from_result_line(line: str) -> Optional[float]:
     """
     結果行から ST を抽出する。
@@ -193,7 +202,6 @@ def extract_st_from_result_line(line: str) -> Optional[float]:
     if re.match(r"^\s*K0\s+", s):
         return None
 
-    # 名前以降の数値列から、展示タイム→進入→ST の並びを拾う
     m = re.search(
         r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([F]?\d+\.\d{2})\b",
         s
@@ -211,13 +219,11 @@ def extract_st_from_result_line(line: str) -> Optional[float]:
 
 
 def clear_output_dir(out_dir: str) -> None:
-    if os.path.isdir(out_dir):
-        for fn in os.listdir(out_dir):
-            path = os.path.join(out_dir, fn)
-            if os.path.isfile(path) and fn.lower().endswith(".json"):
-                os.remove(path)
-    else:
-        os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
+    for fn in os.listdir(out_dir):
+        path = os.path.join(out_dir, fn)
+        if os.path.isfile(path) and fn.lower().endswith(".json"):
+            os.remove(path)
 
 
 def main() -> None:
@@ -227,7 +233,11 @@ def main() -> None:
 
     # base_key(会場|開催名norm) -> date -> reg -> {st_sum, st_count, name}
     day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
-        lambda: defaultdict(lambda: defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}))
+        lambda: defaultdict(
+            lambda: defaultdict(
+                lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}
+            )
+        )
     )
 
     # base_key -> meta
@@ -285,14 +295,7 @@ def main() -> None:
                         rank = str(head.group(1)).strip()
                         reg = str(head.group(3)).strip()
                         tail = str(head.group(4))
-                        name = ""
-
-                        # 名前はモーター番号の直前までを取る
-                        name_match = re.match(r"(.+?)\s+\d+\s+\d+\s+", tail)
-                        if name_match:
-                            name = norm_space(name_match.group(1))
-                        else:
-                            name = norm_space(tail)
+                        name = extract_name_from_tail(tail)
 
                         if rank == "K0":
                             skipped_k0_rows += 1
