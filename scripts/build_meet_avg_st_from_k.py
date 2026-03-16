@@ -4,28 +4,12 @@
 # 選手別「今節ここまで平均ST」を作る
 #
 # 出力:
-#   data/meet_avg_st/<開催キー>.json
+#   data/meet_avg_st/<会場>_<日付>.json
 #
-# ファイル名:
-#   {venue}_{date}.json
-#
-# 例:
-# - data/meet_avg_st/桐生_2026-03-16.json
-# - data/meet_avg_st/蒲郡_2026-03-16.json
-#
-# 中身:
-# - その日付時点で参照すべき「前日まで」の累積ST
-# - 各選手 regno ごとに avg_st / count を持つ
-#
-# 例:
-# - 2026-03-12 のファイルには 2026-03-11 までの累積を入れる
-# - 2026-03-13 のファイルには 2026-03-11〜2026-03-12 の累積を入れる
-# - 初日は過去日が無いので players は空になる
-#
-# 使い方:
-# - race-detail.js 側で
-#   jcd/date ではなく、ひとまず venue + date ベースで対象ファイルを読む
-# - 各選手 regno ごとに avg_st / count を使う
+# 重要:
+# - 内部では 会場|開催タイトル ごとに累積を持つ
+# - ただし出力時は 同じ会場・同じ日付 の内容をマージして1ファイルにまとめる
+# - これにより event_title のブレで一部選手が消える事故を防ぐ
 
 import json
 import os
@@ -51,15 +35,20 @@ def norm_space(s: str) -> str:
 
 def safe_filename_part(s: str) -> str:
     s = norm_space(s)
-    s = s.replace("/", "_")
-    s = s.replace("\\", "_")
-    s = s.replace(":", "_")
-    s = s.replace("*", "_")
-    s = s.replace("?", "_")
-    s = s.replace('"', "_")
-    s = s.replace("<", "_")
-    s = s.replace(">", "_")
-    s = s.replace("|", "_")
+    for ch in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]:
+        s = s.replace(ch, "_")
+    return s
+
+
+def normalize_event_title(s: str) -> str:
+    s = norm_space(s)
+    s = s.replace("　", " ")
+    s = re.sub(r"\s+", " ", s)
+    s = s.replace("第４７回", "第47回")
+    s = s.replace("第１１th", "第11th")
+    s = s.replace("１１th", "11th")
+    s = s.replace("　", "")
+    s = s.replace(" ", "")
     return s
 
 
@@ -127,7 +116,6 @@ def parse_event_title(block: List[str]) -> str:
 
                 if not t:
                     continue
-
                 if "第 " in t and "日" in t:
                     continue
                 if re.search(r"\d{4}/\s*\d{1,2}/\d{1,2}", t):
@@ -175,12 +163,12 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # base_key(会場|開催名) -> date -> reg -> {st_sum, st_count, name}
+    # base_key(会場|開催名norm) -> date -> reg -> {st_sum, st_count, name}
     day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(lambda: defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}))
     )
 
-    # base_key -> venue / event_title
+    # base_key -> meta
     meet_meta: Dict[str, Dict[str, str]] = {}
 
     file_count = 0
@@ -194,16 +182,20 @@ def main() -> None:
         for block in blocks:
             venue = parse_venue(block)
             date_str = parse_date(block)
-            event_title = parse_event_title(block)
+            event_title_raw = parse_event_title(block)
 
-            if not venue or not event_title or not date_str:
+            if not venue or not event_title_raw or not date_str:
                 continue
 
-            base_key = f"{venue}|{event_title}"
-            meet_meta[base_key] = {
-                "venue": venue,
-                "event_title": event_title,
-            }
+            event_title_norm = normalize_event_title(event_title_raw)
+            base_key = f"{venue}|{event_title_norm}"
+
+            if base_key not in meet_meta:
+                meet_meta[base_key] = {
+                    "venue": venue,
+                    "event_title": event_title_raw,
+                    "event_title_norm": event_title_norm,
+                }
 
             current_race = None
             in_result_table = False
@@ -250,10 +242,9 @@ def main() -> None:
                     ):
                         in_result_table = False
 
-    out_dir = os.path.join("data", "meet_avg_st")
-    os.makedirs(out_dir, exist_ok=True)
-
-    written_files = 0
+    # まず base_key ごとに日別playersを作る
+    # その後 会場+日付 でマージして最終出力
+    merged_outputs: Dict[str, Dict[str, Any]] = {}
 
     for base_key, dated_regs in day_stats.items():
         dates_sorted = sorted(dated_regs.keys())
@@ -266,7 +257,18 @@ def main() -> None:
         )
 
         for date_str in dates_sorted:
-            players_out: Dict[str, Any] = {}
+            output_key = f"{venue}|{date_str}"
+
+            if output_key not in merged_outputs:
+                merged_outputs[output_key] = {
+                    "generated_at": datetime.now(JST).isoformat(),
+                    "venue": venue,
+                    "event_title": event_title,
+                    "date": date_str,
+                    "players": {}
+                }
+
+            players_out = merged_outputs[output_key]["players"]
 
             # この日付ファイルには「前日まで」の累積を入れる
             for reg, src in cumulative.items():
@@ -275,28 +277,15 @@ def main() -> None:
                     continue
 
                 avg_st = round(src["st_sum"] / count, 2)
-                players_out[reg] = {
-                    "name": src["name"],
-                    "avg_st": avg_st,
-                    "count": count
-                }
 
-            payload = {
-                "generated_at": datetime.now(JST).isoformat(),
-                "venue": venue,
-                "event_title": event_title,
-                "date": date_str,
-                "player_count": len(players_out),
-                "players": players_out
-            }
-
-            file_name = f"{safe_filename_part(venue)}_{date_str}.json"
-            out_path = os.path.join(out_dir, file_name)
-
-            with open(out_path, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-
-            written_files += 1
+                # すでに同じ reg があれば、count が大きい方を優先
+                prev = players_out.get(reg)
+                if (not prev) or (int(prev.get("count", 0)) < count):
+                    players_out[reg] = {
+                        "name": src["name"],
+                        "avg_st": avg_st,
+                        "count": count
+                    }
 
             # その日の結果を累積へ加算（翌日以降に効く）
             current_day_regs = dated_regs[date_str]
@@ -305,6 +294,24 @@ def main() -> None:
                 cumulative[reg]["st_count"] += int(src["st_count"])
                 if src["name"]:
                     cumulative[reg]["name"] = src["name"]
+
+    out_dir = os.path.join("data", "meet_avg_st")
+    os.makedirs(out_dir, exist_ok=True)
+
+    written_files = 0
+
+    for output_key, payload in merged_outputs.items():
+        venue = payload["venue"]
+        date_str = payload["date"]
+        payload["player_count"] = len(payload["players"])
+
+        file_name = f"{safe_filename_part(venue)}_{date_str}.json"
+        out_path = os.path.join(out_dir, file_name)
+
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        written_files += 1
 
     print("files:", file_count)
     print("races:", race_count)
