@@ -166,6 +166,22 @@ def list_k_txt_files() -> List[str]:
     return sorted(set(candidates))
 
 
+def extract_name_from_result_line(line: str) -> str:
+    """
+    結果行から選手名だけを抜く。
+    想定:
+      01  1 4485 楠　原　　正　剛 42  167  6.85   1    0.17 ...
+    """
+    s = line.rstrip()
+    m = re.match(
+        r"^\s*(?:[0-9]{2}|S[0-9]|F|K0)\s+[1-6]\s+\d{4}\s+(.+?)\s+\d+\s+\d+\s+\d+\.\d{2}\s+[1-6]\s+",
+        s
+    )
+    if m:
+        return norm_space(m.group(1))
+    return ""
+
+
 def extract_st_from_result_line(line: str) -> Optional[float]:
     """
     結果行から ST を抽出する。
@@ -179,19 +195,18 @@ def extract_st_from_result_line(line: str) -> Optional[float]:
     if re.match(r"^\s*K0\s+", s):
         return None
 
-    # 名前以降の数値列から、展示タイム→進入→ST の並びを拾う
+    # 展示タイム → 進入 → ST の並びだけを見る
     # 例:
-    # 42  167  6.85   1    0.17
-    # 40  16   6.84   2   F0.21
+    #   42  167  6.85   1    0.17
+    #   40   16  6.84   2   F0.21
     m = re.search(
-        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([F]?\d+\.\d{2})\b",
+        r"\s+\d+\s+\d+\s+\d+\.\d{2}\s+[1-6]\s+([F]?\d+\.\d{2})\b",
         s
     )
     if not m:
         return None
 
-    st_raw = m.group(3).strip()
-    st_raw = st_raw.lstrip("F")
+    st_raw = m.group(1).strip().lstrip("F")
 
     try:
         return float(st_raw)
@@ -263,20 +278,12 @@ def main() -> None:
                     if head:
                         rank = str(head.group(1)).strip()
                         reg = str(head.group(3)).strip()
-                        tail = str(head.group(4))
-                        name = ""
-
-                        # 名前はモーター番号の直前までを取る
-                        name_match = re.match(r"(.+?)\s+\d+\s+\d+\s+", tail)
-                        if name_match:
-                            name = norm_space(name_match.group(1))
-                        else:
-                            name = norm_space(tail)
 
                         if rank == "K0":
                             skipped_k0_rows += 1
                             continue
 
+                        name = extract_name_from_result_line(line)
                         st = extract_st_from_result_line(line)
 
                         if reg and st is not None:
