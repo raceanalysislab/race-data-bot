@@ -32,6 +32,7 @@ jobs:
           ls -la data/site/races/tomorrow || true
           ls -la data/master || true
           ls -la data/meet_avg_st || true
+          ls -la data/master/racer_gender.json || true
 
       - name: Clone race-analysis repo
         run: |
@@ -60,6 +61,12 @@ jobs:
         run: |
           if [ -f data/master/players_name_master.json ]; then
             cp data/master/players_name_master.json site_repo/data/master/players_name_master.json
+          fi
+
+      - name: Copy racer gender master
+        run: |
+          if [ -f data/master/racer_gender.json ]; then
+            cp data/master/racer_gender.json site_repo/data/master/racer_gender.json
           fi
 
       - name: Build player index
