@@ -1,0 +1,42 @@
+name: Build Event Titles From K
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      TZ: Asia/Tokyo
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout bot repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run build_event_title_candidates_from_k.py
+        run: |
+          python scripts/build_event_title_candidates_from_k.py
+
+      - name: Commit generated candidates
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add data/k_event_title_candidates.json
+
+          git commit -m "build: event title candidates from k files" || echo "no changes"
+
+          git push
