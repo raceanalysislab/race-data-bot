@@ -1,14 +1,80 @@
 [
   {
     "slot": "today",
-    "date": "2026-03-17",
+    "date": "2026-03-18",
+    "name": "大村",
+    "jcd": "24",
+    "next_race": 1,
+    "next_display": "1R 17:41",
+    "day": 1,
+    "total_days": null,
+    "day_label": "初日",
+    "grade_label": "一般",
+    "event_title": "艇 選手 選手 年 支 体級 全国 当地 モーター ボート 今節成績 早",
+    "first_race_time": "17:41",
+    "card_band": "night",
+    "card_tone": "night",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "17:41"
+      },
+      {
+        "rno": 2,
+        "cutoff": "18:08"
+      },
+      {
+        "rno": 3,
+        "cutoff": "18:34"
+      },
+      {
+        "rno": 4,
+        "cutoff": "19:03"
+      },
+      {
+        "rno": 5,
+        "cutoff": "19:30"
+      },
+      {
+        "rno": 6,
+        "cutoff": "19:56"
+      },
+      {
+        "rno": 7,
+        "cutoff": "20:25"
+      },
+      {
+        "rno": 8,
+        "cutoff": "20:59"
+      },
+      {
+        "rno": 9,
+        "cutoff": "21:25"
+      },
+      {
+        "rno": 10,
+        "cutoff": "21:51"
+      },
+      {
+        "rno": 11,
+        "cutoff": "22:16"
+      },
+      {
+        "rno": 12,
+        "cutoff": "22:41"
+      }
+    ]
+  },
+  {
+    "slot": "today",
+    "date": "2026-03-18",
     "name": "唐津",
     "jcd": "23",
     "next_race": 1,
     "next_display": "1R 10:43",
-    "day": 1,
+    "day": 2,
     "total_days": null,
-    "day_label": "初日",
+    "day_label": "2日目",
     "grade_label": "G2",
     "event_title": "唐津MB大賞～スター候補チャレンジマッチ～",
     "first_race_time": "10:43",
@@ -67,16 +133,148 @@
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
-    "name": "芦屋",
-    "jcd": "21",
+    "date": "2026-03-18",
+    "name": "若松",
+    "jcd": "20",
+    "next_race": 1,
+    "next_display": "1R 15:20",
+    "day": 1,
+    "total_days": null,
+    "day_label": "初日",
+    "grade_label": "一般",
+    "event_title": "サンケイスポーツ杯",
+    "first_race_time": "15:20",
+    "card_band": "evening",
+    "card_tone": "evening",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "15:20"
+      },
+      {
+        "rno": 2,
+        "cutoff": "15:46"
+      },
+      {
+        "rno": 3,
+        "cutoff": "16:10"
+      },
+      {
+        "rno": 4,
+        "cutoff": "16:33"
+      },
+      {
+        "rno": 5,
+        "cutoff": "17:01"
+      },
+      {
+        "rno": 6,
+        "cutoff": "17:29"
+      },
+      {
+        "rno": 7,
+        "cutoff": "17:59"
+      },
+      {
+        "rno": 8,
+        "cutoff": "18:26"
+      },
+      {
+        "rno": 9,
+        "cutoff": "18:55"
+      },
+      {
+        "rno": 10,
+        "cutoff": "19:38"
+      },
+      {
+        "rno": 11,
+        "cutoff": "20:06"
+      },
+      {
+        "rno": 12,
+        "cutoff": "20:36"
+      }
+    ]
+  },
+  {
+    "slot": "today",
+    "date": "2026-03-18",
+    "name": "宮島",
+    "jcd": "17",
+    "next_race": 1,
+    "next_display": "1R 10:28",
+    "day": 2,
+    "total_days": null,
+    "day_label": "2日目",
+    "grade_label": "一般",
+    "event_title": "ヴィーナスシリーズ第24戦第11回マクール杯",
+    "first_race_time": "10:28",
+    "card_band": "day",
+    "card_tone": "day",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "10:28"
+      },
+      {
+        "rno": 2,
+        "cutoff": "10:54"
+      },
+      {
+        "rno": 3,
+        "cutoff": "11:22"
+      },
+      {
+        "rno": 4,
+        "cutoff": "11:52"
+      },
+      {
+        "rno": 5,
+        "cutoff": "12:21"
+      },
+      {
+        "rno": 6,
+        "cutoff": "12:51"
+      },
+      {
+        "rno": 7,
+        "cutoff": "13:23"
+      },
+      {
+        "rno": 8,
+        "cutoff": "13:54"
+      },
+      {
+        "rno": 9,
+        "cutoff": "14:28"
+      },
+      {
+        "rno": 10,
+        "cutoff": "15:03"
+      },
+      {
+        "rno": 11,
+        "cutoff": "15:38"
+      },
+      {
+        "rno": 12,
+        "cutoff": "16:15"
+      }
+    ]
+  },
+  {
+    "slot": "today",
+    "date": "2026-03-18",
+    "name": "鳴門",
+    "jcd": "14",
     "next_race": 1,
     "next_display": "1R 08:35",
-    "day": 6,
+    "day": 1,
     "total_days": null,
-    "day_label": "最終日",
+    "day_label": "初日",
     "grade_label": "一般",
-    "event_title": "西スポ杯争奪芦屋カップ",
+    "event_title": "鳴門巧者決定戦競走",
     "first_race_time": "08:35",
     "card_band": "morning",
     "card_tone": "morning",
@@ -99,7 +297,7 @@
       },
       {
         "rno": 5,
-        "cutoff": "10:21"
+        "cutoff": "10:20"
       },
       {
         "rno": 6,
@@ -111,168 +309,36 @@
       },
       {
         "rno": 8,
-        "cutoff": "11:50"
+        "cutoff": "11:48"
       },
       {
         "rno": 9,
-        "cutoff": "12:26"
+        "cutoff": "12:18"
       },
       {
         "rno": 10,
-        "cutoff": "13:03"
+        "cutoff": "12:56"
       },
       {
         "rno": 11,
-        "cutoff": "13:39"
+        "cutoff": "13:37"
       },
       {
         "rno": 12,
-        "cutoff": "14:15"
+        "cutoff": "14:13"
       }
     ]
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
-    "name": "下関",
-    "jcd": "19",
-    "next_race": 1,
-    "next_display": "1R 17:41",
-    "day": 4,
-    "total_days": null,
-    "day_label": "最終日",
-    "grade_label": "一般",
-    "event_title": "MNBR下関11th 日本財団会長杯",
-    "first_race_time": "17:41",
-    "card_band": "night",
-    "card_tone": "night",
-    "race_times": [
-      {
-        "rno": 1,
-        "cutoff": "17:41"
-      },
-      {
-        "rno": 2,
-        "cutoff": "18:08"
-      },
-      {
-        "rno": 3,
-        "cutoff": "18:34"
-      },
-      {
-        "rno": 4,
-        "cutoff": "19:03"
-      },
-      {
-        "rno": 5,
-        "cutoff": "19:30"
-      },
-      {
-        "rno": 6,
-        "cutoff": "19:56"
-      },
-      {
-        "rno": 7,
-        "cutoff": "20:25"
-      },
-      {
-        "rno": 8,
-        "cutoff": "20:56"
-      },
-      {
-        "rno": 9,
-        "cutoff": "21:19"
-      },
-      {
-        "rno": 10,
-        "cutoff": "21:42"
-      },
-      {
-        "rno": 11,
-        "cutoff": "22:05"
-      },
-      {
-        "rno": 12,
-        "cutoff": "22:30"
-      }
-    ]
-  },
-  {
-    "slot": "today",
-    "date": "2026-03-17",
-    "name": "宮島",
-    "jcd": "17",
-    "next_race": 1,
-    "next_display": "1R 10:27",
-    "day": 1,
-    "total_days": null,
-    "day_label": "初日",
-    "grade_label": "一般",
-    "event_title": "ヴィーナスシリーズ第24戦第11回マクール杯",
-    "first_race_time": "10:27",
-    "card_band": "day",
-    "card_tone": "day",
-    "race_times": [
-      {
-        "rno": 1,
-        "cutoff": "10:27"
-      },
-      {
-        "rno": 2,
-        "cutoff": "10:52"
-      },
-      {
-        "rno": 3,
-        "cutoff": "11:22"
-      },
-      {
-        "rno": 4,
-        "cutoff": "11:52"
-      },
-      {
-        "rno": 5,
-        "cutoff": "12:21"
-      },
-      {
-        "rno": 6,
-        "cutoff": "12:50"
-      },
-      {
-        "rno": 7,
-        "cutoff": "13:23"
-      },
-      {
-        "rno": 8,
-        "cutoff": "13:55"
-      },
-      {
-        "rno": 9,
-        "cutoff": "14:28"
-      },
-      {
-        "rno": 10,
-        "cutoff": "15:03"
-      },
-      {
-        "rno": 11,
-        "cutoff": "15:38"
-      },
-      {
-        "rno": 12,
-        "cutoff": "16:15"
-      }
-    ]
-  },
-  {
-    "slot": "today",
-    "date": "2026-03-17",
+    "date": "2026-03-18",
     "name": "尼崎",
     "jcd": "13",
     "next_race": 1,
     "next_display": "1R 10:35",
-    "day": 4,
+    "day": 5,
     "total_days": null,
-    "day_label": "4日目",
+    "day_label": "5日目",
     "grade_label": "G1",
     "event_title": "尼崎市制110周年記念 尼崎センプルカップ",
     "first_race_time": "10:35",
@@ -301,7 +367,7 @@
       },
       {
         "rno": 6,
-        "cutoff": "13:00"
+        "cutoff": "12:59"
       },
       {
         "rno": 7,
@@ -331,14 +397,14 @@
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
+    "date": "2026-03-18",
     "name": "三国",
     "jcd": "10",
     "next_race": 1,
     "next_display": "1R 08:47",
-    "day": 2,
+    "day": 3,
     "total_days": null,
-    "day_label": "2日目",
+    "day_label": "3日目",
     "grade_label": "一般",
     "event_title": "坂井市制20周年記念",
     "first_race_time": "08:47",
@@ -371,7 +437,7 @@
       },
       {
         "rno": 7,
-        "cutoff": "11:35"
+        "cutoff": "11:34"
       },
       {
         "rno": 8,
@@ -383,7 +449,7 @@
       },
       {
         "rno": 10,
-        "cutoff": "13:13"
+        "cutoff": "13:14"
       },
       {
         "rno": 11,
@@ -397,146 +463,146 @@
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
-    "name": "蒲郡",
-    "jcd": "07",
+    "date": "2026-03-18",
+    "name": "常滑",
+    "jcd": "08",
     "next_race": 1,
-    "next_display": "1R 15:17",
-    "day": 6,
+    "next_display": "1R 10:18",
+    "day": 1,
     "total_days": null,
-    "day_label": "最終日",
+    "day_label": "初日",
     "grade_label": "一般",
-    "event_title": "蒲郡商工会議所会頭杯争奪 ガマゴリうどんグランプリ",
-    "first_race_time": "15:17",
-    "card_band": "evening",
-    "card_tone": "evening",
-    "race_times": [
-      {
-        "rno": 1,
-        "cutoff": "15:17"
-      },
-      {
-        "rno": 2,
-        "cutoff": "15:41"
-      },
-      {
-        "rno": 3,
-        "cutoff": "16:07"
-      },
-      {
-        "rno": 4,
-        "cutoff": "16:32"
-      },
-      {
-        "rno": 5,
-        "cutoff": "17:01"
-      },
-      {
-        "rno": 6,
-        "cutoff": "17:29"
-      },
-      {
-        "rno": 7,
-        "cutoff": "17:59"
-      },
-      {
-        "rno": 8,
-        "cutoff": "18:26"
-      },
-      {
-        "rno": 9,
-        "cutoff": "18:55"
-      },
-      {
-        "rno": 10,
-        "cutoff": "19:38"
-      },
-      {
-        "rno": 11,
-        "cutoff": "20:04"
-      },
-      {
-        "rno": 12,
-        "cutoff": "20:36"
-      }
-    ]
-  },
-  {
-    "slot": "today",
-    "date": "2026-03-17",
-    "name": "浜名湖",
-    "jcd": "06",
-    "next_race": 1,
-    "next_display": "1R 11:32",
-    "day": 6,
-    "total_days": null,
-    "day_label": "最終日",
-    "grade_label": "一般",
-    "event_title": "DaiichiーTVファイティングカップ",
-    "first_race_time": "11:32",
+    "event_title": "第28回日本財団会長杯争奪戦競走",
+    "first_race_time": "10:18",
     "card_band": "day",
     "card_tone": "day",
     "race_times": [
       {
         "rno": 1,
-        "cutoff": "11:32"
+        "cutoff": "10:18"
       },
       {
         "rno": 2,
-        "cutoff": "11:59"
+        "cutoff": "10:46"
       },
       {
         "rno": 3,
-        "cutoff": "12:24"
+        "cutoff": "11:18"
       },
       {
         "rno": 4,
-        "cutoff": "12:54"
+        "cutoff": "11:46"
       },
       {
         "rno": 5,
-        "cutoff": "13:20"
+        "cutoff": "12:16"
       },
       {
         "rno": 6,
-        "cutoff": "13:46"
+        "cutoff": "12:46"
       },
       {
         "rno": 7,
-        "cutoff": "14:13"
+        "cutoff": "13:18"
       },
       {
         "rno": 8,
-        "cutoff": "14:46"
+        "cutoff": "13:47"
       },
       {
         "rno": 9,
-        "cutoff": "15:13"
+        "cutoff": "14:17"
       },
       {
         "rno": 10,
-        "cutoff": "15:48"
+        "cutoff": "14:45"
       },
       {
         "rno": 11,
-        "cutoff": "16:30"
+        "cutoff": "15:12"
       },
       {
         "rno": 12,
-        "cutoff": "17:10"
+        "cutoff": "16:00"
       }
     ]
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
+    "date": "2026-03-18",
+    "name": "平和島",
+    "jcd": "04",
+    "next_race": 1,
+    "next_display": "1R 10:57",
+    "day": 1,
+    "total_days": null,
+    "day_label": "初日",
+    "grade_label": "一般",
+    "event_title": "艇 選手 選手 年 支 体級 全国 当地 モーター ボート 今節成績 早",
+    "first_race_time": "10:57",
+    "card_band": "day",
+    "card_tone": "day",
+    "race_times": [
+      {
+        "rno": 1,
+        "cutoff": "10:57"
+      },
+      {
+        "rno": 2,
+        "cutoff": "11:26"
+      },
+      {
+        "rno": 3,
+        "cutoff": "11:55"
+      },
+      {
+        "rno": 4,
+        "cutoff": "12:24"
+      },
+      {
+        "rno": 5,
+        "cutoff": "12:54"
+      },
+      {
+        "rno": 6,
+        "cutoff": "13:24"
+      },
+      {
+        "rno": 7,
+        "cutoff": "13:55"
+      },
+      {
+        "rno": 8,
+        "cutoff": "14:26"
+      },
+      {
+        "rno": 9,
+        "cutoff": "14:58"
+      },
+      {
+        "rno": 10,
+        "cutoff": "15:31"
+      },
+      {
+        "rno": 11,
+        "cutoff": "16:05"
+      },
+      {
+        "rno": 12,
+        "cutoff": "16:40"
+      }
+    ]
+  },
+  {
+    "slot": "today",
+    "date": "2026-03-18",
     "name": "江戸川",
     "jcd": "03",
     "next_race": 1,
     "next_display": "1R 11:14",
-    "day": 3,
+    "day": 4,
     "total_days": null,
-    "day_label": "3日目",
+    "day_label": "4日目",
     "grade_label": "一般",
     "event_title": "新小岩ホルモン平田杯",
     "first_race_time": "11:14",
@@ -595,14 +661,14 @@
   },
   {
     "slot": "today",
-    "date": "2026-03-17",
+    "date": "2026-03-18",
     "name": "桐生",
     "jcd": "01",
     "next_race": 1,
     "next_display": "1R 15:23",
-    "day": 2,
+    "day": 3,
     "total_days": null,
-    "day_label": "2日目",
+    "day_label": "3日目",
     "grade_label": "一般",
     "event_title": "ルーキーシリーズ第6戦 みどり市議会議長杯",
     "first_race_time": "15:23",
@@ -619,7 +685,7 @@
       },
       {
         "rno": 3,
-        "cutoff": "16:19"
+        "cutoff": "16:20"
       },
       {
         "rno": 4,
