@@ -13,18 +13,24 @@
 # - まずは広く拾う
 # - 誤爆は後で消す
 # - grade 判定はまだしない（タイトル母集団づくり優先）
+# - GitHub に載せられるサイズまで絞る
 
 import json
 import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 
 JST = timezone(timedelta(hours=9))
 
 SRC_DIR = os.path.join("data", "extract_k")
 OUT_PATH = os.path.join("data", "k_event_title_candidates.json")
+
+# GitHub に載せるための上限
+MAX_RESULTS = 3000
+MAX_SAMPLE_TITLES = 10
+MAX_SAMPLE_FILES = 20
 
 TRANS = str.maketrans({
     "０": "0", "１": "1", "２": "2", "３": "3", "４": "4",
@@ -46,7 +52,6 @@ TRANS = str.maketrans({
     "Ｚ": "Z",
 })
 
-# ざっくり除外したい行
 SKIP_PATTERNS = [
     r"^\s*$",
     r"^\s*-{3,}\s*$",
@@ -129,7 +134,6 @@ def is_skip_line(s: str) -> bool:
 
 
 def maybe_title_line(s: str) -> bool:
-    # 広めに拾う
     if is_skip_line(s):
         return False
 
@@ -137,15 +141,12 @@ def maybe_title_line(s: str) -> bool:
     if len(c) < 4:
         return False
 
-    # 数字だけっぽいものは除外
     if re.fullmatch(r"[\d\.\-:/]+", c):
         return False
 
-    # 選手行っぽいもの除外
     if re.match(r"^[1-6]\s+\d{4}", s):
         return False
 
-    # よくある開催名キーワードを優先
     keywords = [
         "杯", "賞", "記念", "カップ", "シリーズ", "選抜", "トロフィー",
         "決定戦", "競走", "大会", "チャレンジ", "ヴィーナス", "ルーキー",
@@ -154,7 +155,6 @@ def maybe_title_line(s: str) -> bool:
     if any(k in s for k in keywords):
         return True
 
-    # 英数＋日本語の長め行も候補にする
     if re.search(r"[一-龥ぁ-んァ-ヶA-Za-z]", s) and len(c) >= 8:
         return True
 
@@ -168,14 +168,10 @@ def extract_titles_from_file(path: str) -> List[str]:
     for line in lines:
         if not maybe_title_line(line):
             continue
-
-        # 行頭の会場名だけの残骸っぽいものは除外
         if len(line) <= 3:
             continue
-
         out.append(line)
 
-    # 同一ファイル内重複削除
     seen: Set[str] = set()
     uniq: List[str] = []
     for x in out:
@@ -222,12 +218,15 @@ def main():
     for _, row in grouped.items():
         results.append({
             "title_key": row["title_key"],
-            "sample_titles": sorted(list(row["sample_titles"]))[:10],
+            "sample_titles": sorted(list(row["sample_titles"]))[:MAX_SAMPLE_TITLES],
             "occurrences": int(row["occurrences"]),
-            "sample_files": sorted(list(row["sample_files"]))[:20],
+            "sample_files": sorted(list(row["sample_files"]))[:MAX_SAMPLE_FILES],
         })
 
+    # 出現回数が多い順にして、上位だけ残す
     results.sort(key=lambda x: (-int(x["occurrences"]), str(x["title_key"])))
+    total_unique_before_trim = len(results)
+    results = results[:MAX_RESULTS]
 
     payload = {
         "_meta": {
@@ -235,8 +234,10 @@ def main():
             "source_dir": SRC_DIR,
             "source_file_count": len(files),
             "raw_title_count": total_raw_titles,
+            "unique_title_count_before_trim": total_unique_before_trim,
             "unique_title_count": len(results),
-            "note": "broad extraction from k files; review and prune false positives",
+            "max_results": MAX_RESULTS,
+            "note": "broad extraction from k files; trimmed for GitHub size",
         },
         "titles": results,
     }
@@ -248,7 +249,9 @@ def main():
     print("out:", OUT_PATH)
     print("source_file_count:", len(files))
     print("raw_title_count:", total_raw_titles)
+    print("unique_title_count_before_trim:", total_unique_before_trim)
     print("unique_title_count:", len(results))
+    print("max_results:", MAX_RESULTS)
 
 
 if __name__ == "__main__":
