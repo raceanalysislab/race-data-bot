@@ -76,6 +76,9 @@ def normalize_event_title(s: str) -> str:
     # 第○回は年で変わるため照合対象から除外
     s = re.sub(r"第\s*\d+\s*回", "", s)
 
+    # ○周年は年で変わるため照合対象から除外
+    s = re.sub(r"\d+\s*周年", "", s)
+
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
