@@ -1,0 +1,35 @@
+name: Build Event Manual From Grade Candidates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bot repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run manual builder
+        run: |
+          python scripts/build_event_manual_from_grade_candidates.py
+
+      - name: Commit generated manual
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add data/event_master_manual.json
+
+          git commit -m "build: event master manual from grade candidates" || echo "no changes"
+
+          git push
