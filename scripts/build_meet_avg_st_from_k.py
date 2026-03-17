@@ -13,6 +13,7 @@
 # - ST は「展示タイム」「進入」の後ろにある値だけを拾う
 # - K0 は平均STの対象外
 # - F / L は平均STの対象外
+# - ドカ遅れ補正として ST は 0.30 を上限にクリップして平均化する
 # - 未一致行はログ出力して追跡できるようにする
 # - 出力前に data/meet_avg_st 配下の既存jsonを全削除して、古いゴミファイルを残さない
 # - 年は k230315.txt → 2023-03-15 のように、まずファイル名から確定する
@@ -312,6 +313,8 @@ def main() -> None:
                             continue
 
                         if reg and st is not None:
+                            st = min(st, 0.30)
+
                             day_stats[meet_key][date_str][reg]["st_sum"] += st
                             day_stats[meet_key][date_str][reg]["st_count"] += 1
                             if name:
