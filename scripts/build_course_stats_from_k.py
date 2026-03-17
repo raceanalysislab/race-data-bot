@@ -12,6 +12,9 @@
 # - ren3_rate
 # - avg_st
 # - kimarite（差 / まくり / まくり差し）
+#
+# 補正:
+# - コース別平均STの外れ値対策として ST は 0.30 を上限にクリップして集計する
 
 import json
 import os
@@ -281,7 +284,8 @@ def main() -> None:
                             bucket["ren3"] += 1
 
                     if st is not None:
-                        bucket["st_sum"] += float(st)
+                        st = min(float(st), 0.30)
+                        bucket["st_sum"] += st
                         bucket["st_count"] += 1
 
                     # 決まり手は勝ち選手のコースにだけ加算
