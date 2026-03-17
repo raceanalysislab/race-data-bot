@@ -1,9 +1,10 @@
 {
   "_meta": {
-    "generated_at": "2026-03-17T09:32:42.542464+09:00",
+    "generated_at": "2026-03-17T09:48:21.536753+09:00",
     "source_candidates": "data/event_master_candidates.json",
     "source_manual": "data/event_master_manual.json",
-    "title_count": 35
+    "title_count": 35,
+    "grade_policy": "manual_only_default_ippan"
   },
   "events": {
     "BP梅田開設19周年記念令和スピードレーサー選抜戦": {
@@ -84,7 +85,7 @@
       ]
     },
     "シャボン玉石けん杯": {
-      "grade": "G3",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -161,7 +162,7 @@
       ]
     },
     "児島キングカップ開設73周年記念競走": {
-      "grade": "G1",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -183,7 +184,7 @@
       ]
     },
     "坂井市制20周年記念": {
-      "grade": "G1",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -216,7 +217,7 @@
       ]
     },
     "尼崎市制110周年記念 尼崎センプルカップ": {
-      "grade": "G1",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -249,7 +250,7 @@
       ]
     },
     "日刊スポーツ杯争奪徳山オールレディース": {
-      "grade": "G3",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -359,7 +360,7 @@
       ]
     },
     "開設73周年記念 海の王者決定戦": {
-      "grade": "G1",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
