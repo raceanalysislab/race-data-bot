@@ -1,5 +1,11 @@
 # scripts/build_event_master.py
 # candidates + manual → event_master.json
+#
+# 長期運用方針:
+# - candidates は開催名候補の自動収集専用
+# - candidates の grade_label は本番採用しない
+# - grade の確定値は manual のみで持つ
+# - manual に無いものは既定で「一般」
 
 import json
 import os
@@ -39,6 +45,7 @@ def main():
     master: Dict[str, Dict[str, Any]] = {}
 
     # --- ① candidates をベースに作る ---
+    # grade は candidates を信用せず、既定値は常に「一般」
     for row in titles:
         if not isinstance(row, dict):
             continue
@@ -47,7 +54,7 @@ def main():
         if not title_key:
             continue
 
-        grade = str(row.get("grade_label") or "一般").strip() or "一般"
+        grade = "一般"
         total_days = to_int_or_none(row.get("confirmed_total_days"))
         notes = str(row.get("notes") or "").strip()
 
@@ -68,15 +75,21 @@ def main():
             continue
 
         if title_key not in master:
-            master[title_key] = {}
+            master[title_key] = {
+                "grade": "一般",
+                "total_days": None,
+                "notes": "",
+                "sample_titles": [],
+                "venues": [],
+            }
 
         base = master[title_key]
 
-        base["grade"] = override.get("grade", base.get("grade", "一般"))
-        base["total_days"] = override.get("total_days", base.get("total_days"))
-        base["notes"] = override.get("notes", base.get("notes", ""))
-        base["sample_titles"] = override.get("sample_titles", base.get("sample_titles", []))
-        base["venues"] = override.get("venues", base.get("venues", []))
+        base["grade"] = str(override.get("grade", base.get("grade", "一般")) or "一般").strip() or "一般"
+        base["total_days"] = to_int_or_none(override.get("total_days", base.get("total_days")))
+        base["notes"] = str(override.get("notes", base.get("notes", "")) or "").strip()
+        base["sample_titles"] = override.get("sample_titles", base.get("sample_titles", [])) or []
+        base["venues"] = override.get("venues", base.get("venues", [])) or []
 
         master[title_key] = base
 
@@ -86,6 +99,7 @@ def main():
             "source_candidates": CANDIDATES,
             "source_manual": MANUAL,
             "title_count": len(master),
+            "grade_policy": "manual_only_default_ippan",
         },
         "events": master,
     }
@@ -96,6 +110,7 @@ def main():
 
     print("out:", DST)
     print("title_count:", len(master))
+    print("grade_policy: manual_only_default_ippan")
 
 
 if __name__ == "__main__":
