@@ -43,6 +43,12 @@ BRANCHES = [
     "徳島", "香川", "愛媛", "高知",
     "福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄",
 ]
+VENUE_NAMES = [
+    "桐生", "戸田", "江戸川", "平和島", "多摩川", "浜名湖", "蒲郡", "常滑",
+    "津", "三国", "びわこ", "住之江", "尼崎", "鳴門", "丸亀", "児島",
+    "宮島", "徳山", "下関", "若松", "芦屋", "福岡", "唐津", "大村"
+]
+
 BRANCH_PATTERN = "|".join(sorted(map(re.escape, BRANCHES), key=len, reverse=True))
 
 RE_RACE_HEAD = re.compile(
@@ -67,6 +73,23 @@ def compact(s: str) -> str:
     return norm(s).replace(" ", "")
 
 
+def _dedupe_venue_prefix(s: str) -> str:
+    s = s.strip()
+
+    # 例: "尼崎 尼崎センプルカップ" -> "尼崎センプルカップ"
+    for v in VENUE_NAMES:
+        prefix = f"{v} "
+        if s.startswith(prefix) and s[len(prefix):].startswith(v):
+            return s[len(prefix):].strip()
+
+    # 例: "尼崎 尼崎 ..." 以外にも、前半と後半の頭が同じ会場なら吸収
+    m = re.match(r"^(" + "|".join(map(re.escape, VENUE_NAMES)) + r")\s+\1(.*)$", s)
+    if m:
+        return f"{m.group(1)}{m.group(2)}".strip()
+
+    return s
+
+
 def normalize_event_title(s: str) -> str:
     s = norm(s)
 
@@ -87,7 +110,6 @@ def normalize_event_title(s: str) -> str:
 
     # 開設記念系の表記ゆれ吸収
     s = re.sub(r"\(\s*開設記念\s*\)", "", s)
-    s = re.sub(r"（\s*開設記念\s*）", "", s)
     s = re.sub(r"開設記念競走", "", s)
     s = re.sub(r"開設記念", "", s)
 
@@ -98,6 +120,11 @@ def normalize_event_title(s: str) -> str:
     s = re.sub(r"[()]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
 
+    # 会場名重複吸収
+    s = _dedupe_venue_prefix(s)
+
+    # もう一度整形
+    s = re.sub(r"\s+", " ", s).strip()
     return s
 
 
