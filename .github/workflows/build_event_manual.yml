@@ -1,0 +1,32 @@
+name: Build Event Manual
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bot repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build manual from filtered
+        run: |
+          python scripts/build_event_manual_from_filtered.py
+
+      - name: Commit manual
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add data/event_master_manual.json
+
+          git commit -m "build: event manual (auto G1)" || echo "no changes"
+
+          git push
