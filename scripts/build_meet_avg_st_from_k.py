@@ -1,15 +1,17 @@
 # scripts/build_meet_avg_st_from_k.py
 # extract_k 内の k******.txt を全部読んで
-# 同一開催（会場 + 開催タイトル）の日付ごとの
+# 同一会場の日付ごとの
 # 選手別「今節ここまで平均ST」を作る
 #
 # 出力:
 #   data/meet_avg_st/<会場>_<日付>.json
 #
 # 重要:
-# - 内部では 会場 + 日付 ごとに最終出力を作る
+# - 内部累積キーは「会場のみ」
+#   → 同一節でイベントタイトル表記が少しズレても分断しない
+# - 最終出力は 会場 + 日付 ごと
 # - 会場名は必ず正規化して「三　国」→「三国」のように揃える
-# - イベントタイトルは保持するが、会場名ズレでは落ちないようにする
+# - イベントタイトルは参考として保持するが、累積キーには使わない
 # - ST は「展示タイム」「進入」の後ろにある値だけを拾う
 # - K0 は平均STの対象外
 # - F / L は平均STの対象外
@@ -247,7 +249,7 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # venue|event_title_norm -> date -> reg -> stats
+    # venue -> date -> reg -> stats
     day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
@@ -256,8 +258,8 @@ def main() -> None:
         )
     )
 
-    # meet key meta
-    meet_meta: Dict[str, Dict[str, str]] = {}
+    # venue -> meta
+    venue_meta: Dict[str, Dict[str, str]] = {}
 
     file_count = 0
     race_count = 0
@@ -280,10 +282,9 @@ def main() -> None:
                 continue
 
             event_title_norm = normalize_event_title(event_title_raw)
-            meet_key = f"{venue}|{event_title_norm}"
 
-            if meet_key not in meet_meta:
-                meet_meta[meet_key] = {
+            if venue not in venue_meta:
+                venue_meta[venue] = {
                     "venue": venue,
                     "event_title": event_title_raw,
                     "event_title_norm": event_title_norm,
@@ -330,10 +331,10 @@ def main() -> None:
                             continue
 
                         if reg and st is not None:
-                            day_stats[meet_key][date_str][reg]["st_sum"] += st
-                            day_stats[meet_key][date_str][reg]["st_count"] += 1
+                            day_stats[venue][date_str][reg]["st_sum"] += st
+                            day_stats[venue][date_str][reg]["st_count"] += 1
                             if name:
-                                day_stats[meet_key][date_str][reg]["name"] = name
+                                day_stats[venue][date_str][reg]["name"] = name
                             continue
 
                         s = line.strip()
@@ -350,13 +351,12 @@ def main() -> None:
                     ):
                         in_result_table = False
 
-    # 会場+日付ごとにマージ出力
+    # 会場+日付ごとに出力
     merged_outputs: Dict[str, Dict[str, Any]] = {}
 
-    for meet_key, dated_regs in day_stats.items():
+    for venue, dated_regs in day_stats.items():
         dates_sorted = sorted(dated_regs.keys())
-        meta = meet_meta.get(meet_key, {})
-        venue = normalize_venue(meta.get("venue", ""))
+        meta = venue_meta.get(venue, {})
         event_title = meta.get("event_title", "")
 
         cumulative: Dict[str, Dict[str, Any]] = defaultdict(
