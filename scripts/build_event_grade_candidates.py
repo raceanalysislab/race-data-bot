@@ -11,6 +11,11 @@
 # - event_master_manual.json を直接自動生成しない
 # - まずは「候補」を出して人が確認できる形にする
 # - 誤爆を減らしつつ、重賞候補だけを見る
+#
+# 方針:
+# - SGは厳格に判定（雑な「ダービー」「グランプリ」だけではSGにしない）
+# - G1/G2/G3は実運用寄りの緩さで候補化
+# - 候補止まりなので、最後は人が確認する
 
 import json
 import os
@@ -22,18 +27,25 @@ JST = timezone(timedelta(hours=9))
 SRC = "data/k_event_title_candidates_filtered.json"
 DST = "data/event_grade_candidates.json"
 
-# まずはここを育てていく
-SG_KEYWORDS = [
-    "グランプリ",
-    "ダービー",
-    "クラシック",
-    "メモリアル",
-    "チャレンジカップ",
-    "クイーンズクライマックス",
-    "オーシャンカップ",
+# -----------------------------
+# SG: 厳格判定
+# -----------------------------
+# 単独の「ダービー」「グランプリ」「メモリアル」はSG扱いしない
+# 公式SG級の表現だけに絞る
+SG_STRICT_PATTERNS = [
+    "グランプリ／グランプリシリーズ",
+    "チャレンジカップ／G2レディースCC",
+    "ボートレースクラシック",
     "ボートレースオールスター",
+    "オーシャンカップ",
+    "ボートレースメモリアル",
+    "ボートレースダービー",
+    "クイーンズクライマックス",
 ]
 
+# -----------------------------
+# G2
+# -----------------------------
 G2_KEYWORDS = [
     "MB大賞",
     "モーターボート大賞",
@@ -42,19 +54,24 @@ G2_KEYWORDS = [
     "モーターボート誕生祭",
 ]
 
+# -----------------------------
+# G3
+# -----------------------------
 G3_KEYWORDS = [
     "ヴィーナスシリーズ",
     "オールレディース",
     "ルーキーシリーズ",
 ]
 
-# G1は雑に「開設」だけ見ると誤爆するので、
-# かなり限定した強い単語だけにする
+# -----------------------------
+# G1
+# -----------------------------
+# 「開設」だけだと誤爆するので強い語だけ
 G1_KEYWORDS_STRONG = [
     "周年記念",
     "開設記念競走",
-    "開設記念 海の王者決定戦",
     "開設記念 北陸艇王決戦",
+    "開設記念 海の王者決定戦",
     "開設記念 海響王決定戦",
     "開設記念 びわこ大賞",
     "開設記念 ツッキー王座決定戦",
@@ -72,7 +89,7 @@ G1_KEYWORDS_STRONG = [
     "王者決定戦",
 ]
 
-# これは一般戦寄りが多いので G1 から除外
+# 一般戦寄りをG1から除外
 G1_EXCLUDE_KEYWORDS = [
     "BTS",
     "BP",
@@ -80,7 +97,7 @@ G1_EXCLUDE_KEYWORDS = [
     "オラレ",
     "外向発売所",
     "劇場開設記念",
-    "開設記念令和スピードレーサー選抜戦",
+    "令和スピードレーサー選抜戦",
     "日本財団会長杯",
     "スポーツニッポン杯",
     "ニッカン・コム杯",
@@ -94,6 +111,8 @@ G1_EXCLUDE_KEYWORDS = [
     "JESCO",
     "DS開設記念",
     "D・S開設記念",
+    "会長杯",
+    "杯争奪",
 ]
 
 MIN_OCCURRENCES = 2
@@ -112,18 +131,23 @@ def contains_any(title: str, keywords: List[str]) -> bool:
 
 def suggest_grade(title: str) -> Optional[str]:
     # 優先順が大事
-    if contains_any(title, SG_KEYWORDS):
+    # SGは厳格に
+    if contains_any(title, SG_STRICT_PATTERNS):
         return "SG"
 
+    # G2
     if contains_any(title, G2_KEYWORDS):
         return "G2"
 
+    # G3
     if contains_any(title, G3_KEYWORDS):
         return "G3"
 
+    # G1除外
     if contains_any(title, G1_EXCLUDE_KEYWORDS):
         return None
 
+    # G1
     if contains_any(title, G1_KEYWORDS_STRONG):
         return "G1"
 
@@ -170,6 +194,7 @@ def main():
             "candidate_count": len(out_rows),
             "min_occurrences": MIN_OCCURRENCES,
             "policy": "suggest_only_manual_review_required",
+            "sg_policy": "strict_patterns_only",
         },
         "titles": out_rows,
     }
@@ -180,6 +205,7 @@ def main():
 
     print("out:", DST)
     print("candidate_count:", len(out_rows))
+    print("sg_policy: strict_patterns_only")
 
 
 if __name__ == "__main__":
