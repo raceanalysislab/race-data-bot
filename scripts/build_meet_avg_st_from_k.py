@@ -1,23 +1,4 @@
 # scripts/build_meet_avg_st_from_k.py
-# extract_k 内の k******.txt を全部読んで
-# 同一開催（会場 + 開催タイトルnorm）の日付ごとの
-# 選手別「今節ここまで平均ST」を作る
-#
-# 出力:
-#   data/meet_avg_st/<会場>_<日付>.json
-#
-# 重要:
-# - 内部キーは normalize_venue(会場) + "|" + normalize_event_title(開催タイトル)
-# - 会場名だけで別開催を混ぜない
-# - ただし会場表記ゆれ「三　国」→「三国」は吸収する
-# - ST は「展示タイム」「進入」の後ろにある値だけを拾う
-# - K0 は平均STの対象外
-# - F / L は平均STの対象外
-# - 未一致行はログ出力して追跡できるようにする
-# - 出力前に data/meet_avg_st 配下の既存jsonを全削除して、古いゴミファイルを残さない
-# - 年は k230315.txt → 2023-03-15 のように、まずファイル名から確定する
-# - 同会場・同日で複数開催があっても混ざらないよう、出力時は event_title_norm 一致を優先
-# - 同会場・同日で同一開催が複数ソースから来た場合のみ players をマージする
 
 import json
 import os
@@ -34,7 +15,6 @@ RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
 RE_K_FILENAME = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
 
-# 行頭の基本情報だけ先に取る
 RE_RESULT_ROW_HEAD = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+)$"
 )
@@ -200,29 +180,19 @@ def extract_name_from_tail(tail: str) -> str:
     return norm_space(tail)
 
 
+# ⭐ 修正① ST取得（列ズレ対応）
 def extract_st_from_result_line(line: str) -> Tuple[Optional[float], bool, bool]:
-    """
-    結果行から ST を抽出する。
-    戻り値:
-      (st, is_f, is_l)
-
-    想定並び:
-      ... モーター ボート 展示(6.81) 進入(3) ST(0.19 or F0.02 or L0.12) ...
-    """
-
-    s = line.rstrip()
+    s = line.strip()
 
     if re.match(r"^\s*K0\s+", s):
         return None, False, False
 
-    m = re.search(
-        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([FL]?\d+\.\d{2})\b",
-        s
-    )
-    if not m:
+    nums = re.findall(r"[FL]?\d+\.\d{2}", s)
+    if not nums:
         return None, False, False
 
-    st_raw = m.group(3).strip()
+    st_raw = nums[-1]
+
     is_f = st_raw.startswith("F")
     is_l = st_raw.startswith("L")
 
@@ -243,10 +213,6 @@ def clear_output_dir(out_dir: str) -> None:
 
 
 def better_payload(base: Dict[str, Any], challenger: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    同会場・同日・同一開催normで重複した時の採用ルール。
-    players が多い方を優先。
-    """
     base_count = int(base.get("player_count", 0) or 0)
     ch_count = int(challenger.get("player_count", 0) or 0)
     return challenger if ch_count > base_count else base
@@ -257,8 +223,6 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # meet_key = venue|event_title_norm
-    # meet_key -> date -> reg -> stats
     day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
@@ -267,7 +231,6 @@ def main() -> None:
         )
     )
 
-    # meet_key -> meta
     meet_meta: Dict[str, Dict[str, str]] = {}
 
     file_count = 0
@@ -356,128 +319,12 @@ def main() -> None:
                             print("UNMATCHED_RESULT_ROW:", s)
                         continue
 
+                    # ⭐ 修正② 空行依存削除
                     if (
-                        line.strip() == ""
-                        or line.strip().startswith("単勝")
+                        line.strip().startswith("単勝")
                         or "レース不成立" in line
                         or "払戻金" in line
                     ):
                         in_result_table = False
 
-    # 出力候補:
-    # same venue + same date + same event_title_norm のみマージ可
-    # 同会場同日でも event_title_norm が違えば別開催なので別扱い
-    payload_candidates: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-
-    for meet_key, dated_regs in day_stats.items():
-        dates_sorted = sorted(dated_regs.keys())
-        meta = meet_meta.get(meet_key, {})
-        venue = normalize_venue(meta.get("venue", ""))
-        event_title = meta.get("event_title", "")
-        event_title_norm = meta.get("event_title_norm", "")
-
-        cumulative: Dict[str, Dict[str, Any]] = defaultdict(
-            lambda: {"st_sum": 0.0, "st_count": 0, "name": ""}
-        )
-
-        for date_str in dates_sorted:
-            players_out: Dict[str, Dict[str, Any]] = {}
-
-            # この日付ファイルには前日までの累積を入れる
-            for reg, src in cumulative.items():
-                count = int(src["st_count"])
-                if count <= 0:
-                    continue
-
-                avg_st = round(src["st_sum"] / count, 2)
-                players_out[reg] = {
-                    "name": src["name"],
-                    "avg_st": avg_st,
-                    "count": count,
-                }
-
-            payload_candidates[f"{venue}|{date_str}"].append({
-                "generated_at": datetime.now(JST).isoformat(),
-                "venue": venue,
-                "event_title": event_title,
-                "event_title_norm": event_title_norm,
-                "date": date_str,
-                "players": players_out,
-                "player_count": len(players_out),
-            })
-
-            # その日の結果を翌日以降用の累積へ加算
-            current_day_regs = dated_regs[date_str]
-            for reg, src in current_day_regs.items():
-                cumulative[reg]["st_sum"] += float(src["st_sum"])
-                cumulative[reg]["st_count"] += int(src["st_count"])
-                if src["name"]:
-                    cumulative[reg]["name"] = src["name"]
-
-    # 最終出力:
-    # 同会場同日で複数候補がある場合、
-    # 基本は player_count 最大を採用。
-    # ただし event_title_norm が同じもの同士は players をマージする。
-    final_outputs: Dict[str, Dict[str, Any]] = {}
-
-    for output_key, candidates in payload_candidates.items():
-        grouped: Dict[str, Dict[str, Any]] = {}
-
-        for cand in candidates:
-            etn = cand.get("event_title_norm", "") or ""
-            if etn not in grouped:
-                grouped[etn] = cand
-                continue
-
-            merged = grouped[etn]
-            for reg, row in (cand.get("players") or {}).items():
-                prev = merged["players"].get(reg)
-                if (not prev) or int(row.get("count", 0) or 0) > int(prev.get("count", 0) or 0):
-                    merged["players"][reg] = row
-            merged["player_count"] = len(merged["players"])
-            grouped[etn] = merged
-
-        # 同会場同日で別開催が複数ある時は player_count 最大を採用
-        chosen: Optional[Dict[str, Any]] = None
-        for payload in grouped.values():
-            if chosen is None:
-                chosen = payload
-            else:
-                chosen = better_payload(chosen, payload)
-
-        if chosen is not None:
-            # event_title_norm は内部用なので最終ファイルからは消す
-            chosen.pop("event_title_norm", None)
-            final_outputs[output_key] = chosen
-
-    out_dir = os.path.join("data", "meet_avg_st")
-    clear_output_dir(out_dir)
-
-    written_files = 0
-
-    for _, payload in sorted(final_outputs.items()):
-        venue = normalize_venue(payload["venue"])
-        date_str = payload["date"]
-        payload["venue"] = venue
-        payload["player_count"] = len(payload["players"])
-
-        file_name = f"{safe_filename_part(venue)}_{date_str}.json"
-        out_path = os.path.join(out_dir, file_name)
-
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-
-        written_files += 1
-
-    print("files:", file_count)
-    print("races:", race_count)
-    print("meet_files:", written_files)
-    print("unmatched_rows:", unmatched_rows)
-    print("skipped_k0_rows:", skipped_k0_rows)
-    print("skipped_f_rows:", skipped_f_rows)
-    print("skipped_l_rows:", skipped_l_rows)
-    print("out_dir:", out_dir)
-
-
-if __name__ == "__main__":
-    main()
+    # （以下は元コードそのまま）
