@@ -70,11 +70,6 @@ jobs:
             echo "Found extracted txt: $latest_txt"
           fi
 
-      - name: Build event master candidates
-        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
-        run: |
-          python scripts/build_event_master_candidates.py
-
       - name: Build event master
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
@@ -84,6 +79,11 @@ jobs:
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
         run: |
           python scripts/parse_mbrace_txt.py
+
+      - name: Build unregistered event log
+        if: steps.check_mbrace.outputs.mbrace_ready == 'true'
+        run: |
+          python scripts/build_unregistered_event_log.py
 
       - name: Check parsed mbrace json
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
@@ -109,11 +109,11 @@ jobs:
           echo "----- event master manual -----"
           ls -la data/event_master_manual.json || true
 
-          echo "----- event master candidates -----"
-          ls -la data/event_master_candidates.json || true
-
           echo "----- event master -----"
           ls -la data/event_master.json || true
+
+          echo "----- unregistered event log -----"
+          ls -la data/unregistered_event_titles.json || true
 
           echo "----- parsed mbrace json -----"
           ls -la data/mbrace_races_*.json || true
@@ -138,6 +138,9 @@ jobs:
 
           echo "----- site races dir -----"
           find data/site/races -maxdepth 2 -type f | sort | head -n 200 || true
+
+          echo "----- unregistered event log body -----"
+          cat data/unregistered_event_titles.json || true
 
       - name: Commit fetched data to bot repo
         if: steps.check_mbrace.outputs.mbrace_ready == 'true'
