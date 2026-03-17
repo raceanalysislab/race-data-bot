@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "generated_at": "2026-03-17T10:04:19.823648+09:00",
+    "generated_at": "2026-03-17T11:09:43.122088+09:00",
     "source_candidates": "data/event_master_candidates.json",
     "source_manual": "data/event_master_manual.json",
-    "title_count": 35,
+    "title_count": 190,
     "grade_policy": "manual_only_default_ippan"
   },
   "events": {
@@ -96,15 +96,13 @@
       ]
     },
     "スカパー！・JLC杯戸田ルーキーシリーズ第5戦": {
-      "grade": "一般",
+      "grade": "G3",
       "total_days": null,
-      "notes": "",
+      "notes": "auto_from_grade_candidates: k260307.txt, k260308.txt, k260309.txt, k260311.txt, k260312.txt",
       "sample_titles": [
         "スカパー！・JLC杯戸田ルーキーシリーズ第5戦"
       ],
-      "venues": [
-        "戸田"
-      ]
+      "venues": []
     },
     "スポーツライブ＋杯": {
       "grade": "一般",
@@ -173,7 +171,7 @@
       ]
     },
     "唐津MB大賞～スター候補チャレンジマッチ～": {
-      "grade": "G2",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -217,7 +215,7 @@
       ]
     },
     "尼崎市制110周年記念 尼崎センプルカップ": {
-      "grade": "G1",
+      "grade": "一般",
       "total_days": null,
       "notes": "",
       "sample_titles": [
@@ -250,15 +248,13 @@
       ]
     },
     "日刊スポーツ杯争奪徳山オールレディース": {
-      "grade": "一般",
+      "grade": "G3",
       "total_days": null,
-      "notes": "",
+      "notes": "auto_from_grade_candidates: k241006.txt, k241007.txt, k241008.txt, k241009.txt, k241010.txt",
       "sample_titles": [
         "日刊スポーツ杯争奪徳山オールレディース"
       ],
-      "venues": [
-        "徳山"
-      ]
+      "venues": []
     },
     "春到来！ BOATBoyカップ 2026": {
       "grade": "一般",
@@ -391,6 +387,1454 @@
       "venues": [
         "鳴門"
       ]
+    },
+    "グランプリ／グランプリシリーズ": {
+      "grade": "SG",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231219.txt, k231220.txt, k231221.txt, k231222.txt, k231223.txt",
+      "sample_titles": [
+        "第38回グランプリ／グランプリシリーズ",
+        "第39回グランプリ／グランプリシリーズ",
+        "第40回グランプリ／グランプリシリーズ"
+      ],
+      "venues": []
+    },
+    "チャレンジカップ／G2レディースCC": {
+      "grade": "SG",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231121.txt, k231122.txt, k231123.txt, k231124.txt, k231125.txt",
+      "sample_titles": [
+        "第26回チャレンジカップ／G2レディースCC",
+        "第27回チャレンジカップ／G2レディースCC",
+        "第28回チャレンジカップ／G2レディースCC"
+      ],
+      "venues": []
+    },
+    "開設記念 北陸艇王決戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230325.txt, k230326.txt, k230327.txt, k230328.txt, k230329.txt",
+      "sample_titles": [
+        "開設69周年記念 北陸艇王決戦",
+        "開設70周年記念 北陸艇王決戦",
+        "開設71周年記念 北陸艇王決戦",
+        "開設72周年記念 北陸艇王決戦"
+      ],
+      "venues": []
+    },
+    "開設記念 海の王者決定戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230326.txt, k230327.txt, k230328.txt, k230329.txt, k230330.txt",
+      "sample_titles": [
+        "開設70周年記念 海の王者決定戦",
+        "開設71周年記念 海の王者決定戦",
+        "開設72周年記念 海の王者決定戦",
+        "開設73周年記念 海の王者決定戦"
+      ],
+      "venues": []
+    },
+    "宮島チャンピオンカップ開設記念": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230404.txt, k230405.txt, k230406.txt, k230407.txt, k230408.txt",
+      "sample_titles": [
+        "宮島チャンピオンカップ開設69周年記念",
+        "宮島チャンピオンカップ開設70周年記念",
+        "宮島チャンピオンカップ開設71周年記念"
+      ],
+      "venues": []
+    },
+    "オールジャパン竹島特別 開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230601.txt, k230602.txt, k230603.txt, k230604.txt, k230605.txt",
+      "sample_titles": [
+        "オールジャパン竹島特別 開設70周年記念競走",
+        "オールジャパン竹島特別開設68周年記念競走",
+        "オールジャパン竹島特別開設69周年記念競走"
+      ],
+      "venues": []
+    },
+    "京極賞開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231210.txt, k231211.txt, k231212.txt, k231213.txt, k231214.txt",
+      "sample_titles": [
+        "京極賞 開設71周年記念競走",
+        "京極賞 開設72周年記念競走",
+        "京極賞開設73周年記念競走"
+      ],
+      "venues": []
+    },
+    "児島キングカップ開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230509.txt, k230510.txt, k230511.txt, k230512.txt, k230513.txt",
+      "sample_titles": [
+        "児島キングカップ開設71周年記念競走",
+        "児島キングカップ開設72周年記念競走",
+        "児島キングカップ開設73周年記念競走"
+      ],
+      "venues": []
+    },
+    "全日本王者決定戦（開設記念）": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230925.txt, k230926.txt, k230927.txt, k230928.txt, k230929.txt",
+      "sample_titles": [
+        "全日本王者決定戦（開設70周年記念）",
+        "全日本王者決定戦（開設71周年記念）",
+        "全日本王者決定戦（開設72周年記念）"
+      ],
+      "venues": []
+    },
+    "大渦大賞開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231130.txt, k231201.txt, k231202.txt, k231203.txt, k231204.txt",
+      "sample_titles": [
+        "大渦大賞開設70周年記念競走",
+        "大渦大賞開設71周年記念競走",
+        "大渦大賞開設72周年記念競走"
+      ],
+      "venues": []
+    },
+    "太閤賞競走開設記念": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240324.txt, k240325.txt, k240326.txt, k240327.txt, k240328.txt",
+      "sample_titles": [
+        "太閤賞競走開設67周年記念",
+        "太閤賞競走開設68周年記念",
+        "太閤賞競走開設69周年記念"
+      ],
+      "venues": []
+    },
+    "徳山クラウン争奪戦開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231102.txt, k231103.txt, k231104.txt, k231105.txt, k231106.txt",
+      "sample_titles": [
+        "徳山クラウン争奪戦開設70周年記念競走",
+        "徳山クラウン争奪戦開設71周年記念競走",
+        "徳山クラウン争奪戦開設72周年記念競走"
+      ],
+      "venues": []
+    },
+    "福岡チャンピオンカップ開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231010.txt, k231011.txt, k231012.txt, k231013.txt, k231014.txt",
+      "sample_titles": [
+        "福岡チャンピオンカップ開設70周年記念競走",
+        "福岡チャンピオンカップ開設71周年記念競走",
+        "福岡チャンピオンカップ開設72周年記念競走"
+      ],
+      "venues": []
+    },
+    "読売新聞社杯 全日本王座決定戦 開設記念": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231206.txt, k231207.txt, k231208.txt, k231209.txt, k231210.txt",
+      "sample_titles": [
+        "読売新聞社杯 全日本王座決定戦 開設71周年記念",
+        "読売新聞社杯 全日本王座決定戦 開設72周年記念",
+        "読売新聞社杯 全日本王座決定戦 開設73周年記念"
+      ],
+      "venues": []
+    },
+    "読売新聞社杯全日本覇者決定戦開設記念競走": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231103.txt, k231104.txt, k231105.txt, k231106.txt, k231107.txt",
+      "sample_titles": [
+        "読売新聞社杯全日本覇者決定戦開設71周年記念競走",
+        "読売新聞社杯全日本覇者決定戦開設72周年記念競走",
+        "読売新聞社杯全日本覇者決定戦開設73周年記念競走"
+      ],
+      "venues": []
+    },
+    "開設記念 びわこ大賞": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231001.txt, k231002.txt, k231003.txt, k231004.txt, k231005.txt",
+      "sample_titles": [
+        "開設71周年記念 びわこ大賞",
+        "開設72周年記念 びわこ大賞",
+        "開設73周年記念 びわこ大賞"
+      ],
+      "venues": []
+    },
+    "開設記念 ツッキー王座決定戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230409.txt, k230410.txt, k230411.txt, k230412.txt, k230413.txt",
+      "sample_titles": [
+        "開設71周年記念 ツッキー王座決定戦",
+        "開設72周年記念 ツッキー王座決定戦",
+        "開設73周年記念 ツッキー王座決定戦"
+      ],
+      "venues": []
+    },
+    "開設記念 赤城雷神杯": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230913.txt, k230914.txt, k230915.txt, k230916.txt, k230917.txt",
+      "sample_titles": [
+        "開設67周年記念赤城雷神杯",
+        "開設68周年記念赤城雷神杯",
+        "開設69周年記念 赤城雷神杯"
+      ],
+      "venues": []
+    },
+    "開設記念競走トコタンキング決定戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230831.txt, k230901.txt, k230902.txt, k230903.txt, k230904.txt",
+      "sample_titles": [
+        "開設70周年記念競走トコタンキング決定戦",
+        "開設71周年記念競走トコタンキング決定戦",
+        "開設72周年記念競走トコタンキング決定戦"
+      ],
+      "venues": []
+    },
+    "尼崎センプルカップ（開設記念）": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240304.txt, k240305.txt, k240306.txt, k240307.txt, k240308.txt",
+      "sample_titles": [
+        "尼崎センプルカップ（開設71周年記念）",
+        "尼崎センプルカップ（開設72周年記念）"
+      ],
+      "venues": []
+    },
+    "開設記念 海響王決定戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250111.txt, k250112.txt, k250113.txt, k250114.txt, k250115.txt",
+      "sample_titles": [
+        "開設70周年記念 海響王決定戦",
+        "開設71周年記念 海響王決定戦"
+      ],
+      "venues": []
+    },
+    "開設記念 競帝王決定戦": {
+      "grade": "G1",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240119.txt, k240120.txt, k240121.txt, k240122.txt, k240123.txt",
+      "sample_titles": [
+        "開設69周年記念 競帝王決定戦"
+      ],
+      "venues": []
+    },
+    "MB大賞 ドラキリュウただいま絶好調バトル": {
+      "grade": "G2",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230517.txt, k230518.txt, k230519.txt, k230520.txt, k230521.txt",
+      "sample_titles": [
+        "MB大賞 ドラキリュウただいま絶好調バトル"
+      ],
+      "venues": []
+    },
+    "MB大賞 天下無双！群雄割拠浜名湖の陣 地区対抗戦": {
+      "grade": "G2",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230725.txt, k230726.txt, k230727.txt, k230728.txt, k230729.txt",
+      "sample_titles": [
+        "MB大賞 天下無双！群雄割拠浜名湖の陣 地区対抗戦"
+      ],
+      "venues": []
+    },
+    "オールレディース マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230429.txt, k230430.txt, k230501.txt, k230502.txt, k230503.txt",
+      "sample_titles": [
+        "オールレディース マクール杯"
+      ],
+      "venues": []
+    },
+    "オールレディース LOVE FM福岡なでしこカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230311.txt, k230312.txt, k230930.txt, k231001.txt, k231002.txt",
+      "sample_titles": [
+        "オールレディース LOVE FM福岡なでしこカップ"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第12戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230722.txt, k230723.txt, k230724.txt, k230725.txt, k230726.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第12戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "オールレディース ビーナスちゃんカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230810.txt, k230811.txt, k230812.txt, k230813.txt, k230814.txt",
+      "sample_titles": [
+        "オールレディース ビーナスちゃんカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース ジュエルセブンカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230611.txt, k230612.txt, k230613.txt, k230614.txt, k230615.txt",
+      "sample_titles": [
+        "オールレディース ジュエルセブンカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース 日刊スポーツ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230823.txt, k230824.txt, k230825.txt, k230826.txt, k230827.txt",
+      "sample_titles": [
+        "オールレディース 第56回日刊スポーツ杯",
+        "オールレディース 第57回日刊スポーツ杯",
+        "オールレディース 第58回日刊スポーツ杯"
+      ],
+      "venues": []
+    },
+    "オールレディース 江戸川女王決定戦KIRINCUP": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230530.txt, k230531.txt, k230601.txt, k230602.txt, k230603.txt",
+      "sample_titles": [
+        "オールレディース 江戸川女王決定戦KIRINCUP"
+      ],
+      "venues": []
+    },
+    "オールレディース 瀬戸の女王決定戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240202.txt, k240203.txt, k240204.txt, k240205.txt, k240206.txt",
+      "sample_titles": [
+        "オールレディース 第35回瀬戸の女王決定戦",
+        "オールレディース 第36回瀬戸の女王決定戦",
+        "オールレディース 第37回瀬戸の女王決定戦"
+      ],
+      "venues": []
+    },
+    "オールレディースリップルカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230905.txt, k230906.txt, k230907.txt, k230908.txt, k230909.txt",
+      "sample_titles": [
+        "オールレディースリップルカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース渦の女王決定戦競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230422.txt, k230423.txt, k230424.txt, k230425.txt, k230426.txt",
+      "sample_titles": [
+        "オールレディース第39回渦の女王決定戦競走",
+        "オールレディース第40回渦の女王決定戦競走",
+        "オールレディース第41回渦の女王決定戦競走"
+      ],
+      "venues": []
+    },
+    "オールレディース競走あまがさきピンクルカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240104.txt, k240105.txt, k240106.txt, k240107.txt, k240108.txt",
+      "sample_titles": [
+        "オールレディース競走あまがさきピンクルカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース競走レディース笹川杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231130.txt, k231201.txt, k231202.txt, k231203.txt, k231204.txt",
+      "sample_titles": [
+        "オールレディース競走レディース笹川杯"
+      ],
+      "venues": []
+    },
+    "津オールレディース マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240115.txt, k240116.txt, k240117.txt, k240118.txt, k240119.txt",
+      "sample_titles": [
+        "津オールレディース マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ・Yes！銀座高須クリニック杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250204.txt, k250205.txt, k250206.txt, k250207.txt, k250208.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ・Yes！銀座高須クリニック杯"
+      ],
+      "venues": []
+    },
+    "オールレディース 三国レディースカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231207.txt, k231208.txt, k231209.txt, k231210.txt, k231211.txt",
+      "sample_titles": [
+        "オールレディース 三国レディースカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース 静岡クラウンメロン杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240819.txt, k240820.txt, k240821.txt, k240822.txt, k240823.txt",
+      "sample_titles": [
+        "オールレディース 静岡クラウンメロン杯"
+      ],
+      "venues": []
+    },
+    "オールレディースアクアクイーンカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230401.txt, k230402.txt, k230403.txt, k230404.txt, k230405.txt",
+      "sample_titles": [
+        "オールレディース第34回アクアクイーンカップ",
+        "オールレディース第36回アクアクイーンカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース・大宮アルディージャベントス杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231028.txt, k231029.txt, k231030.txt, k231031.txt, k231101.txt",
+      "sample_titles": [
+        "オールレディース・大宮アルディージャベントス杯"
+      ],
+      "venues": []
+    },
+    "オールレディース競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240906.txt, k240907.txt, k240908.txt, k240909.txt, k240910.txt",
+      "sample_titles": [
+        "オールレディース競走"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯 ルーキーシリーズ第8戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230414.txt, k230415.txt, k230416.txt, k230417.txt, k230418.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯 ルーキーシリーズ第8戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯争奪 ルーキーシリーズ第18戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231018.txt, k231019.txt, k231020.txt, k231021.txt, k231022.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯争奪 ルーキーシリーズ第18戦",
+        "スカパー！・JLC杯争奪ルーキーシリーズ第18戦"
+      ],
+      "venues": []
+    },
+    "マクール杯 ヴィーナスシリーズ第2戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230415.txt, k230416.txt, k230417.txt, k230418.txt, k230419.txt",
+      "sample_titles": [
+        "マクール杯 ヴィーナスシリーズ第2戦"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第11戦スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230712.txt, k230713.txt, k230714.txt, k230715.txt, k230716.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第11戦スカパー！・JLC杯",
+        "ルーキーシリーズ第11戦第9回スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第3戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240220.txt, k240221.txt, k240222.txt, k240223.txt, k240224.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第3戦 スカパー！・JLC杯",
+        "ルーキーシリーズ第3戦スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第10戦 蒼月まるるカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240801.txt, k240802.txt, k240803.txt, k240804.txt, k240805.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第10戦 蒼月まるるカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第1戦・マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230408.txt, k230409.txt, k230410.txt, k230411.txt, k230412.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第1戦・マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第23戦北九州下関フェニックス杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230313.txt, k230314.txt, k230315.txt, k230316.txt, k230317.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第23戦北九州下関フェニックス杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第5戦 マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240525.txt, k240526.txt, k240527.txt, k240528.txt, k240529.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第5戦 マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第7戦 マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230705.txt, k230706.txt, k230707.txt, k230708.txt, k230709.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第7戦 第16回マクール杯",
+        "ヴィーナスシリーズ第7戦 第17回マクール杯"
+      ],
+      "venues": []
+    },
+    "オールレディース 創刊マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240318.txt, k240319.txt, k240320.txt, k240321.txt, k240322.txt",
+      "sample_titles": [
+        "オールレディース 創刊30周年マクール杯"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯 ルーキーシリーズ 第2戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260120.txt, k260121.txt, k260122.txt, k260123.txt, k260124.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯 ルーキーシリーズ 第2戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第15戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230909.txt, k230910.txt, k230911.txt, k230912.txt, k230913.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第15戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第1戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260111.txt, k260112.txt, k260113.txt, k260114.txt, k260115.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第1戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第23戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251208.txt, k251209.txt, k251210.txt, k251211.txt, k251212.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第23戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯徳山ルーキーシリーズ第4戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250225.txt, k250226.txt, k250227.txt, k250228.txt, k250301.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯徳山ルーキーシリーズ第4戦"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第15戦 三国プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231103.txt, k231104.txt, k231105.txt, k231106.txt, k231107.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第15戦 三国プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第4戦 Hayashikane杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250507.txt, k250508.txt, k250509.txt, k250510.txt, k250511.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第4戦 Hayashikane杯"
+      ],
+      "venues": []
+    },
+    "JLC杯 ルーキーシリーズ第3戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250216.txt, k250217.txt, k250218.txt, k250219.txt, k250220.txt",
+      "sample_titles": [
+        "第24回JLC杯 ルーキーシリーズ第3戦"
+      ],
+      "venues": []
+    },
+    "JLC杯 ルーキーシリーズ第6戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240323.txt, k240324.txt, k240325.txt, k240326.txt, k240327.txt",
+      "sample_titles": [
+        "第23回JLC杯 ルーキーシリーズ第6戦"
+      ],
+      "venues": []
+    },
+    "オールレディース ハマナ娘クルーカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230629.txt, k230630.txt, k230701.txt, k230702.txt, k230703.txt",
+      "sample_titles": [
+        "オールレディース ハマナ娘クルーカップ"
+      ],
+      "venues": []
+    },
+    "オールレディース 蛭子能収杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230711.txt, k230712.txt, k230713.txt, k230714.txt, k230715.txt",
+      "sample_titles": [
+        "オールレディース 蛭子能収杯"
+      ],
+      "venues": []
+    },
+    "オールレディースひめちゃん杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250619.txt, k250620.txt, k250621.txt, k250622.txt, k250623.txt",
+      "sample_titles": [
+        "オールレディースひめちゃん杯"
+      ],
+      "venues": []
+    },
+    "オールレディース九州スポーツ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240519.txt, k240520.txt, k240521.txt, k240522.txt, k240523.txt",
+      "sample_titles": [
+        "オールレディース九州スポーツ杯"
+      ],
+      "venues": []
+    },
+    "オールレディース北九州市制記念": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230617.txt, k230618.txt, k230619.txt, k230620.txt, k230621.txt",
+      "sample_titles": [
+        "オールレディース北九州市制60周年記念"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第14戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240928.txt, k240929.txt, k240930.txt, k241001.txt, k241002.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第14戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第16戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241017.txt, k241018.txt, k241019.txt, k241020.txt, k241021.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第16戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯ルーキーシリーズ第19戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231028.txt, k231029.txt, k231030.txt, k231031.txt, k231101.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯ルーキーシリーズ第19戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯争奪 ルーキーシリーズ第5戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250306.txt, k250307.txt, k250308.txt, k250309.txt, k250310.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯争奪 ルーキーシリーズ第5戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯徳山ルーキーシリーズ第17戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231009.txt, k231010.txt, k231011.txt, k231012.txt, k231013.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯徳山ルーキーシリーズ第17戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯徳山ルーキーシリーズ第19戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251020.txt, k251021.txt, k251022.txt, k251023.txt, k251024.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯徳山ルーキーシリーズ第19戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯戸田ルーキーシリーズ第15戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241008.txt, k241009.txt, k241010.txt, k241011.txt, k241012.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯戸田ルーキーシリーズ第15戦"
+      ],
+      "venues": []
+    },
+    "スカパー！・JLC杯戸田ルーキーシリーズ第21戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231116.txt, k231117.txt, k231118.txt, k231119.txt, k231120.txt",
+      "sample_titles": [
+        "スカパー！・JLC杯戸田ルーキーシリーズ第21戦"
+      ],
+      "venues": []
+    },
+    "スポーツニッポン杯争奪ヴィーナスシリーズ第11戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240813.txt, k240814.txt, k240815.txt, k240816.txt, k240817.txt",
+      "sample_titles": [
+        "スポーツニッポン杯争奪ヴィーナスシリーズ第11戦"
+      ],
+      "venues": []
+    },
+    "マクール杯 ヴィーナスシリーズ第18戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241125.txt, k241126.txt, k241127.txt, k241128.txt, k241129.txt",
+      "sample_titles": [
+        "マクール杯 ヴィーナスシリーズ第18戦"
+      ],
+      "venues": []
+    },
+    "マクール杯争奪徳山ヴィーナスシリーズ第12戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250825.txt, k250826.txt, k250827.txt, k250828.txt, k250829.txt",
+      "sample_titles": [
+        "マクール杯争奪徳山ヴィーナスシリーズ第12戦"
+      ],
+      "venues": []
+    },
+    "マクール杯争奪徳山ヴィーナスシリーズ第14戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231022.txt, k231023.txt, k231024.txt, k231025.txt, k231026.txt",
+      "sample_titles": [
+        "マクール杯争奪徳山ヴィーナスシリーズ第14戦"
+      ],
+      "venues": []
+    },
+    "ラグーナテンボス杯争奪 オールレディース": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230723.txt, k230724.txt, k230725.txt, k230726.txt, k230727.txt",
+      "sample_titles": [
+        "ラグーナテンボス杯争奪 オールレディース"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ スカパー・JLC杯オール進入固定": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230701.txt, k230702.txt, k230703.txt, k230704.txt, k230705.txt",
+      "sample_titles": [
+        "ルーキーシリーズ スカパー・JLC杯オール進入固定"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第10戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240720.txt, k240721.txt, k240722.txt, k240723.txt, k240724.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第10戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第11戦 瀬戸の若鷲決定戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250710.txt, k250711.txt, k250712.txt, k250713.txt, k250714.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第11戦 第36回瀬戸の若鷲決定戦"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第13戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240909.txt, k240910.txt, k240911.txt, k240912.txt, k240913.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第13戦"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第14戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230831.txt, k230901.txt, k230902.txt, k230903.txt, k230904.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第14戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第15戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250905.txt, k250906.txt, k250907.txt, k250908.txt, k250909.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第15戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第16戦スカパーJLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250914.txt, k250915.txt, k250916.txt, k250917.txt, k250918.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第16戦第11回スカパーJLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第17戦 スカパー・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241026.txt, k241027.txt, k241028.txt, k241029.txt, k241030.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第17戦 スカパー・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第17戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251002.txt, k251003.txt, k251004.txt, k251005.txt, k251006.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第17戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第18戦・スカパー！JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241105.txt, k241106.txt, k241107.txt, k241108.txt, k241109.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第18戦・スカパー！JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第19戦スカパー・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241114.txt, k241115.txt, k241116.txt, k241117.txt, k241118.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第19戦第10回スカパー・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第1戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240116.txt, k240117.txt, k240118.txt, k240119.txt, k240120.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第1戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第20戦 スカパー！・JLCカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241123.txt, k241124.txt, k241125.txt, k241126.txt, k241127.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第20戦 スカパー！・JLCカップ"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第20戦・スカパー！JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251106.txt, k251107.txt, k251108.txt, k251109.txt, k251110.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第20戦・スカパー！JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第21戦 マンスリーBR杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241202.txt, k241203.txt, k241204.txt, k241205.txt, k241206.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第21戦 第18回マンスリーBR杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第21戦スカパー！・JLC杯争奪戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251118.txt, k251119.txt, k251120.txt, k251121.txt, k251122.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第21戦スカパー！・JLC杯争奪戦"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第22戦 スカパー！・JLCカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231125.txt, k231126.txt, k231127.txt, k231128.txt, k231129.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第22戦 スカパー！・JLCカップ"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第22戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241211.txt, k241212.txt, k241213.txt, k241214.txt, k241215.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第22戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第22戦スカパー！・JLC杯競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251128.txt, k251129.txt, k251130.txt, k251201.txt, k251202.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第22戦スカパー！・JLC杯競走"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第23戦スカパー！JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231204.txt, k231205.txt, k231206.txt, k231207.txt, k231208.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第23戦スカパー！JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第23戦スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241220.txt, k241221.txt, k241222.txt, k241223.txt, k241224.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第23戦スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第24戦スカパー！JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231213.txt, k231214.txt, k231215.txt, k231216.txt, k231217.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第24戦スカパー！第25回JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第24戦スカパー！・JLCカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251218.txt, k251219.txt, k251220.txt, k251221.txt, k251222.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第24戦スカパー！・JLCカップ"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第2戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250119.txt, k250120.txt, k250121.txt, k250122.txt, k250123.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第2戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第2戦スカパー！・JLC杯競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240125.txt, k240126.txt, k240127.txt, k240128.txt, k240129.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第2戦スカパー！・JLC杯競走"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第4戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240302.txt, k240303.txt, k240304.txt, k240305.txt, k240306.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第4戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第5戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230317.txt, k230318.txt, k230319.txt, k230320.txt, k230321.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第5戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第6戦スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230326.txt, k230327.txt, k230328.txt, k230329.txt, k230330.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第6戦第8回スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第6戦スカパー！・JLC杯競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250315.txt, k250316.txt, k250317.txt, k250318.txt, k250319.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第6戦スカパー！・JLC杯競走"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第7戦 ドラキリュウカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230404.txt, k230405.txt, k230406.txt, k230407.txt, k230408.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第7戦 第16回ドラキリュウカップ"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第7戦スカパー！・JLC杯争奪戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240403.txt, k240404.txt, k240405.txt, k240406.txt, k240407.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第7戦スカパー！・JLC杯争奪戦"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第9戦 スカパー！・JLC杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250415.txt, k250416.txt, k250417.txt, k250418.txt, k250419.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第9戦 スカパー！・JLC杯"
+      ],
+      "venues": []
+    },
+    "ルーキーシリーズ第9戦スカパー！・JLC杯争奪戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230620.txt, k230621.txt, k230622.txt, k230623.txt, k230624.txt",
+      "sample_titles": [
+        "ルーキーシリーズ第9戦スカパー！・JLC杯争奪戦"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ マンスリーBOATRACE杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260130.txt, k260131.txt, k260201.txt, k260202.txt, k260203.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ マンスリーBOATRACE杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ 北九州下関フェニックス杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250210.txt, k250211.txt, k250212.txt, k250213.txt, k250214.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ 北九州下関フェニックス杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第11戦 クラリスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230912.txt, k230913.txt, k230914.txt, k230915.txt, k230916.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第11戦 第13回クラリスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第11戦常滑シンデレラカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250819.txt, k250820.txt, k250821.txt, k250822.txt, k250823.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第11戦常滑シンデレラカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第12戦常滑シンデレラカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240831.txt, k240901.txt, k240902.txt, k240903.txt, k240904.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第12戦常滑シンデレラカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第13戦 スポニチ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240918.txt, k240919.txt, k240920.txt, k240921.txt, k240922.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第13戦 スポニチ杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第13戦 マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231010.txt, k231011.txt, k231012.txt, k231013.txt, k231014.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第13戦 マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第14戦 BOATBoyCUP": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240930.txt, k241001.txt, k241002.txt, k241003.txt, k241004.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第14戦 BOATBoyCUP"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第15戦スポニチ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251010.txt, k251011.txt, k251012.txt, k251013.txt, k251014.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第15戦スポニチ杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第16戦 尼崎プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241026.txt, k241027.txt, k241028.txt, k241029.txt, k241030.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第16戦 尼崎プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第17戦 三国プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251112.txt, k251113.txt, k251114.txt, k251115.txt, k251116.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第17戦 三国プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第17戦 尼崎プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k231213.txt, k231214.txt, k231215.txt, k231216.txt, k231217.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第17戦 尼崎プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第17戦是政プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k241113.txt, k241114.txt, k241115.txt, k241116.txt, k241117.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第17戦是政プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第18戦 尼崎プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k251207.txt, k251208.txt, k251209.txt, k251210.txt, k251211.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第18戦 尼崎プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第18戦是政プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240121.txt, k240122.txt, k240123.txt, k240124.txt, k240125.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第18戦是政プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第19戦 クラリスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250117.txt, k250118.txt, k250119.txt, k250120.txt, k250121.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第19戦 第14回クラリスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第19戦・日刊スポーツ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240208.txt, k240209.txt, k240210.txt, k240211.txt, k240212.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第19戦・第57回日刊スポーツ杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第19戦是政プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260110.txt, k260111.txt, k260112.txt, k260113.txt, k260114.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第19戦是政プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第20戦 はっぴーちゃんカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240214.txt, k240215.txt, k240216.txt, k240217.txt, k240218.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第20戦 はっぴーちゃんカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第21戦 クラリスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260206.txt, k260207.txt, k260208.txt, k260209.txt, k260210.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第21戦 第15回クラリスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第21戦マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240227.txt, k240228.txt, k240229.txt, k240301.txt, k240302.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第21戦第9回マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第22戦・マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k260218.txt, k260219.txt, k260220.txt, k260221.txt, k260222.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第22戦・マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第22戦常滑シンデレラカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240305.txt, k240306.txt, k240307.txt, k240308.txt, k240309.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第22戦常滑シンデレラカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第23戦マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250312.txt, k250313.txt, k250314.txt, k250315.txt, k250316.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第23戦第10回マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第24戦 BOATBoyCUP": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240325.txt, k240326.txt, k240327.txt, k240328.txt, k240329.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第24戦 BOATBoyCUP"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第24戦 ゾンビランドサガR杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250325.txt, k250326.txt, k250327.txt, k250328.txt, k250329.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第24戦 ゾンビランドサガR杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第24戦クラリスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230326.txt, k230327.txt, k230328.txt, k230329.txt, k230330.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第24戦第12回クラリスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第3戦 マクール杯競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250425.txt, k250426.txt, k250427.txt, k250428.txt, k250429.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第3戦 マクール杯競走"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第4戦・マクール杯競走": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240513.txt, k240514.txt, k240515.txt, k240516.txt, k240517.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第4戦・マクール杯競走"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第5戦創刊記念スポニチ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230605.txt, k230606.txt, k230607.txt, k230608.txt, k230609.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第5戦創刊75周年記念スポニチ杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第6戦 BOATBoyカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250607.txt, k250608.txt, k250609.txt, k250610.txt, k250611.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第6戦 BOATBoyカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第6戦 カルビーカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230623.txt, k230624.txt, k230625.txt, k230626.txt, k230627.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第6戦 カルビーカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第6戦 三国プリンセスカップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240607.txt, k240608.txt, k240609.txt, k240610.txt, k240611.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第6戦 三国プリンセスカップ"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第8戦 マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250707.txt, k250708.txt, k250709.txt, k250710.txt, k250711.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第8戦 マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第9戦・創刊マクール杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230816.txt, k230817.txt, k230818.txt, k230819.txt, k230820.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第9戦・創刊30周年マクール杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第9戦・日刊スポーツ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k250719.txt, k250720.txt, k250721.txt, k250722.txt, k250723.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第9戦・日刊スポーツ杯"
+      ],
+      "venues": []
+    },
+    "ヴィーナスシリーズ第9戦・東京中日スポーツ杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k240720.txt, k240721.txt, k240722.txt, k240723.txt, k240724.txt",
+      "sample_titles": [
+        "ヴィーナスシリーズ第9戦・東京中日スポーツ杯"
+      ],
+      "venues": []
+    },
+    "日刊スポーツ杯争奪ルーキーシリーズ第16戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230928.txt, k230929.txt, k230930.txt, k231001.txt, k231002.txt",
+      "sample_titles": [
+        "日刊スポーツ杯争奪ルーキーシリーズ第16戦"
+      ],
+      "venues": []
+    },
+    "江戸川ヴィーナスシリーズ・Yes！高須クリニック杯": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230924.txt, k230925.txt, k230926.txt, k230927.txt, k230928.txt",
+      "sample_titles": [
+        "江戸川ヴィーナスシリーズ・Yes！高須クリニック杯"
+      ],
+      "venues": []
+    },
+    "蒲郡市長杯争奪 ヴィーナスシリーズ第4戦": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230523.txt, k230524.txt, k230525.txt, k230526.txt, k230527.txt",
+      "sample_titles": [
+        "蒲郡市長杯争奪 ヴィーナスシリーズ第4戦"
+      ],
+      "venues": []
+    },
+    "西部記者クラブ杯争奪徳山オールレディース": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "auto_from_grade_candidates: k230517.txt, k230518.txt, k230519.txt, k230520.txt, k230521.txt",
+      "sample_titles": [
+        "西部記者クラブ杯争奪徳山オールレディース"
+      ],
+      "venues": []
     }
   }
 }
