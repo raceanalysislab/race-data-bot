@@ -30,6 +30,7 @@ TRANS = str.maketrans({
     "Ｐ": "P", "Ｑ": "Q", "Ｒ": "R", "Ｓ": "S", "Ｔ": "T",
     "Ｕ": "U", "Ｖ": "V", "Ｗ": "W", "Ｘ": "X", "Ｙ": "Y",
     "Ｚ": "Z",
+    "（": "(", "）": ")",
 })
 
 BRANCHES = [
@@ -69,17 +70,34 @@ def compact(s: str) -> str:
 def normalize_event_title(s: str) -> str:
     s = norm(s)
 
-    # グレード文字列による推測はしないが、照合ノイズは除去
+    # グレード表記は照合ノイズ
     s = re.sub(r"\bSG\b", "", s)
     s = re.sub(r"\bG[123]\b", "", s)
 
-    # 第○回は年で変わるため照合対象から除外
+    # 回数は年で変わる
     s = re.sub(r"第\s*\d+\s*回", "", s)
 
-    # ○周年は年で変わるため照合対象から除外
+    # 周年系は年で変わる
+    s = re.sub(r"市制\s*\d+\s*周年記念", "", s)
+    s = re.sub(r"創刊\s*\d+\s*周年記念", "", s)
+    s = re.sub(r"開設\s*\d+\s*周年記念競走", "", s)
+    s = re.sub(r"開設\s*\d+\s*周年記念", "", s)
+    s = re.sub(r"\d+\s*周年記念", "", s)
     s = re.sub(r"\d+\s*周年", "", s)
 
+    # 開設記念系の表記ゆれ吸収
+    s = re.sub(r"\(\s*開設記念\s*\)", "", s)
+    s = re.sub(r"（\s*開設記念\s*）", "", s)
+    s = re.sub(r"開設記念競走", "", s)
+    s = re.sub(r"開設記念", "", s)
+
+    # 記念だけ単独で残ったら消す
+    s = re.sub(r"\b記念\b", "", s)
+
+    # 記号/空白整理
+    s = re.sub(r"[()]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
+
     return s
 
 
@@ -146,7 +164,6 @@ EVENT_MASTER = load_event_master()
 
 
 def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
-    # 完全一致のみ。部分一致は禁止。
     t_compact = compact_event_title(title)
     if not t_compact:
         return None
@@ -475,7 +492,6 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
     if None in (motor_no, motor_2, boat_no, boat_2):
         return None
 
-    # 誤爆防止の軽い妥当性チェック
     if motor_no < 1 or boat_no < 1:
         return None
     if not (0.0 <= motor_2 <= 100.0 and 0.0 <= boat_2 <= 100.0):
