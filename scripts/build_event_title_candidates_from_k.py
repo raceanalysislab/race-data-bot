@@ -10,9 +10,9 @@
 # - manual に入れる材料を作る
 #
 # 方針:
-# - まずは広く拾う
-# - 誤爆は後で消す
-# - grade 判定はまだしない（タイトル母集団づくり優先）
+# - KBGN / KEND ブロック単位で処理
+# - 各ブロックの先頭付近だけ見て開催名を取る
+# - ノイズ行は強めに除外
 # - GitHub に載せられるサイズまで絞る
 
 import json
@@ -20,17 +20,17 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 JST = timezone(timedelta(hours=9))
 
 SRC_DIR = os.path.join("data", "extract_k")
 OUT_PATH = os.path.join("data", "k_event_title_candidates.json")
 
-# GitHub に載せるための上限
 MAX_RESULTS = 3000
 MAX_SAMPLE_TITLES = 10
 MAX_SAMPLE_FILES = 20
+HEADER_SCAN_LINES = 30
 
 TRANS = str.maketrans({
     "０": "0", "１": "1", "２": "2", "３": "3", "４": "4",
@@ -52,25 +52,26 @@ TRANS = str.maketrans({
     "Ｚ": "Z",
 })
 
+RE_KBGN = re.compile(r"\b\d{2}KBGN\b")
+RE_KEND = re.compile(r"\b\d{2}KEND\b")
+RE_HEADER_LINE = re.compile(
+    r"^\s*([^\[\]0-9]{1,8})\s*\[成績\]\s*\d{1,2}/\d{1,2}\s+(.+?)\s+第\s*\d+\s*日\s*$"
+)
+
+SKIP_EXACT_CONTAINS = [
+    "データは、この場の全レース終了後に登録されます。",
+    "内容については主催者発行のものと照合して下さい",
+    "競走成績",
+    "[払戻金]",
+    "ボートレース",
+]
+
 SKIP_PATTERNS = [
     r"^\s*$",
     r"^\s*-{3,}\s*$",
     r"^\s*={3,}\s*$",
     r"^\s*\*{2,}.*\*{2,}\s*$",
-    r"^\s*ボートレース",
-    r"^\s*競走成績",
-    r"^\s*開催日",
-    r"^\s*月日",
-    r"^\s*天候",
-    r"^\s*風",
-    r"^\s*波",
-    r"^\s*レース",
-    r"^\s*R\s",
-    r"^\s*\d{1,2}R\b",
-    r"^\s*着\b",
-    r"^\s*艇\b",
-    r"^\s*選手\b",
-    r"^\s*払戻\b",
+    r"^\s*\[\s*払戻金\s*\]",
     r"^\s*単勝\b",
     r"^\s*複勝\b",
     r"^\s*2連単\b",
@@ -78,13 +79,19 @@ SKIP_PATTERNS = [
     r"^\s*3連単\b",
     r"^\s*3連複\b",
     r"^\s*拡連複\b",
+    r"^\s*着\b",
+    r"^\s*艇\b",
+    r"^\s*登番\b",
+    r"^\s*選手\b",
     r"^\s*進入\b",
     r"^\s*スタート\b",
     r"^\s*決まり手\b",
     r"^\s*返還\b",
     r"^\s*備考\b",
+    r"^\s*\d{1,2}R\b",
+    r"^\s*\d{4}/\s*\d{1,2}/\d{1,2}",
     r"^\s*\d{4}年\s*\d{1,2}月\s*\d{1,2}日",
-    r"^\s*\d{1,2}月\s*\d{1,2}日",
+    r"^\s*\d{1,2}/\d{1,2}\s*$",
 ]
 
 SKIP_REGEXES = [re.compile(p) for p in SKIP_PATTERNS]
@@ -99,11 +106,8 @@ def norm(s: str) -> str:
 def normalize_event_title(s: str) -> str:
     s = norm(s)
 
-    # グレード記号は照合ノイズとして除去
     s = re.sub(r"\bSG\b", "", s)
     s = re.sub(r"\bG[123]\b", "", s)
-
-    # 回数・周年は年変動のため吸収
     s = re.sub(r"第\s*\d+\s*回", "", s)
     s = re.sub(r"\d+\s*周年", "", s)
 
@@ -126,14 +130,61 @@ def read_text_auto(path: str) -> List[str]:
         return f.readlines()
 
 
+def split_blocks_k(lines_raw: List[str]) -> List[List[str]]:
+    blocks: List[List[str]] = []
+    cur: List[str] = []
+
+    for raw in lines_raw:
+        line = raw.rstrip("\n")
+
+        if RE_KBGN.search(line):
+            if cur:
+                blocks.append(cur)
+            cur = [line]
+            continue
+
+        cur.append(line)
+
+        if RE_KEND.search(line):
+            blocks.append(cur)
+            cur = []
+
+    if cur:
+        blocks.append(cur)
+
+    out: List[List[str]] = []
+    for b in blocks:
+        bb = [norm(x) for x in b if norm(x)]
+        if bb:
+            out.append(bb)
+    return out
+
+
 def is_skip_line(s: str) -> bool:
+    if not s:
+        return True
+
+    for kw in SKIP_EXACT_CONTAINS:
+        if kw in s:
+            return True
+
     for rx in SKIP_REGEXES:
         if rx.search(s):
             return True
+
     return False
 
 
-def maybe_title_line(s: str) -> bool:
+def clean_header_title(s: str) -> str:
+    s = norm(s)
+    s = re.sub(r"\s+第\s*\d+\s*日\s*$", "", s)
+    s = re.sub(r"\s+\d{1,2}/\d{1,2}\s+", " ", s)
+    s = re.sub(r"\[成績\]", "", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def looks_like_event_title(s: str) -> bool:
     if is_skip_line(s):
         return False
 
@@ -141,36 +192,56 @@ def maybe_title_line(s: str) -> bool:
     if len(c) < 4:
         return False
 
-    if re.fullmatch(r"[\d\.\-:/]+", c):
-        return False
-
-    if re.match(r"^[1-6]\s+\d{4}", s):
-        return False
-
     keywords = [
         "杯", "賞", "記念", "カップ", "シリーズ", "選抜", "トロフィー",
         "決定戦", "競走", "大会", "チャレンジ", "ヴィーナス", "ルーキー",
         "マクール", "センプル", "MB大賞", "キングカップ",
     ]
-    if any(k in s for k in keywords):
-        return True
+    return any(k in s for k in keywords)
 
-    if re.search(r"[一-龥ぁ-んァ-ヶA-Za-z]", s) and len(c) >= 8:
-        return True
 
-    return False
+def parse_k_event_title(block: List[str]) -> Optional[str]:
+    if not block:
+        return None
+
+    head = block[:HEADER_SCAN_LINES]
+
+    # 優先1: [成績] ヘッダ行から抽出
+    for line in head:
+        m = RE_HEADER_LINE.match(line)
+        if m:
+            title = clean_header_title(m.group(2))
+            if looks_like_event_title(title):
+                return title
+
+    # 優先2: 競走成績見出しの次の数行から抽出
+    for i, line in enumerate(head):
+        if "競走成績" not in line:
+            continue
+
+        for j in range(i + 1, min(i + 8, len(head))):
+            cand = clean_header_title(head[j])
+            if looks_like_event_title(cand):
+                return cand
+
+    # 優先3: 先頭付近からタイトルらしい行を拾う
+    for line in head:
+        cand = clean_header_title(line)
+        if looks_like_event_title(cand):
+            return cand
+
+    return None
 
 
 def extract_titles_from_file(path: str) -> List[str]:
-    lines = [norm(x) for x in read_text_auto(path)]
-    out: List[str] = []
+    lines_raw = read_text_auto(path)
+    blocks = split_blocks_k(lines_raw)
 
-    for line in lines:
-        if not maybe_title_line(line):
-            continue
-        if len(line) <= 3:
-            continue
-        out.append(line)
+    out: List[str] = []
+    for block in blocks:
+        title = parse_k_event_title(block)
+        if title:
+            out.append(title)
 
     seen: Set[str] = set()
     uniq: List[str] = []
@@ -223,7 +294,6 @@ def main():
             "sample_files": sorted(list(row["sample_files"]))[:MAX_SAMPLE_FILES],
         })
 
-    # 出現回数が多い順にして、上位だけ残す
     results.sort(key=lambda x: (-int(x["occurrences"]), str(x["title_key"])))
     total_unique_before_trim = len(results)
     results = results[:MAX_RESULTS]
@@ -237,7 +307,8 @@ def main():
             "unique_title_count_before_trim": total_unique_before_trim,
             "unique_title_count": len(results),
             "max_results": MAX_RESULTS,
-            "note": "broad extraction from k files; trimmed for GitHub size",
+            "header_scan_lines": HEADER_SCAN_LINES,
+            "note": "extracted from KBGN/KEND block headers only",
         },
         "titles": results,
     }
