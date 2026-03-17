@@ -7,9 +7,9 @@
 #   data/meet_avg_st/<会場>_<日付>.json
 #
 # 重要:
-# - 内部では 会場|開催タイトル ごとに累積を持つ
-# - ただし出力時は 同じ会場・同じ日付 の内容をマージして1ファイルにまとめる
-# - これにより event_title のブレで一部選手が消える事故を防ぐ
+# - 内部では 会場 + 日付 ごとに最終出力を作る
+# - 会場名は必ず正規化して「三　国」→「三国」のように揃える
+# - イベントタイトルは保持するが、会場名ズレでは落ちないようにする
 # - ST は「展示タイム」「進入」の後ろにある値だけを拾う
 # - K0 は平均STの対象外
 # - F / L は平均STの対象外
@@ -43,7 +43,8 @@ RE_RESULT_ROW_CANDIDATE = re.compile(
 
 
 def norm_space(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "")).strip()
+    s = (s or "").replace("\u3000", " ")
+    return re.sub(r"\s+", " ", s).strip()
 
 
 def safe_filename_part(s: str) -> str:
@@ -51,6 +52,14 @@ def safe_filename_part(s: str) -> str:
     for ch in ["/", "\\", ":", "*", "?", '"', "<", ">", "|"]:
         s = s.replace(ch, "_")
     return s
+
+
+def normalize_venue(s: str) -> str:
+    s = s or ""
+    s = s.replace("ボートレース", "")
+    s = s.replace("\u3000", "")
+    s = s.replace(" ", "")
+    return s.strip()
 
 
 def normalize_event_title(s: str) -> str:
@@ -104,7 +113,8 @@ def parse_venue(block: List[str]) -> str:
     for line in block[:8]:
         s = norm_space(line)
         if "［成績］" in s:
-            return s.split("［成績］", 1)[0].replace(" ", "")
+            raw = s.split("［成績］", 1)[0]
+            return normalize_venue(raw)
     return ""
 
 
@@ -237,7 +247,7 @@ def main() -> None:
     if not paths:
         raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
 
-    # base_key(会場|開催名norm) -> date -> reg -> {st_sum, st_count, name}
+    # venue|event_title_norm -> date -> reg -> stats
     day_stats: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
@@ -246,7 +256,7 @@ def main() -> None:
         )
     )
 
-    # base_key -> meta
+    # meet key meta
     meet_meta: Dict[str, Dict[str, str]] = {}
 
     file_count = 0
@@ -270,10 +280,10 @@ def main() -> None:
                 continue
 
             event_title_norm = normalize_event_title(event_title_raw)
-            base_key = f"{venue}|{event_title_norm}"
+            meet_key = f"{venue}|{event_title_norm}"
 
-            if base_key not in meet_meta:
-                meet_meta[base_key] = {
+            if meet_key not in meet_meta:
+                meet_meta[meet_key] = {
                     "venue": venue,
                     "event_title": event_title_raw,
                     "event_title_norm": event_title_norm,
@@ -320,10 +330,10 @@ def main() -> None:
                             continue
 
                         if reg and st is not None:
-                            day_stats[base_key][date_str][reg]["st_sum"] += st
-                            day_stats[base_key][date_str][reg]["st_count"] += 1
+                            day_stats[meet_key][date_str][reg]["st_sum"] += st
+                            day_stats[meet_key][date_str][reg]["st_count"] += 1
                             if name:
-                                day_stats[base_key][date_str][reg]["name"] = name
+                                day_stats[meet_key][date_str][reg]["name"] = name
                             continue
 
                         s = line.strip()
@@ -340,13 +350,13 @@ def main() -> None:
                     ):
                         in_result_table = False
 
-    # base_keyごとの日別累積を作り、最後に会場+日付でマージ
+    # 会場+日付ごとにマージ出力
     merged_outputs: Dict[str, Dict[str, Any]] = {}
 
-    for base_key, dated_regs in day_stats.items():
+    for meet_key, dated_regs in day_stats.items():
         dates_sorted = sorted(dated_regs.keys())
-        meta = meet_meta.get(base_key, {})
-        venue = meta.get("venue", "")
+        meta = meet_meta.get(meet_key, {})
+        venue = normalize_venue(meta.get("venue", ""))
         event_title = meta.get("event_title", "")
 
         cumulative: Dict[str, Dict[str, Any]] = defaultdict(
@@ -397,8 +407,9 @@ def main() -> None:
     written_files = 0
 
     for _, payload in merged_outputs.items():
-        venue = payload["venue"]
+        venue = normalize_venue(payload["venue"])
         date_str = payload["date"]
+        payload["venue"] = venue
         payload["player_count"] = len(payload["players"])
 
         file_name = f"{safe_filename_part(venue)}_{date_str}.json"
