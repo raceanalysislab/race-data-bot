@@ -453,8 +453,8 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
 
     m_tail = re.match(
         r"^\s*"
-        r"(\d{1,3})\s+"
-        r"(\d{1,3}\.\d{2})\s+"
+        r"(\d{1,3})\s*"
+        r"(\d{1,3}\.\d{2})\s*"
         r"(\d{1,3})\s+"
         r"([0-9]+\.[0-9]{1,2})"
         r"(?:\s+(.*))?$",
