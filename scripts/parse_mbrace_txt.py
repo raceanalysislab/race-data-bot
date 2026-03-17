@@ -453,11 +453,11 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
 
     m_tail = re.match(
         r"^\s*"
-        r"(\d{1,3})\s*"
-        r"(\d{1,3}\.\d{2})\s*"
-        r"(\d{2,3})\s+"
+        r"(\d{1,3})\s+"
+        r"(\d{1,3}\.\d{2})\s+"
+        r"(\d{1,3})\s+"
         r"([0-9]+\.[0-9]{1,2})"
-        r"(.*)$",
+        r"(?:\s+(.*))?$",
         rest,
     )
     if not m_tail:
@@ -470,6 +470,12 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
     note = norm(m_tail.group(5) or "")
 
     if None in (motor_no, motor_2, boat_no, boat_2):
+        return None
+
+    # 誤爆防止の軽い妥当性チェック
+    if motor_no < 1 or boat_no < 1:
+        return None
+    if not (0.0 <= motor_2 <= 100.0 and 0.0 <= boat_2 <= 100.0):
         return None
 
     return (
