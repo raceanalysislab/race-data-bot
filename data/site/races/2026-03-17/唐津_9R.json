@@ -16,22 +16,23 @@
     "boats": [
       {
         "waku": 1,
-        "regno": null,
-        "name": "取得失敗",
-        "age": null,
-        "branch": "",
-        "weight": null,
-        "grade": "",
-        "nat_win": null,
-        "nat_2": null,
-        "loc_win": null,
-        "loc_2": null,
-        "motor_no": null,
-        "motor_2": null,
-        "boat_no": null,
-        "boat_2": null,
-        "note": "WARNING: missing row (parser could not extract this boat line)",
-        "_missing": true
+        "regno": 4044,
+        "name": "湯川浩司",
+        "age": 46,
+        "branch": "大阪",
+        "weight": 53,
+        "grade": "A1",
+        "nat_win": 6.89,
+        "nat_2": 46.34,
+        "loc_win": 0.0,
+        "loc_2": 0.0,
+        "motor_no": 16,
+        "motor_2": 46.67,
+        "boat_no": 2,
+        "boat_2": 0.0,
+        "note": "4",
+        "avg_st": 0.137,
+        "st_count": 744
       },
       {
         "waku": 2,
@@ -95,22 +96,23 @@
       },
       {
         "waku": 5,
-        "regno": null,
-        "name": "取得失敗",
-        "age": null,
-        "branch": "",
-        "weight": null,
-        "grade": "",
-        "nat_win": null,
-        "nat_2": null,
-        "loc_win": null,
-        "loc_2": null,
-        "motor_no": null,
-        "motor_2": null,
-        "boat_no": null,
-        "boat_2": null,
-        "note": "WARNING: missing row (parser could not extract this boat line)",
-        "_missing": true
+        "regno": 4856,
+        "name": "豊田健士郎",
+        "age": 30,
+        "branch": "三重",
+        "weight": 53,
+        "grade": "A1",
+        "nat_win": 6.99,
+        "nat_2": 52.24,
+        "loc_win": 6.09,
+        "loc_2": 45.45,
+        "motor_no": 13,
+        "motor_2": 22.11,
+        "boat_no": 5,
+        "boat_2": 0.0,
+        "note": "2",
+        "avg_st": 0.139,
+        "st_count": 853
       },
       {
         "waku": 6,
@@ -133,8 +135,6 @@
         "st_count": 617
       }
     ],
-    "tags": [
-      "要確認"
-    ]
+    "tags": []
   }
 }

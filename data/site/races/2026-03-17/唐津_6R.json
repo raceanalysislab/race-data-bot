@@ -36,22 +36,23 @@
       },
       {
         "waku": 2,
-        "regno": null,
-        "name": "取得失敗",
-        "age": null,
-        "branch": "",
-        "weight": null,
-        "grade": "",
-        "nat_win": null,
-        "nat_2": null,
-        "loc_win": null,
-        "loc_2": null,
-        "motor_no": null,
-        "motor_2": null,
-        "boat_no": null,
-        "boat_2": null,
-        "note": "WARNING: missing row (parser could not extract this boat line)",
-        "_missing": true
+        "regno": 4294,
+        "name": "古賀繁輝",
+        "age": 39,
+        "branch": "佐賀",
+        "weight": 56,
+        "grade": "A1",
+        "nat_win": 6.63,
+        "nat_2": 50.79,
+        "loc_win": 6.8,
+        "loc_2": 49.73,
+        "motor_no": 12,
+        "motor_2": 32.98,
+        "boat_no": 7,
+        "boat_2": 0.0,
+        "note": "10",
+        "avg_st": 0.148,
+        "st_count": 727
       },
       {
         "waku": 3,
@@ -134,8 +135,6 @@
         "st_count": 743
       }
     ],
-    "tags": [
-      "要確認"
-    ]
+    "tags": []
   }
 }
