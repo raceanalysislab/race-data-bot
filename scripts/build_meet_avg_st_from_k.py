@@ -1,4 +1,23 @@
 # scripts/build_meet_avg_st_from_k.py
+# extract_k 内の k******.txt を全部読んで
+# 同一開催（会場 + 開催タイトルnorm）の日付ごとの
+# 選手別「今節ここまで平均ST」を作る
+#
+# 出力:
+#   data/meet_avg_st/<会場>_<日付>.json
+#
+# 重要:
+# - 内部キーは normalize_venue(会場) + "|" + normalize_event_title(開催タイトル)
+# - 会場名だけで別開催を混ぜない
+# - ただし会場表記ゆれ「三　国」→「三国」は吸収する
+# - ST は「展示タイム」「進入」の後ろにある値だけを拾う
+# - K0 は平均STの対象外
+# - F / L は平均STの対象外
+# - 未一致行はログ出力して追跡できるようにする
+# - 出力前に data/meet_avg_st 配下の既存jsonを全削除して、古いゴミファイルを残さない
+# - 年は k230315.txt → 2023-03-15 のように、まずファイル名から確定する
+# - 同会場・同日で複数開催があっても混ざらないよう、出力時は event_title_norm 一致を優先
+# - 同会場・同日で同一開催が複数ソースから来た場合のみ players をマージする
 
 import json
 import os
@@ -180,19 +199,20 @@ def extract_name_from_tail(tail: str) -> str:
     return norm_space(tail)
 
 
-# ⭐ 修正① ST取得（列ズレ対応）
 def extract_st_from_result_line(line: str) -> Tuple[Optional[float], bool, bool]:
-    s = line.strip()
+    s = line.rstrip()
 
     if re.match(r"^\s*K0\s+", s):
         return None, False, False
 
-    nums = re.findall(r"[FL]?\d+\.\d{2}", s)
-    if not nums:
+    m = re.search(
+        r"\s+\d+\s+\d+\s+(\d+\.\d{2})\s+([1-6])\s+([FL]?\d+\.\d{2})\b",
+        s
+    )
+    if not m:
         return None, False, False
 
-    st_raw = nums[-1]
-
+    st_raw = m.group(3).strip()
     is_f = st_raw.startswith("F")
     is_l = st_raw.startswith("L")
 
@@ -233,17 +253,9 @@ def main() -> None:
 
     meet_meta: Dict[str, Dict[str, str]] = {}
 
-    file_count = 0
-    race_count = 0
-    unmatched_rows = 0
-    skipped_k0_rows = 0
-    skipped_f_rows = 0
-    skipped_l_rows = 0
-
     for path in paths:
         lines = read_text_auto(path)
         blocks = split_blocks(lines)
-        file_count += 1
 
         for block in blocks:
             venue = parse_venue(block)
@@ -274,7 +286,6 @@ def main() -> None:
                 if race_head and "H1800m" in line:
                     current_race = int(race_head.group(1))
                     in_result_table = False
-                    race_count += 1
                     continue
 
                 if current_race is None:
@@ -293,17 +304,11 @@ def main() -> None:
                         name = extract_name_from_tail(tail)
 
                         if rank == "K0":
-                            skipped_k0_rows += 1
                             continue
 
                         st, is_f, is_l = extract_st_from_result_line(line)
 
-                        if is_f:
-                            skipped_f_rows += 1
-                            continue
-
-                        if is_l:
-                            skipped_l_rows += 1
+                        if is_f or is_l:
                             continue
 
                         if reg and st is not None:
@@ -311,20 +316,63 @@ def main() -> None:
                             day_stats[meet_key][date_str][reg]["st_count"] += 1
                             if name:
                                 day_stats[meet_key][date_str][reg]["name"] = name
-                            continue
 
-                        s = line.strip()
-                        if s and RE_RESULT_ROW_CANDIDATE.match(s):
-                            unmatched_rows += 1
-                            print("UNMATCHED_RESULT_ROW:", s)
-                        continue
+    payload_candidates: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
-                    # ⭐ 修正② 空行依存削除
-                    if (
-                        line.strip().startswith("単勝")
-                        or "レース不成立" in line
-                        or "払戻金" in line
-                    ):
-                        in_result_table = False
+    for meet_key, dated_regs in day_stats.items():
+        dates_sorted = sorted(dated_regs.keys())
+        meta = meet_meta.get(meet_key, {})
+        venue = normalize_venue(meta.get("venue", ""))
+        event_title = meta.get("event_title", "")
 
-    # （以下は元コードそのまま）
+        cumulative = defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""})
+
+        for date_str in dates_sorted:
+            players_out = {}
+
+            merged = defaultdict(lambda: {"st_sum": 0.0, "st_count": 0, "name": ""})
+
+            for reg, src in cumulative.items():
+                merged[reg]["st_sum"] += src["st_sum"]
+                merged[reg]["st_count"] += src["st_count"]
+                merged[reg]["name"] = src["name"]
+
+            for reg, src in dated_regs[date_str].items():
+                merged[reg]["st_sum"] += src["st_sum"]
+                merged[reg]["st_count"] += src["st_count"]
+                merged[reg]["name"] = src["name"]
+
+            for reg, src in merged.items():
+                if src["st_count"] > 0:
+                    players_out[reg] = {
+                        "name": src["name"],
+                        "avg_st": round(src["st_sum"] / src["st_count"], 2),
+                        "count": src["st_count"],
+                    }
+
+            payload_candidates[f"{venue}|{date_str}"].append({
+                "generated_at": datetime.now(JST).isoformat(),
+                "venue": venue,
+                "event_title": event_title,
+                "date": date_str,
+                "players": players_out,
+                "player_count": len(players_out),
+            })
+
+            for reg, src in dated_regs[date_str].items():
+                cumulative[reg]["st_sum"] += src["st_sum"]
+                cumulative[reg]["st_count"] += src["st_count"]
+                cumulative[reg]["name"] = src["name"]
+
+    out_dir = os.path.join("data", "meet_avg_st")
+    clear_output_dir(out_dir)
+
+    for payload in payload_candidates.values():
+        p = payload[0]
+        fn = f"{safe_filename_part(p['venue'])}_{p['date']}.json"
+        with open(os.path.join(out_dir, fn), "w", encoding="utf-8") as f:
+            json.dump(p, f, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    main()
