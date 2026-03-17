@@ -154,8 +154,7 @@ jobs:
 
           git commit -m "Update race data $(date '+%Y-%m-%d %H:%M:%S')"
 
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git push origin HEAD:main --force
 
       - name: Upload debug artifacts (on failure)
         if: failure()
