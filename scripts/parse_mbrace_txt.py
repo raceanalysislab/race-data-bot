@@ -123,6 +123,10 @@ def normalize_event_title(s: str) -> str:
     # 会場名重複吸収
     s = _dedupe_venue_prefix(s)
 
+    # 末尾にぶら下がる孤立数字を削る
+    # 例: "ミッドナイトボートレースin大村 12" -> "ミッドナイトボートレースin大村"
+    s = re.sub(r"\s+\d{1,2}$", "", s)
+
     # もう一度整形
     s = re.sub(r"\s+", " ", s).strip()
     return s
@@ -384,6 +388,7 @@ def _is_event_title_noise(line: str) -> bool:
         "艇選手選手年支体級全国当地モーター",
         "番登番名齢部重別勝率2率勝率2率NO2率NO2率",
         "今節成績",
+        "123456見",
         "１２３４５６見",
     ]
     if any(k in c for k in header_keywords):
@@ -394,6 +399,10 @@ def _is_event_title_noise(line: str) -> bool:
         return True
 
     return False
+
+
+def _cleanup_event_title(title: str) -> str:
+    return normalize_event_title(title)
 
 
 def parse_event_title(block: List[str]) -> str:
@@ -416,7 +425,9 @@ def parse_event_title(block: List[str]) -> str:
             if len(compact(cand)) < 4:
                 continue
 
-            return cand.strip()
+            title = _cleanup_event_title(cand)
+            if title and not _is_event_title_noise(title):
+                return title
 
     # 次善: 先頭の会場・日付行から開催名を補助抽出
     for line in cleaned[:12]:
@@ -426,7 +437,7 @@ def parse_event_title(block: List[str]) -> str:
         s = norm(line)
         m = re.search(r"\d{1,2}月\s*\d{1,2}日\s+(.*?)\s+第\s*[0-9]+\s*日", s)
         if m:
-            title = norm(m.group(1))
+            title = _cleanup_event_title(m.group(1))
             if title and not _is_event_title_noise(title):
                 return title
 
@@ -829,8 +840,11 @@ def main():
         venue = parse_venue(b)
         ymd = parse_date(b)
         current_day, parsed_total_days = parse_day_info(b)
-        event_title = parse_event_title(b)
-        event_title_norm = normalize_event_title(event_title)
+
+        raw_event_title = parse_event_title(b)
+        event_title = normalize_event_title(raw_event_title)
+        event_title_norm = event_title
+
         total_days = resolve_total_days(event_title, parsed_total_days)
         day_label = format_day_label(current_day, total_days)
         grade_label = resolve_grade(event_title)
