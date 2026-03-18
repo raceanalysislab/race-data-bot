@@ -346,39 +346,79 @@ def format_day_label(current_day: Optional[int], total_days: Optional[int]) -> O
     return f"{current_day}日目"
 
 
+def _is_event_title_noise(line: str) -> bool:
+    s = norm(line)
+    c = compact(s)
+
+    if not c:
+        return True
+
+    # 罫線
+    if re.fullmatch(r"[-=]+", c):
+        return True
+    if c.startswith("----"):
+        return True
+
+    # 見出し系
+    if "番組表" in c:
+        return True
+    if "主催者発行" in c:
+        return True
+    if "内容については主催者発行のものと照合して下さい" in c:
+        return True
+
+    # 開催日情報の行
+    if re.search(r"第[0-9]+日", c) and re.search(r"[0-9]{4}年", c):
+        return True
+    if re.search(r"[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日", c):
+        return True
+
+    # レース見出し
+    if RE_RACE_HEAD.search(s):
+        return True
+    if "締切予定" in c:
+        return True
+
+    # 出走表ヘッダ行
+    header_keywords = [
+        "艇選手選手年支体級全国当地モーター",
+        "番登番名齢部重別勝率2率勝率2率NO2率NO2率",
+        "今節成績",
+        "１２３４５６見",
+    ]
+    if any(k in c for k in header_keywords):
+        return True
+
+    # ボートレース会場名だけの説明行
+    if c.startswith("ボートレース") and "月" in c and "第" in c and "日" in c:
+        return True
+
+    return False
+
+
 def parse_event_title(block: List[str]) -> str:
     cleaned = [norm(x) for x in block if norm(x)]
     if not cleaned:
         return ""
 
+    # 最優先: 「番組表」の直後にある正式タイトル行
     for i, line in enumerate(cleaned[:80]):
         c = compact(line)
         if "番組表" not in c:
             continue
 
-        for j in range(i + 1, min(i + 8, len(cleaned))):
+        for j in range(i + 1, min(i + 10, len(cleaned))):
             cand = norm(cleaned[j])
-            cc = compact(cand)
-            if not cc:
+            if _is_event_title_noise(cand):
                 continue
 
-            if "ボートレース" in cc:
-                continue
-            if "主催者発行" in cc:
-                continue
-            if "内容については主催者発行のものと照合して下さい" in cc:
-                continue
-            if re.search(r"第[0-9]+日", cc) and re.search(r"[0-9]{4}年", cc):
-                continue
-            if RE_RACE_HEAD.search(cand):
-                continue
-            if cc.startswith("----"):
-                continue
-            if "締切予定" in cc:
+            # あまりに短い行は誤爆しやすい
+            if len(compact(cand)) < 4:
                 continue
 
             return cand.strip()
 
+    # 次善: 先頭の会場・日付行から開催名を補助抽出
     for line in cleaned[:12]:
         if "ボートレース" not in line:
             continue
@@ -387,7 +427,7 @@ def parse_event_title(block: List[str]) -> str:
         m = re.search(r"\d{1,2}月\s*\d{1,2}日\s+(.*?)\s+第\s*[0-9]+\s*日", s)
         if m:
             title = norm(m.group(1))
-            if title:
+            if title and not _is_event_title_noise(title):
                 return title
 
     return ""
