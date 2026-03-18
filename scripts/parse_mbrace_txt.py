@@ -76,13 +76,11 @@ def compact(s: str) -> str:
 def _dedupe_venue_prefix(s: str) -> str:
     s = s.strip()
 
-    # 例: "尼崎 尼崎センプルカップ" -> "尼崎センプルカップ"
     for v in VENUE_NAMES:
         prefix = f"{v} "
         if s.startswith(prefix) and s[len(prefix):].startswith(v):
             return s[len(prefix):].strip()
 
-    # 例: "尼崎 尼崎 ..." 以外にも、前半と後半の頭が同じ会場なら吸収
     m = re.match(r"^(" + "|".join(map(re.escape, VENUE_NAMES)) + r")\s+\1(.*)$", s)
     if m:
         return f"{m.group(1)}{m.group(2)}".strip()
@@ -93,32 +91,15 @@ def _dedupe_venue_prefix(s: str) -> str:
 def normalize_event_title(s: str) -> str:
     s = norm(s)
 
-    # グレード表記は照合ノイズ
+    # グレード表記だけは照合ノイズとして除去
     s = re.sub(r"\bSG\b", "", s)
     s = re.sub(r"\bG[123]\b", "", s)
 
-    # 回数は年で変わる
+    # 回数表記は年で変わるので除去
     s = re.sub(r"第\s*\d+\s*回", "", s)
 
-    # 周年系は年で変わる
-    s = re.sub(r"市制\s*\d+\s*周年記念", "", s)
-    s = re.sub(r"創刊\s*\d+\s*周年記念", "", s)
-    s = re.sub(r"開設\s*\d+\s*周年記念競走", "", s)
-    s = re.sub(r"開設\s*\d+\s*周年記念", "", s)
-    s = re.sub(r"\d+\s*周年記念", "", s)
-    s = re.sub(r"\d+\s*周年", "", s)
-
-    # 開設記念系の表記ゆれ吸収
-    s = re.sub(r"\(\s*開設記念\s*\)", "", s)
-    s = re.sub(r"開設記念競走", "", s)
-    s = re.sub(r"開設記念", "", s)
-
-    # 記念だけ単独で残ったら消す
-    s = re.sub(r"\b記念\b", "", s)
-
-    # 記号/空白整理
+    # 括弧だけ整理
     s = re.sub(r"[()]", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
 
     # 会場名重複吸収
     s = _dedupe_venue_prefix(s)
@@ -127,7 +108,6 @@ def normalize_event_title(s: str) -> str:
     # 例: "ミッドナイトボートレースin大村 12" -> "ミッドナイトボートレースin大村"
     s = re.sub(r"\s+\d{1,2}$", "", s)
 
-    # もう一度整形
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
@@ -357,13 +337,11 @@ def _is_event_title_noise(line: str) -> bool:
     if not c:
         return True
 
-    # 罫線
     if re.fullmatch(r"[-=]+", c):
         return True
     if c.startswith("----"):
         return True
 
-    # 見出し系
     if "番組表" in c:
         return True
     if "主催者発行" in c:
@@ -371,19 +349,16 @@ def _is_event_title_noise(line: str) -> bool:
     if "内容については主催者発行のものと照合して下さい" in c:
         return True
 
-    # 開催日情報の行
     if re.search(r"第[0-9]+日", c) and re.search(r"[0-9]{4}年", c):
         return True
     if re.search(r"[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日", c):
         return True
 
-    # レース見出し
     if RE_RACE_HEAD.search(s):
         return True
     if "締切予定" in c:
         return True
 
-    # 出走表ヘッダ行
     header_keywords = [
         "艇選手選手年支体級全国当地モーター",
         "番登番名齢部重別勝率2率勝率2率NO2率NO2率",
@@ -394,7 +369,6 @@ def _is_event_title_noise(line: str) -> bool:
     if any(k in c for k in header_keywords):
         return True
 
-    # ボートレース会場名だけの説明行
     if c.startswith("ボートレース") and "月" in c and "第" in c and "日" in c:
         return True
 
@@ -421,7 +395,6 @@ def parse_event_title(block: List[str]) -> str:
             if _is_event_title_noise(cand):
                 continue
 
-            # あまりに短い行は誤爆しやすい
             if len(compact(cand)) < 4:
                 continue
 
