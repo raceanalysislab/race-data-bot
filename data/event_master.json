@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "generated_at": "2026-03-19T13:53:28.906885+09:00",
+    "generated_at": "2026-03-19T13:58:10.445725+09:00",
     "source_candidates": "data/event_master_candidates.json",
     "source_manual": "data/event_master_manual.json",
-    "title_count": 158,
+    "title_count": 160,
     "grade_policy": "manual_only_default_ippan"
   },
   "events": {
@@ -1473,12 +1473,34 @@
       ],
       "venues": []
     },
-    "唐津MB大賞～スター候補チャレンジマッチ～": {
+    "唐津MB大賞〜スター候補チャレンジマッチ〜": {
       "grade": "G2",
       "total_days": null,
       "notes": "",
       "sample_titles": [],
       "venues": []
+    },
+    "尼崎市制110周年記念 尼崎センプルカップ": {
+      "grade": "G1",
+      "total_days": 6,
+      "notes": "manual_override",
+      "sample_titles": [
+        "尼崎市制110周年記念 尼崎センプルカップ"
+      ],
+      "venues": [
+        "尼崎"
+      ]
+    },
+    "坂井市制20周年記念": {
+      "grade": "一般",
+      "total_days": 6,
+      "notes": "manual_override",
+      "sample_titles": [
+        "坂井市制20周年記念"
+      ],
+      "venues": [
+        "三国"
+      ]
     }
   }
 }
