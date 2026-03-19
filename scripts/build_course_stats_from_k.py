@@ -9,11 +9,14 @@
 #
 # 集計項目:
 # - starts
+# - first
+# - second
+# - third
 # - win_rate
 # - ren2_rate
 # - ren3_rate
 # - avg_st
-# - kimarite（差 / まくり / まくり差し）
+# - kimarite（逃げ / 差 / まくり / まくり差し / 抜き / 恵まれ）
 #
 # 補正:
 # - コース別平均STの外れ値対策として ST は 0.30 を上限にクリップして集計する
@@ -218,15 +221,20 @@ def extract_date_from_k_path(path: str) -> Optional[datetime]:
 def make_empty_course_bucket() -> Dict[str, Any]:
     return {
         "starts": 0,
-        "wins": 0,
+        "first": 0,
+        "second": 0,
+        "third": 0,
         "ren2": 0,
         "ren3": 0,
         "st_sum": 0.0,
         "st_count": 0,
         "kimarite": {
+            "逃げ": 0,
             "差": 0,
             "まくり": 0,
             "まくり差し": 0,
+            "抜き": 0,
+            "恵まれ": 0,
         }
     }
 
@@ -241,12 +249,18 @@ def make_empty_player(reg: str, name: str) -> Dict[str, Any]:
 
 def kimarite_key(raw: str) -> Optional[str]:
     s = norm_space(raw)
+    if s == "逃げ":
+        return "逃げ"
     if s == "差し":
         return "差"
     if s == "まくり":
         return "まくり"
     if s == "まくり差し":
         return "まくり差し"
+    if s == "抜き":
+        return "抜き"
+    if s == "恵まれ":
+        return "恵まれ"
     return None
 
 
@@ -288,7 +302,12 @@ def apply_race_to_players(players: Dict[str, Dict[str, Any]], race: Dict[str, An
             bucket["starts"] += 1
 
             if finish == 1:
-                bucket["wins"] += 1
+                bucket["first"] += 1
+            elif finish == 2:
+                bucket["second"] += 1
+            elif finish == 3:
+                bucket["third"] += 1
+
             if finish <= 2:
                 bucket["ren2"] += 1
             if finish <= 3:
@@ -315,9 +334,12 @@ def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         for c in range(1, 7):
             src = pdata["courses"][str(c)]
             starts = int(src["starts"])
+            first = int(src["first"])
+            second = int(src["second"])
+            third = int(src["third"])
 
             if starts > 0:
-                win_rate = round(src["wins"] / starts * 100, 1)
+                win_rate = round(first / starts * 100, 1)
                 ren2_rate = round(src["ren2"] / starts * 100, 1)
                 ren3_rate = round(src["ren3"] / starts * 100, 1)
             else:
@@ -329,14 +351,20 @@ def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
 
             course_out[str(c)] = {
                 "starts": starts,
+                "first": first,
+                "second": second,
+                "third": third,
                 "win_rate": win_rate,
                 "ren2_rate": ren2_rate,
                 "ren3_rate": ren3_rate,
                 "avg_st": avg_st,
                 "kimarite": {
+                    "逃げ": int(src["kimarite"]["逃げ"]),
                     "差": int(src["kimarite"]["差"]),
                     "まくり": int(src["kimarite"]["まくり"]),
                     "まくり差し": int(src["kimarite"]["まくり差し"]),
+                    "抜き": int(src["kimarite"]["抜き"]),
+                    "恵まれ": int(src["kimarite"]["恵まれ"]),
                 }
             }
 
@@ -348,7 +376,13 @@ def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     return out_players
 
 
-def write_payload(out_path: str, file_count: int, race_count: int, out_players: Dict[str, Any], latest_date: str) -> None:
+def write_payload(
+    out_path: str,
+    file_count: int,
+    race_count: int,
+    out_players: Dict[str, Any],
+    latest_date: str
+) -> None:
     payload = {
         "generated_at": datetime.now(JST).isoformat(),
         "latest_file_date": latest_date,
