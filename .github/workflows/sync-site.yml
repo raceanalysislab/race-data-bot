@@ -36,6 +36,8 @@ jobs:
           ls -la data/player_course_stats_all.json || true
           ls -la data/player_course_stats_1y.json || true
           ls -la data/player_course_stats_3y.json || true
+          ls -la data/player_other_boat_trends_1y.json || true
+          ls -la data/player_other_boat_trends_3y.json || true
 
       - name: Clone race-analysis repo
         run: |
@@ -98,6 +100,16 @@ jobs:
 
           if [ -f data/player_course_stats_3y.json ]; then
             cp data/player_course_stats_3y.json site_repo/data/player_course_stats_3y.json
+          fi
+
+      - name: Copy player other boat trends
+        run: |
+          if [ -f data/player_other_boat_trends_1y.json ]; then
+            cp data/player_other_boat_trends_1y.json site_repo/data/player_other_boat_trends_1y.json
+          fi
+
+          if [ -f data/player_other_boat_trends_3y.json ]; then
+            cp data/player_other_boat_trends_3y.json site_repo/data/player_other_boat_trends_3y.json
           fi
 
       - name: Copy meet avg st files
