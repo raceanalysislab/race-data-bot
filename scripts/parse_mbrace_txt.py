@@ -181,6 +181,38 @@ def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
     return EVENT_MASTER.get(t_compact)
 
 
+def infer_grade_from_title(title: str) -> str:
+    s = normalize_event_title(title)
+    c = compact_event_title(title)
+
+    if not c:
+        return "一般"
+
+    # 明示グレード
+    if "SG" in s or "SG" in c:
+        return "SG"
+    if "G1" in s or "G1" in c:
+        return "G1"
+    if "G2" in s or "G2" in c:
+        return "G2"
+    if "G3" in s or "G3" in c:
+        return "G3"
+
+    # 周年記念はG1扱い
+    if "周年記念" in s:
+        return "G1"
+
+    # シリーズ系
+    if "ヴィーナスシリーズ" in s:
+        return "ヴィーナス"
+    if "ルーキーシリーズ" in s:
+        return "ルーキー"
+    if "マスターズリーグ" in s:
+        return "マスターズ"
+
+    return "一般"
+
+
 def read_text_auto(path: str) -> List[str]:
     for enc in ["cp932", "utf-8-sig", "utf-8"]:
         try:
@@ -423,6 +455,11 @@ def resolve_grade(title: str) -> str:
         grade = str(master_hit.get("grade") or "").strip()
         if grade:
             return grade
+
+    inferred = infer_grade_from_title(title)
+    if inferred:
+        return inferred
+
     return "一般"
 
 
