@@ -3,7 +3,9 @@
 # 選手ごとのコース別成績を集計する
 #
 # 出力:
-#   data/player_course_stats.json
+#   data/player_course_stats_all.json
+#   data/player_course_stats_1y.json
+#   data/player_course_stats_3y.json
 #
 # 集計項目:
 # - starts
@@ -15,13 +17,17 @@
 #
 # 補正:
 # - コース別平均STの外れ値対策として ST は 0.30 を上限にクリップして集計する
+#
+# 期間:
+# - all : 全期間
+# - 1y  : 最新日基準で過去365日分
+# - 3y  : 最新日基準で過去1095日分
 
 import json
 import os
 import re
-from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 JST = timezone(timedelta(hours=9))
 
@@ -31,6 +37,7 @@ RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
 RE_RESULT_ROW = re.compile(
     r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+.*?\s+([0-9]+\.[0-9]{2})\s+"
 )
+RE_KFILE = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
 
 VALID_KIMARITE = {
     "逃げ",
@@ -193,6 +200,21 @@ def list_k_txt_files() -> List[str]:
     return sorted(set(candidates))
 
 
+def extract_date_from_k_path(path: str) -> Optional[datetime]:
+    name = os.path.basename(path)
+    m = RE_KFILE.match(name)
+    if not m:
+        return None
+
+    yy, mm, dd = map(int, m.groups())
+    year = 2000 + yy
+
+    try:
+        return datetime(year, mm, dd, tzinfo=JST)
+    except Exception:
+        return None
+
+
 def make_empty_course_bucket() -> Dict[str, Any]:
     return {
         "starts": 0,
@@ -209,6 +231,14 @@ def make_empty_course_bucket() -> Dict[str, Any]:
     }
 
 
+def make_empty_player(reg: str, name: str) -> Dict[str, Any]:
+    return {
+        "reg": reg,
+        "name": name or "",
+        "courses": {str(i): make_empty_course_bucket() for i in range(1, 7)}
+    }
+
+
 def kimarite_key(raw: str) -> Optional[str]:
     s = norm_space(raw)
     if s == "差し":
@@ -220,80 +250,63 @@ def kimarite_key(raw: str) -> Optional[str]:
     return None
 
 
-def main() -> None:
-    paths = list_k_txt_files()
-    if not paths:
-        raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
+def ensure_player(players: Dict[str, Dict[str, Any]], reg: str, name: str) -> None:
+    if reg not in players:
+        players[reg] = make_empty_player(reg, name)
+    elif not players[reg].get("name") and name:
+        players[reg]["name"] = name
 
-    players: Dict[str, Dict[str, Any]] = {}
 
-    race_count = 0
-    file_count = 0
+def apply_race_to_players(players: Dict[str, Dict[str, Any]], race: Dict[str, Any]) -> None:
+    race_kimarite = race.get("kimarite") or ""
+    race_results = race.get("results") or []
 
-    for path in paths:
-        lines = read_text_auto(path)
-        blocks = split_blocks(lines)
-        file_count += 1
+    winner = None
+    for row in race_results:
+        if row.get("finish") == 1:
+            winner = row
+            break
 
-        for block in blocks:
-            races = parse_block(block)
-            if not races:
-                continue
+    for row in race_results:
+        reg = str(row.get("reg") or "").strip()
+        if not reg:
+            continue
 
-            for race in races:
-                race_count += 1
-                race_kimarite = race.get("kimarite") or ""
-                race_results = race.get("results") or []
+        ensure_player(players, reg, row.get("name") or "")
 
-                winner = None
-                for row in race_results:
-                    if row.get("finish") == 1:
-                        winner = row
-                        break
+        course = row.get("course")
+        if course not in (1, 2, 3, 4, 5, 6):
+            continue
 
-                for row in race_results:
-                    reg = str(row.get("reg") or "").strip()
-                    if not reg:
-                        continue
+        bucket = players[reg]["courses"][str(course)]
+        finish = row.get("finish")
+        st = row.get("st")
 
-                    if reg not in players:
-                        players[reg] = {
-                            "reg": reg,
-                            "name": row.get("name") or "",
-                            "courses": {str(i): make_empty_course_bucket() for i in range(1, 7)}
-                        }
+        # starts は正常スタートした完走/通常出走ベース
+        # S1, F, K0 は finish が None になるので starts から除外
+        if isinstance(finish, int):
+            bucket["starts"] += 1
 
-                    course = row.get("course")
-                    if course not in (1, 2, 3, 4, 5, 6):
-                        continue
+            if finish == 1:
+                bucket["wins"] += 1
+            if finish <= 2:
+                bucket["ren2"] += 1
+            if finish <= 3:
+                bucket["ren3"] += 1
 
-                    bucket = players[reg]["courses"][str(course)]
-                    finish = row.get("finish")
-                    st = row.get("st")
+        if st is not None:
+            st = min(float(st), 0.30)
+            bucket["st_sum"] += st
+            bucket["st_count"] += 1
 
-                    # starts は正常スタートした完走/通常出走ベース
-                    # S1, F, K0 は finish が None になるので starts から除外
-                    if isinstance(finish, int):
-                        bucket["starts"] += 1
+        # 決まり手は勝ち選手のコースにだけ加算
+        if winner and winner.get("reg") == reg and isinstance(finish, int) and finish == 1:
+            kk = kimarite_key(race_kimarite)
+            if kk:
+                bucket["kimarite"][kk] += 1
 
-                        if finish == 1:
-                            bucket["wins"] += 1
-                        if finish <= 2:
-                            bucket["ren2"] += 1
-                        if finish <= 3:
-                            bucket["ren3"] += 1
 
-                    if st is not None:
-                        st = min(float(st), 0.30)
-                        bucket["st_sum"] += st
-                        bucket["st_count"] += 1
-
-                    # 決まり手は勝ち選手のコースにだけ加算
-                    if winner and winner.get("reg") == reg and isinstance(finish, int) and finish == 1:
-                        kk = kimarite_key(race_kimarite)
-                        if kk:
-                            bucket["kimarite"][kk] += 1
-
+def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     out_players: Dict[str, Any] = {}
 
     for reg, pdata in players.items():
@@ -332,24 +345,133 @@ def main() -> None:
             "courses": course_out
         }
 
+    return out_players
+
+
+def write_payload(out_path: str, file_count: int, race_count: int, out_players: Dict[str, Any], latest_date: str) -> None:
     payload = {
         "generated_at": datetime.now(JST).isoformat(),
+        "latest_file_date": latest_date,
         "source_files": file_count,
         "race_count": race_count,
         "player_count": len(out_players),
         "players": out_players
     }
 
-    out_path = os.path.join("data", "player_course_stats.json")
-    os.makedirs("data", exist_ok=True)
-
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    print("files:", file_count)
-    print("races:", race_count)
-    print("players:", len(out_players))
-    print("out:", out_path)
+
+def main() -> None:
+    paths = list_k_txt_files()
+    if not paths:
+        raise FileNotFoundError("k結果txtが見つかりません。data/extract_k を確認してください。")
+
+    file_dates: Dict[str, datetime] = {}
+    valid_paths: List[str] = []
+
+    for path in paths:
+        dt = extract_date_from_k_path(path)
+        if dt is None:
+            continue
+        file_dates[path] = dt
+        valid_paths.append(path)
+
+    if not valid_paths:
+        raise FileNotFoundError("日付付きの k結果txt が見つかりません。kYYMMDD.txt 形式を確認してください。")
+
+    latest_dt = max(file_dates.values())
+    latest_date_str = latest_dt.strftime("%Y-%m-%d")
+
+    cut_1y = latest_dt - timedelta(days=365)
+    cut_3y = latest_dt - timedelta(days=365 * 3)
+
+    players_all: Dict[str, Dict[str, Any]] = {}
+    players_1y: Dict[str, Dict[str, Any]] = {}
+    players_3y: Dict[str, Dict[str, Any]] = {}
+
+    race_count_all = 0
+    race_count_1y = 0
+    race_count_3y = 0
+
+    file_count_all = 0
+    file_count_1y = 0
+    file_count_3y = 0
+
+    for path in sorted(valid_paths):
+        file_dt = file_dates[path]
+        lines = read_text_auto(path)
+        blocks = split_blocks(lines)
+
+        file_count_all += 1
+        in_1y = file_dt >= cut_1y
+        in_3y = file_dt >= cut_3y
+
+        if in_1y:
+            file_count_1y += 1
+        if in_3y:
+            file_count_3y += 1
+
+        for block in blocks:
+            races = parse_block(block)
+            if not races:
+                continue
+
+            for race in races:
+                race_count_all += 1
+                apply_race_to_players(players_all, race)
+
+                if in_1y:
+                    race_count_1y += 1
+                    apply_race_to_players(players_1y, race)
+
+                if in_3y:
+                    race_count_3y += 1
+                    apply_race_to_players(players_3y, race)
+
+    out_all = finalize_players(players_all)
+    out_1y = finalize_players(players_1y)
+    out_3y = finalize_players(players_3y)
+
+    os.makedirs("data", exist_ok=True)
+
+    write_payload(
+        os.path.join("data", "player_course_stats_all.json"),
+        file_count_all,
+        race_count_all,
+        out_all,
+        latest_date_str
+    )
+    write_payload(
+        os.path.join("data", "player_course_stats_1y.json"),
+        file_count_1y,
+        race_count_1y,
+        out_1y,
+        latest_date_str
+    )
+    write_payload(
+        os.path.join("data", "player_course_stats_3y.json"),
+        file_count_3y,
+        race_count_3y,
+        out_3y,
+        latest_date_str
+    )
+
+    print("latest_file_date:", latest_date_str)
+    print("all_files:", file_count_all)
+    print("all_races:", race_count_all)
+    print("all_players:", len(out_all))
+    print("out:", os.path.join("data", "player_course_stats_all.json"))
+
+    print("1y_files:", file_count_1y)
+    print("1y_races:", race_count_1y)
+    print("1y_players:", len(out_1y))
+    print("out:", os.path.join("data", "player_course_stats_1y.json"))
+
+    print("3y_files:", file_count_3y)
+    print("3y_races:", race_count_3y)
+    print("3y_players:", len(out_3y))
+    print("out:", os.path.join("data", "player_course_stats_3y.json"))
 
 
 if __name__ == "__main__":
