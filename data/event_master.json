@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "generated_at": "2026-03-20T00:12:27.466164+09:00",
+    "generated_at": "2026-03-20T00:20:44.286784+09:00",
     "source_candidates": "data/event_master_candidates.json",
     "source_manual": "data/event_master_manual.json",
-    "title_count": 160,
+    "title_count": 161,
     "grade_policy": "manual_only_default_ippan"
   },
   "events": {
@@ -1504,6 +1504,17 @@
       ],
       "venues": [
         "唐津"
+      ]
+    },
+    "中日カップ": {
+      "grade": "G3",
+      "total_days": null,
+      "notes": "manual_add",
+      "sample_titles": [
+        "第39回 中日カップ"
+      ],
+      "venues": [
+        "浜名湖"
       ]
     }
   }
