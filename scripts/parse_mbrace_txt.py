@@ -198,9 +198,13 @@ def infer_grade_from_title(title: str) -> str:
     if "G3" in s or "G3" in c:
         return "G3"
 
-    # 周年記念はG1扱い
-    if "周年記念" in s:
+    # 開設○周年記念だけG1扱い
+    if re.search(r"開設\s*\d+\s*周年記念", s):
         return "G1"
+
+    # 市制○周年記念などは一般のまま
+    if re.search(r"[市町村]制\s*\d+\s*周年記念", s):
+        return "一般"
 
     # シリーズ系
     if "ヴィーナスシリーズ" in s:
