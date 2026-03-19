@@ -38,6 +38,10 @@ jobs:
         run: |
           python scripts/build_course_stats_from_k.py
 
+      - name: Run other boat trends build
+        run: |
+          python scripts/build_other_boat_trends_from_k.py
+
       - name: Commit result
         run: |
           git config --global user.name "github-actions[bot]"
@@ -46,9 +50,11 @@ jobs:
           git add \
             data/player_course_stats_all.json \
             data/player_course_stats_1y.json \
-            data/player_course_stats_3y.json
+            data/player_course_stats_3y.json \
+            data/player_other_boat_trends_1y.json \
+            data/player_other_boat_trends_3y.json
 
           git diff --cached --quiet && echo "no changes" && exit 0
 
-          git commit -m "update player course stats"
+          git commit -m "update player course stats and other boat trends"
           git push
