@@ -42,14 +42,14 @@ RE_RESULT_ROW = re.compile(
 )
 RE_KFILE = re.compile(r"^k(\d{2})(\d{2})(\d{2})\.txt$", re.IGNORECASE)
 
-VALID_KIMARITE = {
-    "逃げ",
-    "差し",
-    "まくり",
+VALID_KIMARITE = [
     "まくり差し",
+    "まくり",
+    "差し",
+    "逃げ",
     "抜き",
     "恵まれ",
-}
+]
 
 
 def norm_space(s: str) -> str:
@@ -107,8 +107,10 @@ def extract_kimarite_nearby(block: List[str], header_idx: int) -> str:
 
     for i in range(start, end):
         s = norm_space(block[i])
-        if s in VALID_KIMARITE:
-            return s
+
+        for k in VALID_KIMARITE:
+            if s == k:
+                return k
 
         for k in VALID_KIMARITE:
             if k in s:
@@ -249,14 +251,14 @@ def make_empty_player(reg: str, name: str) -> Dict[str, Any]:
 
 def kimarite_key(raw: str) -> Optional[str]:
     s = norm_space(raw)
-    if s == "逃げ":
-        return "逃げ"
-    if s == "差し":
-        return "差"
-    if s == "まくり":
-        return "まくり"
     if s == "まくり差し":
         return "まくり差し"
+    if s == "まくり":
+        return "まくり"
+    if s == "差し":
+        return "差"
+    if s == "逃げ":
+        return "逃げ"
     if s == "抜き":
         return "抜き"
     if s == "恵まれ":
