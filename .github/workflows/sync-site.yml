@@ -33,6 +33,9 @@ jobs:
           ls -la data/master || true
           ls -la data/meet_avg_st || true
           ls -la data/master/racer_gender.json || true
+          ls -la data/player_course_stats_all.json || true
+          ls -la data/player_course_stats_1y.json || true
+          ls -la data/player_course_stats_3y.json || true
 
       - name: Clone race-analysis repo
         run: |
@@ -85,8 +88,16 @@ jobs:
 
       - name: Copy player course stats
         run: |
-          if [ -f data/player_course_stats.json ]; then
-            cp data/player_course_stats.json site_repo/data/player_course_stats.json
+          if [ -f data/player_course_stats_all.json ]; then
+            cp data/player_course_stats_all.json site_repo/data/player_course_stats_all.json
+          fi
+
+          if [ -f data/player_course_stats_1y.json ]; then
+            cp data/player_course_stats_1y.json site_repo/data/player_course_stats_1y.json
+          fi
+
+          if [ -f data/player_course_stats_3y.json ]; then
+            cp data/player_course_stats_3y.json site_repo/data/player_course_stats_3y.json
           fi
 
       - name: Copy meet avg st files
