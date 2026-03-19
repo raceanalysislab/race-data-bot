@@ -6,19 +6,9 @@
 #   data/player_other_boat_trends_1y.json
 #   data/player_other_boat_trends_3y.json
 #
-# 例:
-#   選手Aが5コースの時
-#   -> 1コース艇は1着何回 / 2着何回 / 3着何回 / どんな決まり手で勝ったか
-#   -> 2コース艇は...
-#   -> 6コース艇は...
-#
 # 集計単位:
+#   players[regno]["base_courses"]["5"]["starts"]
 #   players[regno]["base_courses"]["5"]["others"]["1"..."6"]
-#
-# 注意:
-# - 本人コース自身（例: base_course=5 の others["5"]）は表示用には使わず保持だけしてもいいが、
-#   ここでは見やすさ優先で starts=0 のままにする
-# - 決まり手は「そのコースの艇が1着だった時」のみ加算
 #
 # 期間:
 # - 1y  : 最新日基準で過去365日分
@@ -128,9 +118,8 @@ def parse_block(block: List[str]) -> List[Dict[str, Any]]:
             if current_race:
                 races.append(current_race)
 
-            rno = int(race_head.group(1))
             current_race = {
-                "rno": rno,
+                "rno": int(race_head.group(1)),
                 "kimarite": extract_kimarite_nearby(block, idx),
                 "results": []
             }
@@ -151,14 +140,8 @@ def parse_block(block: List[str]) -> List[Dict[str, Any]]:
                 boat_no = int(m.group(2))
                 reg = m.group(3)
                 name = norm_space(m.group(4))
-                st_raw = m.group(5)
 
                 finish = normalize_finish(finish_raw)
-                st = None
-                try:
-                    st = float(st_raw)
-                except Exception:
-                    st = None
 
                 current_race["results"].append({
                     "reg": reg,
@@ -166,7 +149,6 @@ def parse_block(block: List[str]) -> List[Dict[str, Any]]:
                     "boat": boat_no,
                     "course": normalize_course(boat_no),
                     "finish": finish,
-                    "st": st
                 })
                 continue
 
@@ -220,12 +202,9 @@ def extract_date_from_k_path(path: str) -> Optional[datetime]:
 
 def make_empty_other_bucket() -> Dict[str, Any]:
     return {
-        "starts": 0,
         "first": 0,
         "second": 0,
         "third": 0,
-        "ren2": 0,
-        "ren3": 0,
         "kimarite": {
             "逃げ": 0,
             "差": 0,
@@ -243,6 +222,7 @@ def make_empty_player(reg: str, name: str) -> Dict[str, Any]:
         "name": name or "",
         "base_courses": {
             str(base_course): {
+                "starts": 0,
                 "others": {str(other_course): make_empty_other_bucket() for other_course in range(1, 7)}
             }
             for base_course in range(1, 7)
@@ -293,7 +273,10 @@ def apply_race_to_players(players: Dict[str, Dict[str, Any]], race: Dict[str, An
     race_kimarite = race.get("kimarite") or ""
     results = race.get("results") or []
 
-    valid_rows = [row for row in results if str(row.get("reg") or "").strip()]
+    valid_rows = [
+        row for row in results
+        if str(row.get("reg") or "").strip() and row.get("course") in (1, 2, 3, 4, 5, 6)
+    ]
     if len(valid_rows) < 2:
         return
 
@@ -307,6 +290,9 @@ def apply_race_to_players(players: Dict[str, Dict[str, Any]], race: Dict[str, An
 
         ensure_player(players, base_reg, base_name)
 
+        base_slot = players[base_reg]["base_courses"][str(base_course)]
+        base_slot["starts"] += 1
+
         for other_row in valid_rows:
             other_course = other_row.get("course")
             finish = other_row.get("finish")
@@ -314,32 +300,21 @@ def apply_race_to_players(players: Dict[str, Dict[str, Any]], race: Dict[str, An
             if other_course not in (1, 2, 3, 4, 5, 6):
                 continue
 
-            # 本人コース自身は他艇傾向に含めない
             if other_course == base_course:
                 continue
 
-            bucket = players[base_reg]["base_courses"][str(base_course)]["others"][str(other_course)]
-
-            # その選手が base_course にいたレース回数として加算
-            bucket["starts"] += 1
+            bucket = base_slot["others"][str(other_course)]
 
             if isinstance(finish, int):
                 if finish == 1:
                     bucket["first"] += 1
+                    kk = kimarite_key(race_kimarite)
+                    if kk:
+                        bucket["kimarite"][kk] += 1
                 elif finish == 2:
                     bucket["second"] += 1
                 elif finish == 3:
                     bucket["third"] += 1
-
-                if finish <= 2:
-                    bucket["ren2"] += 1
-                if finish <= 3:
-                    bucket["ren3"] += 1
-
-                if finish == 1:
-                    kk = kimarite_key(race_kimarite)
-                    if kk:
-                        bucket["kimarite"][kk] += 1
 
 
 def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
@@ -349,27 +324,27 @@ def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         base_courses_out: Dict[str, Any] = {}
 
         for base_course in range(1, 7):
+            src_base = pdata["base_courses"][str(base_course)]
+            starts = int(src_base["starts"])
             others_out: Dict[str, Any] = {}
 
             for other_course in range(1, 7):
-                src = pdata["base_courses"][str(base_course)]["others"][str(other_course)]
+                src = src_base["others"][str(other_course)]
 
-                starts = int(src["starts"])
                 first = int(src["first"])
                 second = int(src["second"])
                 third = int(src["third"])
 
                 if starts > 0:
                     first_rate = round(first / starts * 100, 1)
-                    ren2_rate = round(int(src["ren2"]) / starts * 100, 1)
-                    ren3_rate = round(int(src["ren3"]) / starts * 100, 1)
+                    ren2_rate = round((first + second) / starts * 100, 1)
+                    ren3_rate = round((first + second + third) / starts * 100, 1)
                 else:
                     first_rate = 0.0
                     ren2_rate = 0.0
                     ren3_rate = 0.0
 
                 others_out[str(other_course)] = {
-                    "starts": starts,
                     "first": first,
                     "second": second,
                     "third": third,
@@ -387,6 +362,7 @@ def finalize_players(players: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
                 }
 
             base_courses_out[str(base_course)] = {
+                "starts": starts,
                 "others": others_out
             }
 
@@ -447,7 +423,6 @@ def main() -> None:
 
     race_count_1y = 0
     race_count_3y = 0
-
     file_count_1y = 0
     file_count_3y = 0
 
@@ -499,12 +474,10 @@ def main() -> None:
     )
 
     print("latest_file_date:", latest_date_str)
-
     print("1y_files:", file_count_1y)
     print("1y_races:", race_count_1y)
     print("1y_players:", len(out_1y))
     print("out:", os.path.join("data", "player_other_boat_trends_1y.json"))
-
     print("3y_files:", file_count_3y)
     print("3y_races:", race_count_3y)
     print("3y_players:", len(out_3y))
