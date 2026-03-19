@@ -31,6 +31,8 @@ TRANS = str.maketrans({
     "Ｕ": "U", "Ｖ": "V", "Ｗ": "W", "Ｘ": "X", "Ｙ": "Y",
     "Ｚ": "Z",
     "（": "(", "）": ")",
+    "～": "〜",
+    "~": "〜",
 })
 
 BRANCHES = [
@@ -90,6 +92,9 @@ def _dedupe_venue_prefix(s: str) -> str:
 
 def normalize_event_title(s: str) -> str:
     s = norm(s)
+
+    # 波ダッシュ系を統一
+    s = s.replace("～", "〜").replace("~", "〜")
 
     # グレード表記だけは照合ノイズとして除去
     s = re.sub(r"\bSG\b", "", s)
