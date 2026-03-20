@@ -57,12 +57,17 @@ def normalize_event_title(title: str) -> str:
     return s.strip()
 
 
-def compact_event_title(title: str) -> str:
-    return normalize_event_title(title).replace(" ", "")
-
-
 def normalize_name(name: str) -> str:
     return re.sub(r"[\s\u3000]+", "", str(name or "")).strip()
+
+
+def normalize_regno(v: Any) -> str:
+    s = str(v or "").strip()
+    if not s:
+        return ""
+    if s.isdigit():
+        return str(int(s)).zfill(4)
+    return s
 
 
 def reset_out_dir(path: str) -> None:
@@ -103,10 +108,7 @@ def build_current_racer_map_from_venue(venue_item: Dict[str, Any]) -> Dict[str, 
     for race in venue_item.get("races") or []:
         for boat in race.get("boats") or []:
             regno = boat.get("regno")
-            if regno is None:
-                continue
-
-            reg = str(regno).strip()
+            reg = normalize_regno(regno)
             if not reg:
                 continue
 
@@ -122,29 +124,23 @@ def select_relevant_k_days(
     all_k_venues: List[Dict[str, Any]],
     venue_name: str,
     jcd: str,
-    event_title: str,
     target_date: str,
     current_day_no: int,
 ) -> List[Dict[str, Any]]:
-    title_key = compact_event_title(event_title)
     candidates: List[Dict[str, Any]] = []
 
     for item in all_k_venues:
         item_jcd = str(item.get("jcd") or "").zfill(2)
         item_venue = str(item.get("venue") or "").strip()
         item_date = str(item.get("date") or "").strip()
-        item_title_key = compact_event_title(item.get("event_title_norm") or item.get("event_title") or "")
 
         if not item_date or item_date >= target_date:
             continue
 
-        if jcd and item_jcd and item_jcd != jcd:
+        if jcd and item_jcd != jcd:
             continue
 
-        if venue_name and item_venue and item_venue != venue_name:
-            continue
-
-        if title_key and item_title_key and item_title_key != title_key:
+        if venue_name and item_venue != venue_name:
             continue
 
         candidates.append(item)
@@ -198,7 +194,7 @@ def build_racers_from_k_days(
 
         for race in races:
             for result in race.get("results") or []:
-                reg = str(result.get("reg") or "").strip()
+                reg = normalize_regno(result.get("reg"))
                 if not reg:
                     continue
 
@@ -264,7 +260,6 @@ def build_payload_for_venue(
         all_k_venues=all_k_venues,
         venue_name=venue_name,
         jcd=jcd,
-        event_title=event_title,
         target_date=target_date,
         current_day_no=current_day_no,
     )
