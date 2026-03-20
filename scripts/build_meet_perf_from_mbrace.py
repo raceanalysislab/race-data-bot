@@ -2,8 +2,9 @@ import glob
 import json
 import os
 import re
+import shutil
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 OUT_DIR = "data/meet_perf"
 K_RESULTS_PATH = os.path.join("data", "k_results_parsed.json")
@@ -49,12 +50,9 @@ def norm_space(s: str) -> str:
 def normalize_event_title(title: str) -> str:
     s = norm_space(title)
     s = s.replace("～", "〜").replace("~", "〜")
-    s = s.replace("・", "")
-    s = s.replace("　", " ")
     s = re.sub(r"第\s*\d+\s*回", "", s)
     s = re.sub(r"\bSG\b", "", s)
     s = re.sub(r"\bG[123]\b", "", s)
-    s = re.sub(r"[()（）「」『』【】［］\[\]]", "", s)
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
@@ -67,7 +65,9 @@ def normalize_name(name: str) -> str:
     return re.sub(r"[\s\u3000]+", "", str(name or "")).strip()
 
 
-def ensure_dir(path: str) -> None:
+def reset_out_dir(path: str) -> None:
+    if os.path.isdir(path):
+        shutil.rmtree(path)
     os.makedirs(path, exist_ok=True)
 
 
@@ -94,7 +94,6 @@ def load_k_results() -> List[Dict[str, Any]]:
     for item in venues:
         if isinstance(item, dict):
             out.append(item)
-
     return out
 
 
@@ -118,29 +117,6 @@ def build_current_racer_map_from_venue(venue_item: Dict[str, Any]) -> Dict[str, 
     return racers
 
 
-def title_match_score(base_title: str, cand_title: str) -> int:
-    a = compact_event_title(base_title)
-    b = compact_event_title(cand_title)
-
-    if not a or not b:
-        return 0
-    if a == b:
-        return 3
-    if a in b or b in a:
-        return 2
-
-    common = 0
-    for ch in set(a):
-        if ch in b:
-            common += 1
-
-    short_len = min(len(a), len(b))
-    if short_len > 0 and common / short_len >= 0.6:
-        return 1
-
-    return 0
-
-
 def select_relevant_k_days(
     *,
     all_k_venues: List[Dict[str, Any]],
@@ -150,51 +126,39 @@ def select_relevant_k_days(
     target_date: str,
     current_day_no: int,
 ) -> List[Dict[str, Any]]:
-    candidates: List[Tuple[int, str, int, Dict[str, Any]]] = []
+    title_key = compact_event_title(event_title)
+    candidates: List[Dict[str, Any]] = []
 
     for item in all_k_venues:
         item_jcd = str(item.get("jcd") or "").zfill(2)
         item_venue = str(item.get("venue") or "").strip()
         item_date = str(item.get("date") or "").strip()
-        item_day_no = int(item.get("day_no") or 0)
-        item_title = str(item.get("event_title_norm") or item.get("event_title") or "").strip()
+        item_title_key = compact_event_title(item.get("event_title_norm") or item.get("event_title") or "")
 
         if not item_date or item_date >= target_date:
             continue
 
-        if jcd and item_jcd != jcd:
+        if jcd and item_jcd and item_jcd != jcd:
             continue
 
-        if venue_name and item_venue != venue_name:
+        if venue_name and item_venue and item_venue != venue_name:
             continue
 
-        score = title_match_score(event_title, item_title)
-        candidates.append((score, item_date, item_day_no, item))
+        if title_key and item_title_key and item_title_key != title_key:
+            continue
 
-    if not candidates:
-        return []
+        candidates.append(item)
 
-    # 開催名一致スコアが高いものを優先
-    max_score = max(x[0] for x in candidates)
-
-    # 1つでもタイトル一致系があれば、そのグループだけ使う
-    if max_score > 0:
-        filtered = [x for x in candidates if x[0] == max_score]
-    else:
-        # タイトル一致ゼロでも、同会場同jcdの直近日を使う
-        filtered = candidates
-
-    filtered.sort(key=lambda x: (x[1], x[2]))
+    candidates.sort(key=lambda x: (x.get("date") or "", int(x.get("day_no") or 0)))
 
     completed_days = max(0, current_day_no - 1)
     if completed_days <= 0:
         return []
 
-    picked = [x[3] for x in filtered]
-    if len(picked) <= completed_days:
-        return picked
+    if len(candidates) <= completed_days:
+        return candidates
 
-    return picked[-completed_days:]
+    return candidates[-completed_days:]
 
 
 def build_empty_days() -> List[List[Optional[Dict[str, Any]]]]:
@@ -341,7 +305,7 @@ def main() -> None:
         print("no mbrace json files")
         return
 
-    ensure_dir(OUT_DIR)
+    reset_out_dir(OUT_DIR)
     all_k_venues = load_k_results()
 
     written = 0
