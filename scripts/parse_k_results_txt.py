@@ -26,15 +26,6 @@ RE_RESULT_ROW = re.compile(
     r"(.+?)\s*$"                       # レースタイム以降
 )
 
-VALID_KIMARITE = {
-    "逃げ",
-    "差し",
-    "まくり",
-    "まくり差し",
-    "抜き",
-    "恵まれ",
-}
-
 
 def norm_space(s: str) -> str:
     s = str(s or "")
@@ -53,10 +44,6 @@ def normalize_event_title(title: str) -> str:
     return s.strip()
 
 
-def compact_event_title(title: str) -> str:
-    return normalize_event_title(title).replace(" ", "")
-
-
 def read_text_auto(path: str) -> List[str]:
     for enc in ("cp932", "utf-8-sig", "utf-8"):
         try:
@@ -67,6 +54,11 @@ def read_text_auto(path: str) -> List[str]:
 
     with open(path, "r", encoding="cp932", errors="ignore") as f:
         return [x.rstrip("\n") for x in f]
+
+
+def glob_safe(pattern: str) -> List[str]:
+    import glob
+    return glob.glob(pattern)
 
 
 def collect_k_txt_files() -> List[str]:
@@ -81,11 +73,6 @@ def collect_k_txt_files() -> List[str]:
         files.extend(sorted([p for p in glob_safe(pattern) if os.path.isfile(p)]))
 
     return sorted(set(files))
-
-
-def glob_safe(pattern: str) -> List[str]:
-    import glob
-    return glob.glob(pattern)
 
 
 def split_blocks(lines: List[str]) -> List[Tuple[str, List[str]]]:
@@ -152,15 +139,14 @@ def parse_date(block: List[str]) -> str:
 
 def parse_day_no(block: List[str]) -> Optional[int]:
     joined = "\n".join(norm_space(x) for x in block[:30])
-
     m = RE_DAYNO.search(joined)
-    if m:
-        try:
-            return int(m.group(1))
-        except Exception:
-            return None
+    if not m:
+        return None
 
-    return None
+    try:
+        return int(m.group(1))
+    except Exception:
+        return None
 
 
 def parse_event_title(block: List[str]) -> str:
@@ -211,32 +197,6 @@ def normalize_st(raw: str) -> str:
     return f".{m.group(2)}"
 
 
-def extract_kimarite_nearby(block: List[str], header_idx: int) -> str:
-    start = max(0, header_idx - 3)
-    end = min(len(block), header_idx + 4)
-
-    for i in range(start, end):
-        s = norm_space(block[i])
-        if s in VALID_KIMARITE:
-            return s
-        for k in VALID_KIMARITE:
-            if k in s:
-                return k
-
-    return ""
-
-
-def parse_race_title(line: str, rno: int) -> str:
-    s = line.rstrip()
-    m = re.match(rf"^\s*{rno}R\s+(.+?)\s+H1800m", s)
-    if m:
-        return norm_space(m.group(1))
-
-    s2 = re.sub(rf"^\s*{rno}R\s+", "", s)
-    s2 = re.sub(r"\s+H1800m.*$", "", s2)
-    return norm_space(s2)
-
-
 def parse_result_row(line: str) -> Optional[Dict[str, Any]]:
     s = line.rstrip()
     m = RE_RESULT_ROW.match(s)
@@ -244,27 +204,17 @@ def parse_result_row(line: str) -> Optional[Dict[str, Any]]:
         return None
 
     finish_raw = m.group(1)
-    boat_no = int(m.group(2))
     reg = m.group(3)
     name = norm_space(m.group(4))
-    motor_no = int(m.group(5))
-    boat_id = int(m.group(6))
-    tenji = m.group(7)
     course = int(m.group(8))
     st = normalize_st(m.group(9))
-    race_time = norm_space(m.group(10))
 
     return {
         "reg": reg,
         "name": name,
-        "boat": boat_no,
         "course": course,
         "st": st,
         "finish": normalize_finish(finish_raw),
-        "motor_no": motor_no,
-        "boat_id": boat_id,
-        "tenji": tenji,
-        "race_time": race_time,
     }
 
 
@@ -279,7 +229,7 @@ def parse_block(jcd: str, block: List[str]) -> Dict[str, Any]:
     current_race: Optional[Dict[str, Any]] = None
     in_result_table = False
 
-    for idx, line in enumerate(block):
+    for line in block:
         race_head = RE_RACE_HEADER.match(line)
         if race_head and "H1800m" in line:
             if current_race:
@@ -288,8 +238,6 @@ def parse_block(jcd: str, block: List[str]) -> Dict[str, Any]:
             rno = int(race_head.group(1))
             current_race = {
                 "rno": rno,
-                "race_title": parse_race_title(line, rno),
-                "label": extract_kimarite_nearby(block, idx),
                 "results": []
             }
             in_result_table = False
@@ -324,7 +272,6 @@ def parse_block(jcd: str, block: List[str]) -> Dict[str, Any]:
         "venue": venue,
         "date": date,
         "day_no": day_no,
-        "event_title": event_title,
         "event_title_norm": event_title_norm,
         "races": races
     }
@@ -344,7 +291,6 @@ def main() -> None:
         for jcd, block in blocks:
             parsed = parse_block(jcd, block)
             if parsed["venue"] and parsed["races"]:
-                parsed["source"] = os.path.basename(path)
                 out_items.append(parsed)
 
     out_items.sort(key=lambda x: (x.get("date") or "", x.get("jcd") or ""))
@@ -359,7 +305,7 @@ def main() -> None:
     os.makedirs("data", exist_ok=True)
 
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
 
     print("files:", len(files))
     print("out:", out_path)
