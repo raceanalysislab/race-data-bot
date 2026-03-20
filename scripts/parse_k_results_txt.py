@@ -2,16 +2,28 @@ import json
 import os
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 JST = timezone(timedelta(hours=9))
 
-RE_KBGN = re.compile(r"^\d{2}KBGN$")
-RE_KEND = re.compile(r"^\d{2}KEND$")
-RE_DATE = re.compile(r"(\d{1,2})/(\d{1,2})")
+RE_KBGN = re.compile(r"^(\d{2})KBGN$")
+RE_KEND = re.compile(r"^(\d{2})KEND$")
+RE_DATE = re.compile(r"(\d{4})/\s*(\d{1,2})/\s*(\d{1,2})")
+RE_DATE_SHORT = re.compile(r"(\d{1,2})/(\d{1,2})")
+RE_DAYNO = re.compile(r"第\s*([0-9]+)\s*日")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
 RE_RESULT_ROW = re.compile(
-    r"^\s*([0-9]{2}|S[0-9]|F|K0)\s+([1-6])\s+(\d{4})\s+(.+?)\s+\d+\s+\d+\s+"
+    r"^\s*"
+    r"(\d{2}|S\d|F|K0)\s+"            # 着
+    r"([1-6])\s+"                      # 艇
+    r"(\d{4})\s+"                      # 登番
+    r"(.+?)\s+"                        # 選手名
+    r"(\d{1,3})\s+"                    # モーター
+    r"(\d{1,3})\s+"                    # ボート
+    r"([0-9]+\.[0-9]{2})\s+"           # 展示
+    r"([1-6])\s+"                      # 進入
+    r"([0-9]+\.[0-9]{2})\s+"           # ST
+    r"(.+?)\s*$"                       # レースタイム以降
 )
 
 VALID_KIMARITE = {
@@ -25,98 +37,89 @@ VALID_KIMARITE = {
 
 
 def norm_space(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "")).strip()
+    s = str(s or "")
+    s = s.replace("　", " ")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def normalize_event_title(title: str) -> str:
+    s = norm_space(title)
+    s = s.replace("～", "〜").replace("~", "〜")
+    s = re.sub(r"第\s*\d+\s*回", "", s)
+    s = re.sub(r"\bSG\b", "", s)
+    s = re.sub(r"\bG[123]\b", "", s)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def compact_event_title(title: str) -> str:
+    return normalize_event_title(title).replace(" ", "")
 
 
 def read_text_auto(path: str) -> List[str]:
-    for enc in ["cp932", "utf-8-sig", "utf-8"]:
+    for enc in ("cp932", "utf-8-sig", "utf-8"):
         try:
             with open(path, "r", encoding=enc) as f:
                 return [x.rstrip("\n") for x in f]
         except Exception:
-            pass
+            continue
+
     with open(path, "r", encoding="cp932", errors="ignore") as f:
         return [x.rstrip("\n") for x in f]
 
 
-def _find_latest_k_txt() -> Optional[str]:
-    search_dirs = [
-        os.path.join("data", "extract"),
-        os.path.join("data"),
+def collect_k_txt_files() -> List[str]:
+    patterns = [
+        os.path.join("data", "extract", "k*.txt"),
+        os.path.join("data", "extract_k", "k*.txt"),
+        os.path.join("data", "k*.txt"),
     ]
 
-    cands: List[str] = []
+    files: List[str] = []
+    for pattern in patterns:
+        files.extend(sorted([p for p in glob_safe(pattern) if os.path.isfile(p)]))
 
-    for base in search_dirs:
-        if not os.path.isdir(base):
-            continue
-
-        for root, _, files in os.walk(base):
-            for fn in files:
-                if re.match(r"^k\d{6}\.txt$", fn, re.IGNORECASE):
-                    cands.append(os.path.join(root, fn))
-
-    if not cands:
-        return None
-
-    cands.sort(key=lambda p: os.path.getmtime(p), reverse=True)
-    return cands[0]
+    return sorted(set(files))
 
 
-def infer_txt_path() -> str:
-    p = os.path.join("data", "source_final_url_k.txt")
-
-    if os.path.exists(p):
-        try:
-            with open(p, "r", encoding="utf-8", errors="ignore") as f:
-                url = f.read().strip()
-
-            m = re.search(r"/k(\d{6})\.lzh", url, re.IGNORECASE)
-            if m:
-                yymmdd = m.group(1)
-
-                guesses = [
-                    os.path.join("data", "extract", f"k{yymmdd}.txt"),
-                    os.path.join("data", f"k{yymmdd}.txt"),
-                ]
-
-                for guess in guesses:
-                    if os.path.exists(guess):
-                        return guess
-        except Exception:
-            pass
-
-    latest = _find_latest_k_txt()
-    if latest:
-        return latest
-
-    raise FileNotFoundError(
-        "k結果txtが見つかりません。"
-        " data/source_final_url_k.txt または data/extract/k******.txt を確認してください。"
-    )
+def glob_safe(pattern: str) -> List[str]:
+    import glob
+    return glob.glob(pattern)
 
 
-def split_blocks(lines: List[str]) -> List[List[str]]:
-    blocks: List[List[str]] = []
+def split_blocks(lines: List[str]) -> List[Tuple[str, List[str]]]:
+    blocks: List[Tuple[str, List[str]]] = []
+    cur_jcd: Optional[str] = None
     cur: List[str] = []
 
     for line in lines:
-        if RE_KBGN.match(line.strip()):
-            if cur:
-                blocks.append(cur)
-            cur = [line]
+        stripped = line.strip()
+
+        m_start = RE_KBGN.match(stripped)
+        if m_start:
+            if cur_jcd and cur:
+                blocks.append((cur_jcd, cur))
+            cur_jcd = m_start.group(1)
+            cur = []
             continue
 
-        cur.append(line)
-
-        if RE_KEND.match(line.strip()):
-            blocks.append(cur)
+        m_end = RE_KEND.match(stripped)
+        if m_end:
+            end_jcd = m_end.group(1)
+            if cur_jcd == end_jcd:
+                blocks.append((cur_jcd, cur))
+            cur_jcd = None
             cur = []
+            continue
 
-    if cur:
-        blocks.append(cur)
+        if cur_jcd:
+            cur.append(line)
 
-    return [b for b in blocks if b]
+    if cur_jcd and cur:
+        blocks.append((cur_jcd, cur))
+
+    return blocks
 
 
 def parse_venue(block: List[str]) -> str:
@@ -128,15 +131,36 @@ def parse_venue(block: List[str]) -> str:
 
 
 def parse_date(block: List[str]) -> str:
-    year = datetime.now(JST).year
+    year_now = datetime.now(JST).year
 
     for line in block[:30]:
-        m = RE_DATE.search(line)
+        s = norm_space(line)
+        m = RE_DATE.search(s)
+        if m:
+            y, mm, dd = m.groups()
+            return f"{int(y):04d}-{int(mm):02d}-{int(dd):02d}"
+
+    for line in block[:20]:
+        s = norm_space(line)
+        m = RE_DATE_SHORT.search(s)
         if m:
             mm, dd = m.groups()
-            return f"{year:04d}-{int(mm):02d}-{int(dd):02d}"
+            return f"{year_now:04d}-{int(mm):02d}-{int(dd):02d}"
 
     return ""
+
+
+def parse_day_no(block: List[str]) -> Optional[int]:
+    joined = "\n".join(norm_space(x) for x in block[:30])
+
+    m = RE_DAYNO.search(joined)
+    if m:
+        try:
+            return int(m.group(1))
+        except Exception:
+            return None
+
+    return None
 
 
 def parse_event_title(block: List[str]) -> str:
@@ -149,7 +173,6 @@ def parse_event_title(block: List[str]) -> str:
 
                 if not t:
                     continue
-
                 if "第 " in t and "日" in t:
                     continue
                 if re.search(r"\d{4}/\s*\d{1,2}/\d{1,2}", t):
@@ -173,16 +196,6 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
-def normalize_event_title(title: str) -> str:
-    s = norm_space(title)
-
-    s = re.sub(r"第\s*\d+\s*回", "", s)
-    s = re.sub(r"\bSG\b", "", s)
-    s = re.sub(r"\bG[123]\b", "", s)
-
-    return s.strip()
-
-
 def normalize_finish(raw: str) -> Any:
     raw = raw.strip()
     if raw.isdigit():
@@ -190,19 +203,22 @@ def normalize_finish(raw: str) -> Any:
     return raw
 
 
-def normalize_course(value: int) -> int:
-    return int(value)
+def normalize_st(raw: str) -> str:
+    s = str(raw or "").strip()
+    m = re.match(r"^([0-9]+)\.([0-9]{2})$", s)
+    if not m:
+        return ""
+    return f".{m.group(2)}"
 
 
 def extract_kimarite_nearby(block: List[str], header_idx: int) -> str:
-    start = max(0, header_idx - 6)
-    end = min(len(block), header_idx + 20)
+    start = max(0, header_idx - 3)
+    end = min(len(block), header_idx + 4)
 
     for i in range(start, end):
         s = norm_space(block[i])
         if s in VALID_KIMARITE:
             return s
-
         for k in VALID_KIMARITE:
             if k in s:
                 return k
@@ -221,9 +237,41 @@ def parse_race_title(line: str, rno: int) -> str:
     return norm_space(s2)
 
 
-def parse_block(block: List[str]) -> Dict[str, Any]:
+def parse_result_row(line: str) -> Optional[Dict[str, Any]]:
+    s = line.rstrip()
+    m = RE_RESULT_ROW.match(s)
+    if not m:
+        return None
+
+    finish_raw = m.group(1)
+    boat_no = int(m.group(2))
+    reg = m.group(3)
+    name = norm_space(m.group(4))
+    motor_no = int(m.group(5))
+    boat_id = int(m.group(6))
+    tenji = m.group(7)
+    course = int(m.group(8))
+    st = normalize_st(m.group(9))
+    race_time = norm_space(m.group(10))
+
+    return {
+        "reg": reg,
+        "name": name,
+        "boat": boat_no,
+        "course": course,
+        "st": st,
+        "finish": normalize_finish(finish_raw),
+        "motor_no": motor_no,
+        "boat_id": boat_id,
+        "tenji": tenji,
+        "race_time": race_time,
+    }
+
+
+def parse_block(jcd: str, block: List[str]) -> Dict[str, Any]:
     venue = parse_venue(block)
     date = parse_date(block)
+    day_no = parse_day_no(block)
     event_title = parse_event_title(block)
     event_title_norm = normalize_event_title(event_title)
 
@@ -255,20 +303,9 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
             continue
 
         if in_result_table:
-            m = RE_RESULT_ROW.match(line)
-            if m:
-                finish_raw = m.group(1)
-                boat_no = int(m.group(2))
-                reg = m.group(3)
-                name = norm_space(m.group(4))
-
-                current_race["results"].append({
-                    "reg": reg,
-                    "name": name,
-                    "boat": boat_no,
-                    "course": normalize_course(boat_no),
-                    "finish": normalize_finish(finish_raw)
-                })
+            row = parse_result_row(line)
+            if row:
+                current_race["results"].append(row)
                 continue
 
             if (
@@ -283,29 +320,39 @@ def parse_block(block: List[str]) -> Dict[str, Any]:
         races.append(current_race)
 
     return {
+        "jcd": jcd,
         "venue": venue,
         "date": date,
+        "day_no": day_no,
         "event_title": event_title,
         "event_title_norm": event_title_norm,
         "races": races
     }
 
 
-def main():
-    txt_path = infer_txt_path()
-    lines = read_text_auto(txt_path)
-    blocks = split_blocks(lines)
+def main() -> None:
+    files = collect_k_txt_files()
+    if not files:
+        raise FileNotFoundError("k結果txtが見つかりません。data/extract/k******.txt を確認してください。")
 
-    out_blocks: List[Dict[str, Any]] = []
-    for block in blocks:
-        parsed = parse_block(block)
-        if parsed["venue"] and parsed["races"]:
-            out_blocks.append(parsed)
+    out_items: List[Dict[str, Any]] = []
+
+    for path in files:
+        lines = read_text_auto(path)
+        blocks = split_blocks(lines)
+
+        for jcd, block in blocks:
+            parsed = parse_block(jcd, block)
+            if parsed["venue"] and parsed["races"]:
+                parsed["source"] = os.path.basename(path)
+                out_items.append(parsed)
+
+    out_items.sort(key=lambda x: (x.get("date") or "", x.get("jcd") or ""))
 
     payload = {
-        "source": os.path.basename(txt_path),
         "parsed_at": datetime.now(JST).isoformat(),
-        "venues": out_blocks
+        "count": len(out_items),
+        "venues": out_items
     }
 
     out_path = os.path.join("data", "k_results_parsed.json")
@@ -314,9 +361,9 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    print("txt:", txt_path)
+    print("files:", len(files))
     print("out:", out_path)
-    print("venues:", len(out_blocks))
+    print("venues:", len(out_items))
 
 
 if __name__ == "__main__":
