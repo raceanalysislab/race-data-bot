@@ -16,17 +16,16 @@ ZEN2HAN = str.maketrans({
     "　": " ",
     "：": ":",
     "Ｒ": "R",
-    "第": "第",
-    "日": "日",
 })
 
 BLOCK_START_RE = re.compile(r"^(\d{2})BBGN$")
 BLOCK_END_RE = re.compile(r"^(\d{2})BEND$")
 DATE_RE = re.compile(r"(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日")
 DAYNO_RE = re.compile(r"第\s*(\d+)\s*日")
-RACE_HEADER_RE = re.compile(r"^\s*([0-9０-９]{1,2})R")
+RACE_HEADER_RE = re.compile(r"^\s*([0-9]{1,2})R")
 RACER_LINE_RE = re.compile(r"^\s*([1-6])\s*(\d{4})(.+)$")
 GRADE_RE = re.compile(r"(A1|A2|B1|B2|L1|L2)")
+VENUE_HEAD_RE = re.compile(r"^ボートレース\s*([^\s0-9]+)")
 
 
 def norm(s: str) -> str:
@@ -97,9 +96,9 @@ def extract_meta(lines: List[str], jcd: str) -> Dict:
 
     for line in lines[:10]:
         s = norm(line).strip()
-        if s.startswith("ボートレース"):
-            venue = s.replace("ボートレース", "", 1).strip()
-            venue = re.sub(r"\s+", "", venue)
+        m = VENUE_HEAD_RE.match(s)
+        if m:
+            venue = re.sub(r"\s+", "", m.group(1))
             break
 
     m_date = DATE_RE.search(joined)
@@ -130,30 +129,39 @@ def find_perf_header_positions(lines: List[str]) -> Tuple[Optional[int], Optiona
     return None, None
 
 
-def clean_name_from_tail(raw_tail: str) -> str:
-    s = norm(raw_tail)
+def extract_name_from_tail(tail: str) -> str:
+    s = norm(tail).strip()
 
     m_grade = GRADE_RE.search(s)
-    head = s[:m_grade.start()] if m_grade else s
-
-    name_chars = re.findall(r"[一-龥ぁ-んァ-ヶーA-Za-z]+", head)
-    if not name_chars:
+    if not m_grade:
         return ""
 
-    name = "".join(name_chars[-1:])
-    return re.sub(r"\s+", "", name)
+    left = s[:m_grade.start()]
+
+    # 末尾の「年齢(1-2桁) + 支部 + 体重(2桁前後)」を落とす
+    # 例: 村田敦55東京52
+    m = re.match(r"^(.*?)(\d{1,2})([一-龥ぁ-んァ-ヶー]+)(\d{2})\s*$", left)
+    if m:
+        name = m.group(1)
+        return re.sub(r"\s+", "", name)
+
+    # 少し緩い保険
+    m2 = re.match(r"^(.*?)(\d{1,2})([一-龥ぁ-んァ-ヶー]+)\s*$", left)
+    if m2:
+        name = m2.group(1)
+        return re.sub(r"\s+", "", name)
+
+    return ""
 
 
 def extract_meet_perf_raw(line: str, perf_start: Optional[int], ken_start: Optional[int]) -> str:
     s = norm(line.rstrip("\n"))
 
     if perf_start is not None and ken_start is not None and len(s) >= perf_start:
-        chunk = s[perf_start:ken_start]
-        chunk = chunk.rstrip()
+        chunk = s[perf_start:ken_start].rstrip()
         if chunk:
             return chunk
 
-    # fallback: 後ろ側から「今節成績っぽい塊」を取る
     m = re.search(r"([FL転欠妨失エ0-9 ]+)\s+\d{0,2}\s*$", s)
     if m:
         return m.group(1).rstrip()
@@ -175,7 +183,7 @@ def parse_racer_line(
     regno = m.group(2)
     tail = m.group(3)
 
-    name = clean_name_from_tail(tail)
+    name = extract_name_from_tail(tail)
     meet_perf_raw = extract_meet_perf_raw(s, perf_start, ken_start)
 
     if not regno:
@@ -191,9 +199,7 @@ def parse_racer_line(
 
 def score_meet_perf(raw: str) -> Tuple[int, int]:
     s = str(raw or "")
-    non_space_len = len(s.replace(" ", ""))
-    total_len = len(s)
-    return (non_space_len, total_len)
+    return (len(s.replace(" ", "")), len(s))
 
 
 def parse_block(jcd: str, lines: List[str]) -> Dict:
@@ -208,7 +214,7 @@ def parse_block(jcd: str, lines: List[str]) -> Dict:
 
         m_race = RACE_HEADER_RE.match(s)
         if m_race:
-            current_race_no = int(norm(m_race.group(1)))
+            current_race_no = int(m_race.group(1))
             continue
 
         racer = parse_racer_line(s, perf_start, ken_start)
@@ -229,10 +235,7 @@ def parse_block(jcd: str, lines: List[str]) -> Dict:
             racers[regno] = row
             continue
 
-        prev_score = score_meet_perf(prev.get("meet_perf_raw") or "")
-        new_score = score_meet_perf(racer.get("meet_perf_raw") or "")
-
-        if new_score > prev_score:
+        if score_meet_perf(row["meet_perf_raw"]) > score_meet_perf(prev.get("meet_perf_raw") or ""):
             racers[regno] = row
 
     return {
