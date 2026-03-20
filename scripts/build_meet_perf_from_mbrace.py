@@ -198,18 +198,16 @@ def build_racers_from_k_days(
                 if not reg:
                     continue
 
+                # 今節のmbraceに載っている選手だけ採用
+                if reg not in racers:
+                    continue
+
                 bucket[reg].append({
                     "rno": int(race.get("rno") or 0),
                     "course": int(result.get("course") or 0) if result.get("course") else None,
                     "st": str(result.get("st") or "").strip(),
                     "rank": result.get("finish"),
                 })
-
-                if reg not in racers:
-                    racers[reg] = {
-                        "name": normalize_name(result.get("name") or ""),
-                        "days": build_empty_days(),
-                    }
 
         for reg, results in bucket.items():
             results.sort(key=lambda x: (x.get("rno") or 0))
@@ -270,7 +268,11 @@ def build_payload_for_venue(
     )
 
     racers_out: Dict[str, Any] = {}
-    for reg, row in sorted(racers.items(), key=lambda x: x[0]):
+    for reg in sorted(current_racers.keys()):
+        row = racers.get(reg, {
+            "name": current_racers[reg].get("name") or "",
+            "days": build_empty_days(),
+        })
         racers_out[reg] = {
             "name": row.get("name") or "",
             "days": row.get("days") or build_empty_days(),
