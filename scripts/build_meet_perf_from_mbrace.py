@@ -1,291 +1,341 @@
+import glob
 import json
 import os
 import re
-import glob
-from typing import Dict, List, Optional, Tuple
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple
 
-SRC_GLOBS = [
-    "data/extract/*.txt",
-    "data/mbrace/*.txt",
-]
 OUT_DIR = "data/meet_perf"
+K_RESULTS_PATH = os.path.join("data", "k_results_parsed.json")
 
-ZEN2HAN = str.maketrans({
-    "０": "0", "１": "1", "２": "2", "３": "3", "４": "4",
-    "５": "5", "６": "6", "７": "7", "８": "8", "９": "9",
-    "　": " ",
-    "：": ":",
-    "Ｒ": "R",
-})
+VENUE_NAME_TO_JCD = {
+    "桐生": "01",
+    "戸田": "02",
+    "江戸川": "03",
+    "平和島": "04",
+    "多摩川": "05",
+    "浜名湖": "06",
+    "蒲郡": "07",
+    "常滑": "08",
+    "津": "09",
+    "三国": "10",
+    "びわこ": "11",
+    "住之江": "12",
+    "尼崎": "13",
+    "鳴門": "14",
+    "丸亀": "15",
+    "児島": "16",
+    "宮島": "17",
+    "徳山": "18",
+    "下関": "19",
+    "若松": "20",
+    "芦屋": "21",
+    "福岡": "22",
+    "唐津": "23",
+    "大村": "24",
+}
 
-BLOCK_START_RE = re.compile(r"^(\d{2})BBGN$")
-BLOCK_END_RE = re.compile(r"^(\d{2})BEND$")
-DATE_RE = re.compile(r"(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日")
-DAYNO_RE = re.compile(r"第\s*(\d+)\s*日")
-RACE_HEADER_RE = re.compile(r"^\s*([0-9]{1,2})R")
-RACER_LINE_RE = re.compile(r"^\s*([1-6])\s*(\d{4})(.+)$")
-GRADE_RE = re.compile(r"(A1|A2|B1|B2|L1|L2)")
-VENUE_HEAD_RE = re.compile(r"^ボートレース\s*([^\s0-9]+)")
+DAY_COUNT = 7
+SLOTS_PER_DAY = 2
 
 
-def norm(s: str) -> str:
-    return str(s or "").translate(ZEN2HAN)
+def norm_space(s: str) -> str:
+    s = str(s or "")
+    s = s.replace("　", " ")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def normalize_event_title(title: str) -> str:
+    s = norm_space(title)
+    s = s.replace("～", "〜").replace("~", "〜")
+    s = re.sub(r"第\s*\d+\s*回", "", s)
+    s = re.sub(r"\bSG\b", "", s)
+    s = re.sub(r"\bG[123]\b", "", s)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def compact_event_title(title: str) -> str:
+    return normalize_event_title(title).replace(" ", "")
+
+
+def normalize_name(name: str) -> str:
+    return re.sub(r"[\s\u3000]+", "", str(name or "")).strip()
 
 
 def ensure_dir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
 
 
-def read_text(path: str) -> str:
-    for enc in ("utf-8", "cp932", "shift_jis", "utf-8-sig"):
-        try:
-            with open(path, "r", encoding=enc) as f:
-                return f.read()
-        except UnicodeDecodeError:
+def read_json(path: str) -> Any:
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def collect_mbrace_json_files() -> List[str]:
+    files = sorted(glob.glob(os.path.join("data", "mbrace_races_*.json")))
+    return [p for p in files if os.path.isfile(p)]
+
+
+def load_k_results() -> List[Dict[str, Any]]:
+    if not os.path.exists(K_RESULTS_PATH):
+        return []
+
+    payload = read_json(K_RESULTS_PATH)
+    venues = payload.get("venues") if isinstance(payload, dict) else None
+    if not isinstance(venues, list):
+        return []
+
+    out: List[Dict[str, Any]] = []
+    for item in venues:
+        if not isinstance(item, dict):
             continue
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        return f.read()
+        out.append(item)
+
+    return out
 
 
-def collect_source_files() -> List[str]:
-    files: List[str] = []
-    for pattern in SRC_GLOBS:
-        files.extend(glob.glob(pattern))
-    return sorted(set(files))
+def build_current_racer_map_from_venue(venue_item: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    racers: Dict[str, Dict[str, Any]] = {}
+
+    for race in venue_item.get("races") or []:
+        for boat in race.get("boats") or []:
+            regno = boat.get("regno")
+            if regno is None:
+                continue
+
+            reg = str(regno).strip()
+            if not reg:
+                continue
+
+            racers[reg] = {
+                "name": normalize_name(boat.get("name") or ""),
+            }
+
+    return racers
 
 
-def extract_blocks(text: str) -> List[Tuple[str, List[str]]]:
-    lines = text.splitlines()
-    blocks: List[Tuple[str, List[str]]] = []
+def select_relevant_k_days(
+    *,
+    all_k_venues: List[Dict[str, Any]],
+    venue_name: str,
+    jcd: str,
+    event_title: str,
+    target_date: str,
+    current_day_no: int,
+) -> List[Dict[str, Any]]:
+    title_key = compact_event_title(event_title)
+    candidates: List[Dict[str, Any]] = []
 
-    current_jcd: Optional[str] = None
-    current_lines: List[str] = []
+    for item in all_k_venues:
+        item_jcd = str(item.get("jcd") or "").zfill(2)
+        item_venue = str(item.get("venue") or "").strip()
+        item_date = str(item.get("date") or "").strip()
+        item_title_key = compact_event_title(item.get("event_title_norm") or item.get("event_title") or "")
 
-    for raw in lines:
-        line = raw.rstrip("\n")
-        stripped = line.strip()
-
-        m_start = BLOCK_START_RE.match(stripped)
-        m_end = BLOCK_END_RE.match(stripped)
-
-        if m_start:
-            current_jcd = m_start.group(1)
-            current_lines = []
+        if not item_date or item_date >= target_date:
             continue
 
-        if m_end:
-            end_jcd = m_end.group(1)
-            if current_jcd == end_jcd:
-                blocks.append((current_jcd, current_lines[:]))
-            current_jcd = None
-            current_lines = []
+        if jcd and item_jcd and item_jcd != jcd:
             continue
 
-        if current_jcd:
-            current_lines.append(line)
+        if venue_name and item_venue and item_venue != venue_name:
+            continue
 
-    return blocks
+        if title_key and item_title_key and item_title_key != title_key:
+            continue
+
+        candidates.append(item)
+
+    candidates.sort(key=lambda x: (x.get("date") or "", int(x.get("day_no") or 0)))
+
+    completed_days = max(0, current_day_no - 1)
+    if completed_days <= 0:
+        return []
+
+    if len(candidates) <= completed_days:
+        return candidates
+
+    return candidates[-completed_days:]
 
 
-def extract_meta(lines: List[str], jcd: str) -> Dict:
-    joined = "\n".join(norm(x) for x in lines[:30])
+def build_empty_days() -> List[List[Optional[Dict[str, Any]]]]:
+    return [[None for _ in range(SLOTS_PER_DAY)] for _ in range(DAY_COUNT)]
 
-    venue = ""
-    date_str = ""
-    day_no = None
 
-    for line in lines[:10]:
-        s = norm(line).strip()
-        m = VENUE_HEAD_RE.match(s)
-        if m:
-            venue = re.sub(r"\s+", "", m.group(1))
-            break
+def put_result_into_day_slot(
+    days: List[List[Optional[Dict[str, Any]]]],
+    day_index: int,
+    result_obj: Dict[str, Any],
+) -> None:
+    if not (0 <= day_index < DAY_COUNT):
+        return
 
-    m_date = DATE_RE.search(joined)
-    if m_date:
-        y, m, d = m_date.groups()
-        date_str = f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
+    for slot_idx in range(SLOTS_PER_DAY):
+        if days[day_index][slot_idx] is None:
+            days[day_index][slot_idx] = result_obj
+            return
 
-    m_day = DAYNO_RE.search(joined)
-    if m_day:
-        day_no = int(m_day.group(1))
+
+def build_racers_from_k_days(
+    *,
+    current_racers: Dict[str, Dict[str, Any]],
+    k_days: List[Dict[str, Any]],
+) -> Dict[str, Dict[str, Any]]:
+    racers: Dict[str, Dict[str, Any]] = {}
+
+    for reg, meta in current_racers.items():
+        racers[reg] = {
+            "name": normalize_name(meta.get("name") or ""),
+            "days": build_empty_days(),
+        }
+
+    for day_pos, k_day in enumerate(k_days):
+        races = sorted(k_day.get("races") or [], key=lambda x: int(x.get("rno") or 0))
+
+        bucket: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+        for race in races:
+            for result in race.get("results") or []:
+                reg = str(result.get("reg") or "").strip()
+                if not reg:
+                    continue
+
+                bucket[reg].append({
+                    "rno": int(race.get("rno") or 0),
+                    "course": int(result.get("course") or 0) if result.get("course") else None,
+                    "st": str(result.get("st") or "").strip(),
+                    "rank": result.get("finish"),
+                })
+
+                if reg not in racers:
+                    racers[reg] = {
+                        "name": normalize_name(result.get("name") or ""),
+                        "days": build_empty_days(),
+                    }
+
+        for reg, results in bucket.items():
+            results.sort(key=lambda x: (x.get("rno") or 0))
+
+            for item in results[:SLOTS_PER_DAY]:
+                put_result_into_day_slot(
+                    racers[reg]["days"],
+                    day_pos,
+                    {
+                        "course": item.get("course"),
+                        "st": item.get("st") or "",
+                        "rank": item.get("rank"),
+                    },
+                )
+
+    return racers
+
+
+def build_day_label(current_day_no: int, total_days: Optional[int]) -> str:
+    if current_day_no <= 0:
+        return "—"
+    if current_day_no == 1:
+        return "初日"
+    if total_days is not None and current_day_no == total_days:
+        return "最終日"
+    return f"{current_day_no}日目"
+
+
+def build_payload_for_venue(
+    *,
+    venue_item: Dict[str, Any],
+    all_k_venues: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    venue_name = str(venue_item.get("venue") or "").strip()
+    target_date = str(venue_item.get("date") or "").strip()
+    event_title = str(venue_item.get("event_title") or "").strip()
+    current_day_no = int(venue_item.get("day") or 0) if venue_item.get("day") is not None else 0
+    total_days_raw = venue_item.get("total_days")
+    total_days = int(total_days_raw) if total_days_raw is not None else None
+    jcd = VENUE_NAME_TO_JCD.get(venue_name, "")
+
+    if not venue_name or not target_date or not jcd:
+        return None
+
+    current_racers = build_current_racer_map_from_venue(venue_item)
+
+    k_days = select_relevant_k_days(
+        all_k_venues=all_k_venues,
+        venue_name=venue_name,
+        jcd=jcd,
+        event_title=event_title,
+        target_date=target_date,
+        current_day_no=current_day_no,
+    )
+
+    racers = build_racers_from_k_days(
+        current_racers=current_racers,
+        k_days=k_days,
+    )
+
+    racers_out: Dict[str, Any] = {}
+    for reg, row in sorted(racers.items(), key=lambda x: x[0]):
+        racers_out[reg] = {
+            "name": row.get("name") or "",
+            "days": row.get("days") or build_empty_days(),
+        }
 
     return {
         "jcd": jcd,
-        "venue": venue,
-        "date": date_str,
-        "day_no": day_no,
+        "venue": venue_name,
+        "date": target_date,
+        "day_no": current_day_no,
+        "day_label": venue_item.get("day_label") or build_day_label(current_day_no, total_days),
+        "total_days": total_days,
+        "event_title": event_title,
+        "event_title_norm": venue_item.get("event_title_norm") or normalize_event_title(event_title),
+        "racers": racers_out,
     }
 
 
-def find_perf_header_positions(lines: List[str]) -> Tuple[Optional[int], Optional[int]]:
-    for line in lines:
-        s = norm(line)
-        if "今節成績" in s and "見" in s:
-            perf_idx = s.find("今節成績")
-            ken_idx = s.rfind("見")
-            if perf_idx >= 0 and ken_idx > perf_idx:
-                return perf_idx + len("今節成績"), ken_idx
-    return None, None
-
-
-def extract_name_from_tail(tail: str) -> str:
-    s = norm(tail).strip()
-
-    m_grade = GRADE_RE.search(s)
-    if not m_grade:
-        return ""
-
-    left = s[:m_grade.start()]
-
-    # 末尾の「年齢(1-2桁) + 支部 + 体重(2桁前後)」を落とす
-    # 例: 村田敦55東京52
-    m = re.match(r"^(.*?)(\d{1,2})([一-龥ぁ-んァ-ヶー]+)(\d{2})\s*$", left)
-    if m:
-        name = m.group(1)
-        return re.sub(r"\s+", "", name)
-
-    # 少し緩い保険
-    m2 = re.match(r"^(.*?)(\d{1,2})([一-龥ぁ-んァ-ヶー]+)\s*$", left)
-    if m2:
-        name = m2.group(1)
-        return re.sub(r"\s+", "", name)
-
-    return ""
-
-
-def extract_meet_perf_raw(line: str, perf_start: Optional[int], ken_start: Optional[int]) -> str:
-    s = norm(line.rstrip("\n"))
-
-    if perf_start is not None and ken_start is not None and len(s) >= perf_start:
-        chunk = s[perf_start:ken_start].rstrip()
-        if chunk:
-            return chunk
-
-    m = re.search(r"([FL転欠妨失エ0-9 ]+)\s+\d{0,2}\s*$", s)
-    if m:
-        return m.group(1).rstrip()
-
-    return ""
-
-
-def parse_racer_line(
-    line: str,
-    perf_start: Optional[int],
-    ken_start: Optional[int],
-) -> Optional[Dict]:
-    s = norm(line)
-    m = RACER_LINE_RE.match(s)
-    if not m:
-        return None
-
-    boat_no = int(m.group(1))
-    regno = m.group(2)
-    tail = m.group(3)
-
-    name = extract_name_from_tail(tail)
-    meet_perf_raw = extract_meet_perf_raw(s, perf_start, ken_start)
-
-    if not regno:
-        return None
-
-    return {
-        "boat_no": boat_no,
-        "regno": regno,
-        "name": name,
-        "meet_perf_raw": meet_perf_raw,
-    }
-
-
-def score_meet_perf(raw: str) -> Tuple[int, int]:
-    s = str(raw or "")
-    return (len(s.replace(" ", "")), len(s))
-
-
-def parse_block(jcd: str, lines: List[str]) -> Dict:
-    meta = extract_meta(lines, jcd)
-    perf_start, ken_start = find_perf_header_positions(lines)
-
-    racers: Dict[str, Dict] = {}
-    current_race_no: Optional[int] = None
-
-    for raw in lines:
-        s = norm(raw)
-
-        m_race = RACE_HEADER_RE.match(s)
-        if m_race:
-            current_race_no = int(m_race.group(1))
-            continue
-
-        racer = parse_racer_line(s, perf_start, ken_start)
-        if not racer:
-            continue
-
-        regno = racer["regno"]
-        prev = racers.get(regno)
-
-        row = {
-            "name": racer["name"],
-            "meet_perf_raw": racer["meet_perf_raw"],
-            "sample_race_no": current_race_no,
-            "boat_no": racer["boat_no"],
-        }
-
-        if not prev:
-            racers[regno] = row
-            continue
-
-        if score_meet_perf(row["meet_perf_raw"]) > score_meet_perf(prev.get("meet_perf_raw") or ""):
-            racers[regno] = row
-
-    return {
-        "jcd": meta["jcd"],
-        "venue": meta["venue"],
-        "date": meta["date"],
-        "day_no": meta["day_no"],
-        "racers": racers,
-    }
-
-
-def write_json(data: Dict) -> Optional[str]:
-    date_str = data.get("date") or ""
-    jcd = data.get("jcd") or ""
-    if not date_str or not jcd:
-        return None
-
-    ensure_dir(OUT_DIR)
-    out_path = os.path.join(OUT_DIR, f"{date_str}_{jcd}.json")
-
-    with open(out_path, "w", encoding="utf-8") as f:
+def write_json(path: str, data: Dict[str, Any]) -> None:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-    return out_path
 
 
 def main() -> None:
-    files = collect_source_files()
-    if not files:
-        print("no source files")
+    mbrace_files = collect_mbrace_json_files()
+    if not mbrace_files:
+        print("no mbrace json files")
         return
 
     ensure_dir(OUT_DIR)
+    all_k_venues = load_k_results()
 
     written = 0
-    parsed_blocks = 0
 
-    for path in files:
-        text = read_text(path)
-        blocks = extract_blocks(text)
+    for path in mbrace_files:
+        payload = read_json(path)
+        venues = payload.get("venues") if isinstance(payload, dict) else None
+        if not isinstance(venues, list):
+            continue
 
-        for jcd, lines in blocks:
-            data = parse_block(jcd, lines)
-            out = write_json(data)
-            if out:
-                written += 1
-            parsed_blocks += 1
+        for venue_item in venues:
+            if not isinstance(venue_item, dict):
+                continue
 
-    print(f"source_files: {len(files)}")
-    print(f"parsed_blocks: {parsed_blocks}")
+            out_data = build_payload_for_venue(
+                venue_item=venue_item,
+                all_k_venues=all_k_venues,
+            )
+            if not out_data:
+                continue
+
+            out_path = os.path.join(
+                OUT_DIR,
+                f"{out_data['date']}_{out_data['jcd']}.json"
+            )
+            write_json(out_path, out_data)
+            written += 1
+
+    print(f"mbrace_files: {len(mbrace_files)}")
+    print(f"k_venues: {len(all_k_venues)}")
     print(f"written: {written}")
 
 
