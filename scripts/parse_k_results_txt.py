@@ -12,6 +12,7 @@ RE_DATE = re.compile(r"(\d{4})/\s*(\d{1,2})/\s*(\d{1,2})")
 RE_DATE_SHORT = re.compile(r"(\d{1,2})/(\d{1,2})")
 RE_DAYNO = re.compile(r"第\s*([0-9]+)\s*日")
 RE_RACE_HEADER = re.compile(r"^\s*(\d{1,2})R")
+RE_DISTANCE = re.compile(r"H\s*\d{3,4}m")
 RE_RESULT_ROW = re.compile(
     r"^\s*"
     r"(\d{2}|S\d|F|K0)\s+"            # 着
@@ -231,7 +232,9 @@ def parse_block(jcd: str, block: List[str]) -> Dict[str, Any]:
 
     for line in block:
         race_head = RE_RACE_HEADER.match(line)
-        if race_head and "H1800m" in line:
+
+        # H1800m 固定ではなく、H1200m / H1800m / Hxxxxm 全対応
+        if race_head and RE_DISTANCE.search(line):
             if current_race:
                 races.append(current_race)
 
