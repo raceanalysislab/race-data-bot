@@ -32,6 +32,7 @@ jobs:
           ls -la data/site/races/tomorrow || true
           ls -la data/master || true
           ls -la data/meet_avg_st || true
+          ls -la data/meet_perf || true
           ls -la data/master/racer_gender.json || true
           ls -la data/player_course_stats_all.json || true
           ls -la data/player_course_stats_1y.json || true
@@ -51,6 +52,8 @@ jobs:
           mkdir -p site_repo/data/master
           rm -rf site_repo/data/meet_avg_st
           mkdir -p site_repo/data/meet_avg_st
+          rm -rf site_repo/data/meet_perf
+          mkdir -p site_repo/data/meet_perf
 
       - name: Copy generated site files first
         run: |
@@ -116,6 +119,12 @@ jobs:
         run: |
           if [ -d data/meet_avg_st ]; then
             cp -R data/meet_avg_st/. site_repo/data/meet_avg_st/
+          fi
+
+      - name: Copy meet perf files
+        run: |
+          if [ -d data/meet_perf ]; then
+            cp -R data/meet_perf/. site_repo/data/meet_perf/
           fi
 
       - name: Commit and push
