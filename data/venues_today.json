@@ -1,14 +1,11 @@
 {
   "date": "2026-03-23",
-  "checked_at": "2026-03-23T02:55:01.931405+09:00",
+  "checked_at": "2026-03-23T04:16:41.943698+09:00",
   "blocked": false,
   "held_places": [
-    "津",
     "鳴門",
     "丸亀",
-    "児島",
-    "唐津",
-    "大村"
+    "児島"
   ],
   "venues": [
     {
@@ -86,7 +83,7 @@
     {
       "name": "津",
       "jcd": "09",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -359,7 +356,7 @@
     {
       "name": "唐津",
       "jcd": "23",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -368,7 +365,7 @@
     {
       "name": "大村",
       "jcd": "24",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
