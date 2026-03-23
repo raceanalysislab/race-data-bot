@@ -102,8 +102,9 @@ def main() -> None:
 
     reset_output_dir(OUTPUT_DIR)
 
-    today = datetime.now(JST).strftime("%Y-%m-%d")
-    print(f"today: {today}")
+    today = datetime.now(JST).date()
+    target_day = (today - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"target_day: {target_day}")
 
     venues_by_jcd: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for v in venues:
@@ -120,7 +121,7 @@ def main() -> None:
         for target in items:
             target_date = str(target.get("date") or "").strip()
 
-            if not target_date or target_date != today:
+            if not target_date or target_date != target_day:
                 continue
 
             day_no = int(target.get("day_no") or 1)
