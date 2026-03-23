@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 from collections import defaultdict
-from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 INPUT = "data/k_results_parsed.json"
@@ -35,10 +34,6 @@ def normalize_reg(v: Any) -> str:
 
 def sort_races(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return sorted(races or [], key=lambda x: int(x.get("rno") or 0))
-
-
-def parse_ymd(s: str) -> datetime.date:
-    return datetime.strptime(str(s), "%Y-%m-%d").date()
 
 
 def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
@@ -95,11 +90,19 @@ def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
     return targets
 
 
-def build_racers_from_days(days_data: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def build_racers_from_k_days(
+    k_days: List[Dict[str, Any]],
+) -> Dict[str, Dict[str, Any]]:
     racers: Dict[str, Dict[str, Any]] = {}
 
-    for day_index, venue_day in enumerate(days_data):
-        for race in sort_races(venue_day.get("races") or []):
+    for k_day in k_days:
+        day_no = int(k_day.get("day_no") or 0)
+        day_index = day_no - 1
+
+        if not (0 <= day_index < DAY_COUNT):
+            continue
+
+        for race in sort_races(k_day.get("races") or []):
             for r in race.get("results") or []:
                 reg = normalize_reg(r.get("reg"))
                 if not reg:
@@ -126,19 +129,27 @@ def build_racers_from_days(days_data: List[Dict[str, Any]]) -> Dict[str, Dict[st
     return racers
 
 
-def pick_previous_days(same_venue_days: List[Dict[str, Any]], mbrace_date: str) -> List[Dict[str, Any]]:
-    target_prev_date = (parse_ymd(mbrace_date) - timedelta(days=1)).strftime("%Y-%m-%d")
+def pick_same_series_previous_days(
+    same_venue_days: List[Dict[str, Any]],
+    current_day_no: int,
+) -> List[Dict[str, Any]]:
+    completed_days = max(0, current_day_no - 1)
+    if completed_days <= 0:
+        return []
 
     prev_days = [
         v for v in same_venue_days
-        if str(v.get("date") or "").strip() <= target_prev_date
+        if isinstance(v.get("day_no"), int) or str(v.get("day_no") or "").isdigit()
     ]
-    prev_days.sort(key=lambda x: str(x.get("date") or ""))
 
-    if not prev_days:
-        return []
+    normalized: List[Dict[str, Any]] = []
+    for v in prev_days:
+        day_no = int(v.get("day_no") or 0)
+        if 1 <= day_no <= completed_days:
+            normalized.append(v)
 
-    return prev_days[-DAY_COUNT:]
+    normalized.sort(key=lambda x: int(x.get("day_no") or 0))
+    return normalized
 
 
 def build_day_label(current_day_no: int) -> str:
@@ -181,38 +192,32 @@ def main() -> None:
             print(f"skip_no_items: {jcd}")
             continue
 
-        items.sort(key=lambda x: str(x.get("date") or ""))
-
-        mbrace_date = str(target.get("date") or "").strip()
-        if not mbrace_date:
-            print(f"skip_no_mbrace_date: {jcd}")
-            continue
-
-        day_no = int(target.get("day_no") or 0)
+        current_day_no = int(target.get("day_no") or 0)
         venue_name = str(target.get("venue") or "").strip()
+        mbrace_date = str(target.get("date") or "").strip()
         event_title = str(target.get("event_title") or "").strip()
         event_title_norm = str(target.get("event_title_norm") or event_title).strip()
 
-        k_latest_date = str(items[-1].get("date") or "").strip() if items else ""
-        target_prev_date = (parse_ymd(mbrace_date) - timedelta(days=1)).strftime("%Y-%m-%d")
+        if current_day_no <= 0 or not mbrace_date:
+            print(f"skip_invalid_target: {jcd}")
+            continue
+
+        prev_days = pick_same_series_previous_days(items, current_day_no)
 
         print(
             f"target jcd={jcd} venue={venue_name} "
-            f"mbrace_date={mbrace_date} target_prev_date={target_prev_date} "
-            f"k_latest_date={k_latest_date}"
+            f"mbrace_date={mbrace_date} current_day_no={current_day_no}"
         )
+        print(f"picked_days: {[int(x.get('day_no') or 0) for x in prev_days]}")
 
-        prev_days = pick_previous_days(items, mbrace_date)
-        print(f"picked_days: {len(prev_days)}")
-
-        racers = build_racers_from_days(prev_days)
+        racers = build_racers_from_k_days(prev_days)
 
         out = {
             "jcd": jcd,
             "venue": venue_name,
             "date": mbrace_date,
-            "day_no": day_no,
-            "day_label": build_day_label(day_no),
+            "day_no": current_day_no,
+            "day_label": build_day_label(current_day_no),
             "total_days": None,
             "event_title": event_title,
             "event_title_norm": event_title_norm,
