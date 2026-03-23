@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 from collections import defaultdict
-from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 INPUT = "data/k_results_parsed.json"
@@ -14,10 +13,6 @@ SLOTS_PER_DAY = 2
 
 def create_empty_days() -> List[List[Optional[Dict[str, Any]]]]:
     return [[None for _ in range(SLOTS_PER_DAY)] for _ in range(DAY_COUNT)]
-
-
-def parse_date(s: str):
-    return datetime.strptime(str(s), "%Y-%m-%d").date()
 
 
 def reset_output_dir(path: str) -> None:
@@ -70,9 +65,7 @@ def build_racers_from_days(days_data: List[Dict[str, Any]]) -> Dict[str, Dict[st
     return racers
 
 
-def pick_contiguous_previous_days(same_venue_days: List[Dict[str, Any]], target_date: str) -> List[Dict[str, Any]]:
-    target_dt = parse_date(target_date)
-
+def pick_previous_days(same_venue_days: List[Dict[str, Any]], target_date: str) -> List[Dict[str, Any]]:
     prev_days = [
         v for v in same_venue_days
         if str(v.get("date") or "").strip() < target_date
@@ -82,23 +75,7 @@ def pick_contiguous_previous_days(same_venue_days: List[Dict[str, Any]], target_
     if not prev_days:
         return []
 
-    by_date = {}
-    for v in prev_days:
-        d = str(v.get("date") or "").strip()
-        by_date[d] = v
-
-    picked: List[Dict[str, Any]] = []
-    cursor = target_dt - timedelta(days=1)
-
-    while True:
-        key = cursor.strftime("%Y-%m-%d")
-        if key not in by_date:
-            break
-        picked.append(by_date[key])
-        cursor -= timedelta(days=1)
-
-    picked.reverse()
-    return picked[:DAY_COUNT]
+    return prev_days[-DAY_COUNT:]
 
 
 def build_day_label(current_day_no: int) -> str:
@@ -137,7 +114,7 @@ def main() -> None:
             if not target_date:
                 continue
 
-            prev_days = pick_contiguous_previous_days(items, target_date)
+            prev_days = pick_previous_days(items, target_date)
             racers = build_racers_from_days(prev_days)
 
             out = {
