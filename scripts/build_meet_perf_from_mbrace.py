@@ -134,7 +134,7 @@ def select_relevant_k_days(
         item_venue = str(item.get("venue") or "").strip()
         item_date = str(item.get("date") or "").strip()
 
-        if not item_date or item_date >= target_date:
+        if not item_date:
             continue
 
         if jcd and item_jcd != jcd:
@@ -146,7 +146,7 @@ def select_relevant_k_days(
         candidates.append(item)
 
     candidates.sort(key=lambda x: (x.get("date") or "", int(x.get("day_no") or 0)))
-
+    candidates = candidates[-7:]
     completed_days = max(0, current_day_no - 1)
     if completed_days <= 0:
         return []
