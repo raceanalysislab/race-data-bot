@@ -32,6 +32,10 @@ def normalize_reg(v: Any) -> str:
     return s
 
 
+def normalize_title(v: Any) -> str:
+    return str(v or "").strip()
+
+
 def sort_races(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return sorted(races or [], key=lambda x: int(x.get("rno") or 0))
 
@@ -132,24 +136,34 @@ def build_racers_from_k_days(
 def pick_same_series_previous_days(
     same_venue_days: List[Dict[str, Any]],
     current_day_no: int,
+    mbrace_date: str,
+    event_title_norm: str,
 ) -> List[Dict[str, Any]]:
     completed_days = max(0, current_day_no - 1)
     if completed_days <= 0:
         return []
 
-    prev_days = [
-        v for v in same_venue_days
-        if isinstance(v.get("day_no"), int) or str(v.get("day_no") or "").isdigit()
-    ]
+    normalized_target = normalize_title(event_title_norm)
+    picked: List[Dict[str, Any]] = []
 
-    normalized: List[Dict[str, Any]] = []
-    for v in prev_days:
+    for v in same_venue_days:
         day_no = int(v.get("day_no") or 0)
-        if 1 <= day_no <= completed_days:
-            normalized.append(v)
+        date_str = str(v.get("date") or "").strip()
+        title_norm = normalize_title(v.get("event_title_norm"))
 
-    normalized.sort(key=lambda x: int(x.get("day_no") or 0))
-    return normalized
+        if not date_str:
+            continue
+        if date_str >= mbrace_date:
+            continue
+        if not (1 <= day_no <= completed_days):
+            continue
+        if normalized_target and title_norm != normalized_target:
+            continue
+
+        picked.append(v)
+
+    picked.sort(key=lambda x: int(x.get("day_no") or 0))
+    return picked
 
 
 def build_day_label(current_day_no: int) -> str:
@@ -202,11 +216,17 @@ def main() -> None:
             print(f"skip_invalid_target: {jcd}")
             continue
 
-        prev_days = pick_same_series_previous_days(items, current_day_no)
+        prev_days = pick_same_series_previous_days(
+            items,
+            current_day_no,
+            mbrace_date,
+            event_title_norm,
+        )
 
         print(
             f"target jcd={jcd} venue={venue_name} "
-            f"mbrace_date={mbrace_date} current_day_no={current_day_no}"
+            f"mbrace_date={mbrace_date} current_day_no={current_day_no} "
+            f"event_title_norm={event_title_norm}"
         )
         print(f"picked_days: {[int(x.get('day_no') or 0) for x in prev_days]}")
 
