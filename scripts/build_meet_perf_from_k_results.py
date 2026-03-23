@@ -4,6 +4,7 @@ import os
 import shutil
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 INPUT = "data/k_results_parsed.json"
 MBRACE_GLOB = "data/mbrace_races_*.json"
@@ -30,6 +31,8 @@ def normalize_reg(v: Any) -> str:
     if s.isdigit():
         return s.zfill(4)
     return s
+def parse_ymd(s: str):
+    return datetime.strptime(str(s), "%Y-%m-%d").date()
 
 
 def sort_races(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -95,13 +98,16 @@ def build_racers_from_k_days(
 ) -> Dict[str, Dict[str, Any]]:
     racers: Dict[str, Dict[str, Any]] = {}
 
-    for k_day in k_days:
-        day_no = int(k_day.get("day_no") or 0)
-        day_index = day_no - 1
+    if not k_days:
+        return {}
+    k_days = sorted(k_days, key=lambda x: x["date"])
 
+    start_date = parse_ymd(k_days[0]["date"])
+    for k_day in k_days:
+        current_date = parse_ymd(k_day["date"])
+        day_index = (current_date - start_date).days
         if not (0 <= day_index < DAY_COUNT):
             continue
-
         for race in sort_races(k_day.get("races") or []):
             for r in race.get("results") or []:
                 reg = normalize_reg(r.get("reg"))
