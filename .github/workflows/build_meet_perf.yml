@@ -36,9 +36,9 @@ jobs:
         run: |
           mkdir -p data/meet_perf
 
-      - name: Run build_meet_perf_from_k
+      - name: Run build_meet_perf_from_k_results
         run: |
-          python scripts/build_meet_perf_from_k.py
+          python scripts/build_meet_perf_from_k_results.py
 
       - name: Commit and push if changed
         run: |
@@ -52,5 +52,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Build meet perf (from k)"
+          git commit -m "Build meet perf (from k results)"
           git push
