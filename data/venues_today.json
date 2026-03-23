@@ -1,6 +1,6 @@
 {
   "date": "2026-03-23",
-  "checked_at": "2026-03-23T08:57:40.197283+09:00",
+  "checked_at": "2026-03-23T14:50:17.672458+09:00",
   "blocked": false,
   "held_places": [
     "鳴門",
@@ -129,9 +129,9 @@
       "name": "鳴門",
       "jcd": "14",
       "held": true,
-      "next_race": 2,
-      "next_cutoff": "2026-03-23T09:13:00+09:00",
-      "next_display": "2R 9:13",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -245,9 +245,9 @@
       "name": "児島",
       "jcd": "16",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-03-23T10:57:00+09:00",
-      "next_display": "1R 10:57",
+      "next_race": 9,
+      "next_cutoff": "2026-03-23T15:08:00+09:00",
+      "next_display": "9R 15:08",
       "cutoffs": [
         {
           "rno": 1,
@@ -275,11 +275,11 @@
         },
         {
           "rno": 7,
-          "time": "13:55"
+          "time": "13:59"
         },
         {
           "rno": 8,
-          "time": "14:31"
+          "time": "14:35"
         },
         {
           "rno": 9,
