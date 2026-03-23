@@ -35,11 +35,10 @@ jobs:
       - name: Prepare directories
         run: |
           mkdir -p data/meet_perf
-          mkdir -p data/mbrace
 
-      - name: Run build_meet_perf_from_mbrace
+      - name: Run build_meet_perf_from_k
         run: |
-          python scripts/build_meet_perf_from_mbrace.py
+          python scripts/build_meet_perf_from_k.py
 
       - name: Commit and push if changed
         run: |
@@ -53,5 +52,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Build meet perf"
+          git commit -m "Build meet perf (from k)"
           git push
