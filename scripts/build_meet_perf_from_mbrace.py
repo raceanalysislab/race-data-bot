@@ -145,16 +145,17 @@ def select_relevant_k_days(
 
         candidates.append(item)
 
-    candidates.sort(key=lambda x: (x.get("date") or "", int(x.get("day_no") or 0)))
+    candidates.sort(key=lambda x: (
+        x.get("date") or "",
+        int(x.get("day_no") or 0)
+    ))
 
     completed_days = max(0, current_day_no - 1)
+
     if completed_days <= 0:
         return []
 
-    if len(candidates) <= completed_days:
-        return candidates
-
-    return candidates[-completed_days:]
+    return candidates[:completed_days]
 
 
 def build_empty_days() -> List[List[Optional[Dict[str, Any]]]]:
@@ -198,7 +199,6 @@ def build_racers_from_k_days(
                 if not reg:
                     continue
 
-                # 今節のmbraceに載っている選手だけ採用
                 if reg not in racers:
                     continue
 
