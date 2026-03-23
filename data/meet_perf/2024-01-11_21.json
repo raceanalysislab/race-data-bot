@@ -8,763 +8,209 @@
   "event_title": "アサヒビールカップ",
   "event_title_norm": "アサヒビールカップ",
   "racers": {
-    "4958": {
-      "name": "溝 口 海義也",
+    "4189": {
+      "name": "川 上 剛",
       "days": [
         [
           {
             "course": 1,
-            "st": ".09",
+            "st": ".15",
             "rank": 1
           },
           {
             "course": 5,
-            "st": ".05",
-            "rank": 3
+            "st": ".11",
+            "rank": 5
           }
         ],
-        [
-          {
-            "course": 2,
-            "st": ".04",
-            "rank": 2
-          },
-          {
-            "course": 6,
-            "st": ".15",
-            "rank": 6
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4835": {
-      "name": "橋 本 明",
-      "days": [
         [
           {
             "course": 3,
             "st": ".13",
-            "rank": 2
+            "rank": 3
           },
           null
         ],
         [
           {
-            "course": 6,
-            "st": ".18",
-            "rank": 6
+            "course": 1,
+            "st": ".20",
+            "rank": 1
           },
           {
-            "course": 6,
-            "st": ".15",
-            "rank": 6
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4632": {
-      "name": "長 尾 京志郎",
-      "days": [
-        [
-          {
-            "course": 5,
+            "course": 4,
             "st": ".17",
-            "rank": 3
-          },
-          {
-            "course": 4,
-            "st": ".19",
-            "rank": 4
-          }
-        ],
-        [
-          {
-            "course": 3,
-            "st": ".11",
-            "rank": 3
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3233": {
-      "name": "小 畑 実 成",
-      "days": [
-        [
-          {
-            "course": 2,
-            "st": ".14",
-            "rank": 4
-          },
-          {
-            "course": 1,
-            "st": ".18",
-            "rank": 2
-          }
-        ],
-        [
-          {
-            "course": 6,
-            "st": ".21",
-            "rank": 5
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3455": {
-      "name": "谷 本 幸 司",
-      "days": [
-        [
-          {
-            "course": 4,
-            "st": ".15",
-            "rank": 5
-          },
-          {
-            "course": 5,
-            "st": ".21",
-            "rank": 4
-          }
-        ],
-        [
-          {
-            "course": 2,
-            "st": ".16",
-            "rank": 4
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3478": {
-      "name": "嶋 田 貴 支",
-      "days": [
-        [
-          {
-            "course": 6,
-            "st": ".26",
-            "rank": 6
-          },
-          {
-            "course": 2,
-            "st": ".19",
-            "rank": 2
-          }
-        ],
-        [
-          {
-            "course": 4,
-            "st": ".15",
-            "rank": 3
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4772": {
-      "name": "石 丸 海 渡",
-      "days": [
-        [
-          {
-            "course": 4,
-            "st": ".21",
-            "rank": 1
-          },
-          {
-            "course": 6,
-            "st": ".12",
-            "rank": 5
-          }
-        ],
-        [
-          {
-            "course": 1,
-            "st": ".08",
-            "rank": 1
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4988": {
-      "name": "牟 田 奨 太",
-      "days": [
-        [
-          {
-            "course": 3,
-            "st": ".21",
-            "rank": 2
-          },
-          {
-            "course": 6,
-            "st": ".22",
-            "rank": 6
-          }
-        ],
-        [
-          {
-            "course": 2,
-            "st": ".07",
-            "rank": 3
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4396": {
-      "name": "大 田 直 弥",
-      "days": [
-        [
-          {
-            "course": 5,
-            "st": ".23",
-            "rank": 3
-          },
-          {
-            "course": 3,
-            "st": ".13",
-            "rank": 1
-          }
-        ],
-        [
-          {
-            "course": 4,
-            "st": ".19",
-            "rank": 2
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4007": {
-      "name": "榮 田 将 彦",
-      "days": [
-        [
-          {
-            "course": 2,
-            "st": ".29",
-            "rank": 4
-          },
-          {
-            "course": 5,
-            "st": ".11",
-            "rank": 5
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4216": {
-      "name": "星 栄 爾",
-      "days": [
-        [
-          {
-            "course": 6,
-            "st": ".27",
-            "rank": 5
-          },
-          {
-            "course": 3,
-            "st": ".11",
             "rank": 2
           }
         ],
         [
           {
             "course": 1,
+            "st": ".34",
+            "rank": 4
+          },
+          {
+            "course": 2,
             "st": ".10",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".15",
             "rank": 1
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4580": {
-      "name": "長谷川 雅 和",
-      "days": [
-        [
-          {
-            "course": 1,
-            "st": ".26",
-            "rank": 6
-          },
-          {
-            "course": 3,
-            "st": ".21",
-            "rank": 3
-          }
-        ],
-        [
-          {
-            "course": 6,
-            "st": ".05",
-            "rank": 5
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4537": {
-      "name": "渡 邉 和 将",
-      "days": [
-        [
-          {
-            "course": 1,
-            "st": ".21",
-            "rank": 1
-          },
-          {
-            "course": 5,
-            "st": ".15",
-            "rank": 5
-          }
-        ],
-        [
-          {
-            "course": 6,
-            "st": ".14",
-            "rank": 5
-          },
-          {
-            "course": 3,
-            "st": ".17",
-            "rank": 4
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4413": {
-      "name": "水 摩 敦",
-      "days": [
-        [
-          {
-            "course": 5,
-            "st": ".24",
-            "rank": 2
-          },
-          {
-            "course": 4,
-            "st": ".15",
-            "rank": 6
-          }
-        ],
-        [
-          {
-            "course": 5,
-            "st": ".13",
-            "rank": 6
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4062": {
-      "name": "後 藤 陽 介",
-      "days": [
-        [
-          {
-            "course": 2,
-            "st": ".29",
-            "rank": 3
-          },
-          null
-        ],
-        [
-          {
-            "course": 6,
-            "st": ".15",
-            "rank": 4
-          },
-          {
-            "course": 5,
-            "st": ".07",
-            "rank": 4
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4005": {
-      "name": "瀬 川 公 則",
-      "days": [
-        [
-          {
-            "course": 6,
-            "st": ".33",
-            "rank": 4
-          },
-          {
-            "course": 3,
-            "st": ".15",
-            "rank": 5
-          }
-        ],
-        [
-          {
-            "course": 5,
-            "st": ".17",
-            "rank": 5
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4403": {
-      "name": "木 下 大 將",
-      "days": [
-        [
-          {
-            "course": 3,
-            "st": ".22",
-            "rank": 5
           },
           {
             "course": 4,
             "st": ".03",
-            "rank": 6
+            "rank": 1
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "5008": {
+      "name": "羽 野 諒",
+      "days": [
+        [
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 2
           }
         ],
         [
           {
             "course": 6,
-            "st": ".11",
+            "st": ".25",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".16",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".19",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".12",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".17",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".05",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".09",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".19",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".15",
+            "rank": 5
+          },
+          {
+            "course": 6,
+            "st": ".12",
+            "rank": 6
+          }
+        ]
+      ]
+    },
+    "5073": {
+      "name": "上 原 健次郎",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".33",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".20",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".12",
+            "rank": 3
+          },
+          {
+            "course": 5,
+            "st": ".09",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".26",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".16",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".08",
             "rank": 3
           },
           null
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 3
+          },
           null
         ],
         [
@@ -777,31 +223,124 @@
         ]
       ]
     },
-    "3568": {
-      "name": "木 村 光 宏",
+    "5286": {
+      "name": "坂 井 滉 哉",
       "days": [
         [
           {
-            "course": 4,
-            "st": ".34",
-            "rank": 6
+            "course": 6,
+            "st": ".19",
+            "rank": 4
           },
           {
-            "course": 2,
-            "st": ".11",
+            "course": 6,
+            "st": ".15",
             "rank": 5
           }
         ],
         [
           {
-            "course": 3,
+            "course": 6,
+            "st": ".25",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".21",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
             "st": ".17",
             "rank": 6
           },
           null
         ],
         [
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 5
+          },
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": 6
+          }
+        ],
+        [
           null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4346": {
+      "name": "前 田 健太郎",
+      "days": [
+        [
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 5
+          },
+          {
+            "course": 1,
+            "st": ".19",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 3
+          },
+          {
+            "course": 5,
+            "st": ".29",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".28",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".12",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".18",
+            "rank": 3
+          },
           null
         ],
         [
@@ -810,6 +349,132 @@
         ],
         [
           null,
+          null
+        ]
+      ]
+    },
+    "4094": {
+      "name": "中 島 真 二",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 6
+          },
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".17",
+            "rank": 6
+          },
+          {
+            "course": 2,
+            "st": ".18",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".17",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 5
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4932": {
+      "name": "新 開 航",
+      "days": [
+        [
+          {
+            "course": 4,
+            "st": ".12",
+            "rank": 1
+          },
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".23",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          },
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".12",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".02",
+            "rank": 4
+          },
           null
         ],
         [
@@ -827,6 +492,66 @@
       "days": [
         [
           {
+            "course": 1,
+            "st": ".14",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".10",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".16",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".10",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".17",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".13",
+            "rank": 1
+          }
+        ],
+        [
+          {
             "course": 2,
             "st": ".17",
             "rank": 1
@@ -844,18 +569,67 @@
             "st": ".17",
             "rank": 2
           }
+        ]
+      ]
+    },
+    "3741": {
+      "name": "松 尾 基 成",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".22",
+            "rank": 3
+          },
+          {
+            "course": 5,
+            "st": ".10",
+            "rank": 3
+          }
         ],
         [
-          null,
+          {
+            "course": 1,
+            "st": ".09",
+            "rank": 2
+          },
           null
         ],
         [
-          null,
-          null
+          {
+            "course": 3,
+            "st": ".21",
+            "rank": 5
+          },
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 6
+          }
         ],
         [
-          null,
-          null
+          {
+            "course": 4,
+            "st": ".20",
+            "rank": 5
+          },
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".09",
+            "rank": 4
+          },
+          {
+            "course": 4,
+            "st": ".17",
+            "rank": 4
+          }
         ],
         [
           null,
@@ -867,40 +641,68 @@
         ]
       ]
     },
-    "4172": {
-      "name": "森 定 晃 史",
+    "4395": {
+      "name": "下 河 雅 史",
       "days": [
         [
           {
-            "course": 3,
-            "st": ".16",
-            "rank": 2
+            "course": 2,
+            "st": ".18",
+            "rank": 4
           },
           {
-            "course": 6,
-            "st": ".15",
+            "course": 5,
+            "st": ".07",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".07",
             "rank": 3
           }
         ],
         [
           {
             "course": 5,
+            "st": ".17",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 1,
             "st": ".11",
-            "rank": 4
+            "rank": 1
           },
-          null
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 6
+          }
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
+          {
+            "course": 4,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 6,
+            "st": ".13",
+            "rank": 6
+          }
         ],
         [
           null,
@@ -912,68 +714,165 @@
         ]
       ]
     },
-    "4042": {
-      "name": "丸 岡 正 典",
+    "5268": {
+      "name": "山 本 幸 也",
+      "days": [
+        [
+          {
+            "course": 6,
+            "st": ".23",
+            "rank": 5
+          },
+          {
+            "course": 6,
+            "st": ".14",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".27",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".27",
+            "rank": 5
+          },
+          {
+            "course": 4,
+            "st": ".18",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".17",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".19",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": "S1"
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3537": {
+      "name": "田 山 和 広",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 5
+          },
+          {
+            "course": 1,
+            "st": ".24",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".17",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".06",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".07",
+            "rank": 6
+          },
+          {
+            "course": 2,
+            "st": ".21",
+            "rank": 5
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4684": {
+      "name": "楠 原 翔 太",
       "days": [
         [
           {
             "course": 1,
-            "st": ".17",
-            "rank": 3
-          },
-          {
-            "course": 3,
-            "st": ".13",
-            "rank": 4
-          }
-        ],
-        [
-          {
-            "course": 5,
-            "st": ".13",
+            "st": ".16",
             "rank": 1
           },
           {
             "course": 2,
-            "st": ".12",
-            "rank": 1
+            "st": ".21",
+            "rank": 6
           }
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4273": {
-      "name": "佐 藤 旭",
-      "days": [
-        [
           {
             "course": 5,
-            "st": ".19",
-            "rank": 4
+            "st": ".16",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".10",
+            "rank": 3
           },
           {
             "course": 3,
-            "st": ".18",
-            "rank": 3
+            "st": ".08",
+            "rank": 4
           }
         ],
         [
@@ -985,8 +884,16 @@
           null
         ],
         [
-          null,
-          null
+          {
+            "course": 5,
+            "st": ".12",
+            "rank": 2
+          },
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 3
+          }
         ],
         [
           null,
@@ -994,6 +901,132 @@
         ],
         [
           null,
+          null
+        ]
+      ]
+    },
+    "4521": {
+      "name": "小 池 公 生",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".09",
+            "rank": 2
+          },
+          {
+            "course": 3,
+            "st": ".06",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": 5
+          },
+          {
+            "course": 4,
+            "st": ".21",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".24",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".21",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".03",
+            "rank": 1
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3783": {
+      "name": "瓜 生 正 義",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".07",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 3,
+            "st": ".16",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".13",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".25",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".08",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".09",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".17",
+            "rank": 5
+          },
           null
         ],
         [
@@ -1006,273 +1039,68 @@
         ]
       ]
     },
-    "4463": {
-      "name": "三 苫 晃 幸",
+    "4588": {
+      "name": "田 中 京 介",
       "days": [
         [
           {
-            "course": 4,
+            "course": 2,
+            "st": ".15",
+            "rank": 4
+          },
+          {
+            "course": 3,
             "st": ".16",
             "rank": 5
-          },
-          {
-            "course": 1,
-            "st": ".12",
-            "rank": 2
           }
         ],
         [
           {
-            "course": 6,
-            "st": ".13",
-            "rank": 5
-          },
-          {
-            "course": 3,
-            "st": ".12",
-            "rank": 1
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "5114": {
-      "name": "小 林 孝 彰",
-      "days": [
-        [
-          {
-            "course": 6,
-            "st": ".19",
-            "rank": 6
-          },
-          null
-        ],
-        [
-          {
-            "course": 4,
-            "st": ".05",
-            "rank": 4
-          },
-          {
-            "course": 2,
-            "st": ".06",
-            "rank": 1
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4402": {
-      "name": "乙 藤 智 史",
-      "days": [
-        [
-          {
-            "course": 1,
-            "st": ".18",
-            "rank": 1
-          },
-          null
-        ],
-        [
-          {
-            "course": 4,
+            "course": 5,
             "st": ".17",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".23",
             "rank": 3
           },
           {
             "course": 4,
-            "st": ".24",
-            "rank": 6
+            "st": ".17",
+            "rank": 2
           }
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3908": {
-      "name": "重 成 一 人",
-      "days": [
-        [
-          {
-            "course": 3,
-            "st": ".13",
-            "rank": 2
-          },
           {
             "course": 2,
             "st": ".09",
-            "rank": 6
-          }
-        ],
-        [
-          {
-            "course": 5,
-            "st": ".14",
             "rank": 2
           },
           {
-            "course": 1,
-            "st": ".14",
-            "rank": 1
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3708": {
-      "name": "岡 部 貴 司",
-      "days": [
-        [
-          {
-            "course": 2,
+            "course": 5,
             "st": ".17",
-            "rank": 3
-          },
-          null
-        ],
-        [
-          {
-            "course": 5,
-            "st": ".04",
-            "rank": 2
-          },
-          {
-            "course": 4,
-            "st": ".06",
-            "rank": 5
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "5008": {
-      "name": "羽 野 諒",
-      "days": [
-        [
-          {
-            "course": 4,
-            "st": ".19",
             "rank": 4
-          },
-          null
+          }
         ],
         [
           {
             "course": 2,
-            "st": ".15",
-            "rank": 5
+            "st": ".09",
+            "rank": 3
           },
           {
             "course": 6,
-            "st": ".12",
-            "rank": 6
+            "st": ".09",
+            "rank": 5
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ],
         [
           null,
@@ -1284,8 +1112,8 @@
         ]
       ]
     },
-    "4437": {
-      "name": "中 田 元 泰",
+    "4355": {
+      "name": "小 川 広 大",
       "days": [
         [
           {
@@ -1294,142 +1122,35 @@
             "rank": 5
           },
           {
-            "course": 1,
-            "st": ".16",
-            "rank": 2
-          }
-        ],
-        [
-          {
-            "course": 6,
-            "st": ".14",
-            "rank": 4
-          },
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "5034": {
-      "name": "若 林 義 人",
-      "days": [
-        [
-          {
-            "course": 5,
-            "st": ".14",
-            "rank": 6
-          },
-          null
-        ],
-        [
-          {
-            "course": 3,
-            "st": ".09",
-            "rank": 4
-          },
-          {
-            "course": 2,
-            "st": ".18",
-            "rank": 2
-          }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4148": {
-      "name": "枝 尾 賢",
-      "days": [
-        [
-          {
-            "course": 4,
-            "st": ".14",
-            "rank": 2
-          },
-          {
-            "course": 1,
-            "st": ".11",
-            "rank": 1
-          }
-        ],
-        [
-          {
             "course": 4,
             "st": ".15",
-            "rank": 5
-          },
-          {
-            "course": 5,
-            "st": ".16",
-            "rank": 5
+            "rank": 6
           }
         ],
         [
-          null,
+          {
+            "course": 5,
+            "st": ".28",
+            "rank": 4
+          },
           null
         ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "3731": {
-      "name": "高 濱 芳 久",
-      "days": [
         [
           {
+            "course": 2,
+            "st": ".23",
+            "rank": 4
+          },
+          {
             "course": 1,
-            "st": ".17",
+            "st": ".09",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".16",
             "rank": 3
           },
           null
@@ -1437,26 +1158,14 @@
         [
           {
             "course": 3,
-            "st": ".24",
-            "rank": 3
+            "st": ".19",
+            "rank": 5
           },
           {
-            "course": 4,
-            "st": ".11",
-            "rank": 4
+            "course": 2,
+            "st": ".12",
+            "rank": 2
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ],
         [
           null,
@@ -1468,88 +1177,128 @@
         ]
       ]
     },
-    "4184": {
-      "name": "渡 邊 雄一郎",
+    "3804": {
+      "name": "中 渡 修 作",
       "days": [
         [
           {
-            "course": 2,
+            "course": 4,
             "st": ".12",
-            "rank": 5
+            "rank": 6
           },
           {
-            "course": 5,
-            "st": ".01",
-            "rank": 1
-          }
-        ],
-        [
-          {
-            "course": 1,
-            "st": ".12",
-            "rank": 2
-          },
-          {
-            "course": 5,
+            "course": 6,
             "st": ".13",
             "rank": 3
           }
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ]
-      ]
-    },
-    "4549": {
-      "name": "小 林 文 彦",
-      "days": [
-        [
           {
             "course": 6,
-            "st": ".15",
-            "rank": 6
+            "st": ".21",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 2
           },
           {
             "course": 4,
             "st": ".08",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".29",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".20",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".08",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".11",
+            "rank": 5
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4522": {
+      "name": "古 澤 光 紀",
+      "days": [
+        [
+          {
+            "course": 1,
+            "st": ".15",
             "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".08",
+            "rank": 4
+          },
+          {
+            "course": 6,
+            "st": ".23",
+            "rank": 4
           }
         ],
         [
           {
             "course": 1,
-            "st": ".13",
-            "rank": 2
+            "st": ".22",
+            "rank": 3
           },
-          null
+          {
+            "course": 5,
+            "st": ".12",
+            "rank": 2
+          }
         ],
         [
-          null,
-          null
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 1
+          },
+          {
+            "course": 3,
+            "st": ".08",
+            "rank": 2
+          }
         ],
         [
-          null,
-          null
-        ],
-        [
-          null,
+          {
+            "course": 6,
+            "st": ".06",
+            "rank": 3
+          },
           null
         ],
         [
@@ -1562,27 +1311,63 @@
         ]
       ]
     },
-    "3662": {
-      "name": "大 庭 元 明",
+    "5012": {
+      "name": "加 倉 侑 征",
       "days": [
         [
           {
-            "course": 1,
-            "st": ".19",
-            "rank": 1
+            "course": 2,
+            "st": ".14",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".06",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".02",
+            "rank": 4
           },
           null
         ],
         [
           {
             "course": 6,
-            "st": ".02",
-            "rank": 3
+            "st": ".11",
+            "rank": 5
           },
           {
+            "course": 3,
+            "st": ".16",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".12",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".05",
+            "rank": 4
+          }
+        ],
+        [
+          {
             "course": 2,
-            "st": ".06",
-            "rank": 3
+            "st": ".17",
+            "rank": 2
+          },
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 2
           }
         ],
         [
@@ -1592,9 +1377,62 @@
         [
           null,
           null
+        ]
+      ]
+    },
+    "5207": {
+      "name": "高 山 敬 悟",
+      "days": [
+        [
+          {
+            "course": 6,
+            "st": ".07",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 6
+          }
         ],
         [
-          null,
+          {
+            "course": 4,
+            "st": ".46",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".14",
+            "rank": 1
+          },
+          {
+            "course": 3,
+            "st": ".38",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".10",
+            "rank": 4
+          },
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".08",
+            "rank": 6
+          },
           null
         ],
         [
@@ -1607,21 +1445,151 @@
         ]
       ]
     },
-    "4314": {
-      "name": "青 木 幸太郎",
+    "4367": {
+      "name": "山 口 修 路",
       "days": [
         [
           {
             "course": 4,
-            "st": ".15",
+            "st": ".32",
+            "rank": 4
+          },
+          {
+            "course": 4,
+            "st": ".14",
             "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".21",
+            "rank": 2
+          },
+          {
+            "course": 5,
+            "st": ".25",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".18",
+            "rank": 6
           },
           null
         ],
         [
           {
             "course": 5,
-            "st": ".16",
+            "st": ".27",
+            "rank": 3
+          },
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".24",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "5274": {
+      "name": "城 間 盛 渚",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".15",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".07",
+            "rank": 6
+          },
+          {
+            "course": 4,
+            "st": ".38",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".17",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".27",
+            "rank": 4
+          },
+          {
+            "course": 6,
+            "st": ".08",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": "S1"
+          },
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3574": {
+      "name": "大 神 康 司",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 6
+          },
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".12",
             "rank": 6
           },
           {
@@ -1631,8 +1599,32 @@
           }
         ],
         [
-          null,
+          {
+            "course": 2,
+            "st": ".19",
+            "rank": 3
+          },
           null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".23",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".20",
+            "rank": 2
+          },
+          {
+            "course": 2,
+            "st": ".15",
+            "rank": 4
+          }
         ],
         [
           null,
@@ -1640,6 +1632,63 @@
         ],
         [
           null,
+          null
+        ]
+      ]
+    },
+    "4364": {
+      "name": "池 永 太",
+      "days": [
+        [
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 1
+          },
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".17",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".08",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".08",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".17",
+            "rank": 1
+          },
+          {
+            "course": 1,
+            "st": ".05",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".10",
+            "rank": 1
+          },
           null
         ],
         [
@@ -1652,26 +1701,318 @@
         ]
       ]
     },
-    "3921": {
-      "name": "川 村 正 輝",
+    "4121": {
+      "name": "富 永 修 一",
+      "days": [
+        [
+          {
+            "course": 2,
+            "st": ".21",
+            "rank": 3
+          },
+          {
+            "course": 5,
+            "st": ".21",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".25",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".09",
+            "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".04",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 2
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "5029": {
+      "name": "中 亮 太",
       "days": [
         [
           {
             "course": 5,
-            "st": ".17",
+            "st": ".05",
             "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".02",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".10",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 2
+          },
+          {
+            "course": 3,
+            "st": ".12",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".06",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".04",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".03",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3434": {
+      "name": "松 尾 宣 邦",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".16",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".27",
+            "rank": 3
           },
           null
         ],
         [
           {
             "course": 2,
-            "st": ".04",
-            "rank": 5
+            "st": ".14",
+            "rank": 3
           },
           {
-            "course": 3,
+            "course": 5,
             "st": ".13",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".24",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "5284": {
+      "name": "嘉手苅 徹 哉",
+      "days": [
+        [
+          {
+            "course": 6,
+            "st": ".18",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".08",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".34",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".18",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".13",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".03",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4193": {
+      "name": "郷 原 章 平",
+      "days": [
+        [
+          {
+            "course": 2,
+            "st": ".15",
+            "rank": 1
+          },
+          {
+            "course": 1,
+            "st": ".15",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".18",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".11",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 1
+          },
+          {
+            "course": 4,
+            "st": ".13",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".19",
             "rank": 4
           }
         ],
@@ -1682,10 +2023,63 @@
         [
           null,
           null
+        ]
+      ]
+    },
+    "4368": {
+      "name": "山 口 隆 史",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 4
+          },
+          null
         ],
         [
-          null,
+          {
+            "course": 2,
+            "st": ".21",
+            "rank": 2
+          },
           null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".14",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".14",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".26",
+            "rank": 6
+          },
+          {
+            "course": 1,
+            "st": ".13",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".19",
+            "rank": 6
+          },
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 2
+          }
         ],
         [
           null,
@@ -1700,6 +2094,58 @@
     "3876": {
       "name": "中 辻 崇 人",
       "days": [
+        [
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".07",
+            "rank": 1
+          },
+          {
+            "course": 4,
+            "st": ".14",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".09",
+            "rank": 2
+          },
+          {
+            "course": 2,
+            "st": ".16",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".10",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".08",
+            "rank": 6
+          },
+          null
+        ],
         [
           {
             "course": 2,
@@ -1723,6 +2169,63 @@
             "st": ".20",
             "rank": 2
           }
+        ]
+      ]
+    },
+    "3703": {
+      "name": "鳥 飼 眞",
+      "days": [
+        [
+          {
+            "course": 4,
+            "st": ".12",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 5,
+            "st": ".22",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".22",
+            "rank": 4
+          },
+          {
+            "course": 6,
+            "st": ".12",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".12",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 4
+          }
         ],
         [
           null,
@@ -1731,9 +2234,123 @@
         [
           null,
           null
+        ]
+      ]
+    },
+    "4406": {
+      "name": "幸 野 史 明",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".14",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".18",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 3,
+            "st": ".15",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".16",
+            "rank": 3
+          },
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 1
+          }
         ],
         [
           null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3444": {
+      "name": "香 月 大 介",
+      "days": [
+        [
+          {
+            "course": 1,
+            "st": ".13",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".12",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".19",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".08",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 4
+          },
+          {
+            "course": 3,
+            "st": ".10",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 6
+          },
           null
         ],
         [
@@ -1746,9 +2363,2172 @@
         ]
       ]
     },
+    "4551": {
+      "name": "三 川 昂 暁",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".15",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".09",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".22",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".13",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".18",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".11",
+            "rank": 1
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4424": {
+      "name": "松 尾 昂 明",
+      "days": [
+        [
+          {
+            "course": 6,
+            "st": ".05",
+            "rank": 3
+          },
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".16",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".06",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".24",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".05",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".09",
+            "rank": 1
+          },
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 6
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4451": {
+      "name": "松 崎 祐太郎",
+      "days": [
+        [
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 4
+          },
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".18",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".17",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".12",
+            "rank": 3
+          },
+          {
+            "course": 6,
+            "st": ".16",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".14",
+            "rank": 3
+          },
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".11",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".14",
+            "rank": 3
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4640": {
+      "name": "山ノ内 雅 人",
+      "days": [
+        [
+          {
+            "course": 5,
+            "st": ".21",
+            "rank": 4
+          },
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".07",
+            "rank": 5
+          },
+          {
+            "course": 2,
+            "st": ".10",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".13",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".28",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".18",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 3
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4566": {
+      "name": "塩 田 北 斗",
+      "days": [
+        [
+          {
+            "course": 2,
+            "st": ".14",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 1
+          },
+          {
+            "course": 1,
+            "st": ".11",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 1
+          },
+          {
+            "course": 6,
+            "st": ".10",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".07",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".12",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".03",
+            "rank": 2
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3514": {
+      "name": "山 一 鉄 也",
+      "days": [
+        [
+          {
+            "course": 6,
+            "st": ".24",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".19",
+            "rank": 1
+          },
+          {
+            "course": 3,
+            "st": ".15",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".10",
+            "rank": 2
+          },
+          {
+            "course": 2,
+            "st": ".16",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 2
+          },
+          {
+            "course": 5,
+            "st": ".10",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".16",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".18",
+            "rank": 3
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4288": {
+      "name": "永 田 啓 二",
+      "days": [
+        [
+          {
+            "course": 1,
+            "st": ".05",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".12",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".20",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 6
+          },
+          {
+            "course": 5,
+            "st": ".06",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".08",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".07",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 1
+          },
+          {
+            "course": 4,
+            "st": ".12",
+            "rank": 2
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "3523": {
+      "name": "寳 田 亮 治",
+      "days": [
+        [
+          {
+            "course": 3,
+            "st": ".16",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".13",
+            "rank": 5
+          },
+          {
+            "course": 6,
+            "st": ".23",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".09",
+            "rank": 1
+          },
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".31",
+            "rank": 5
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".19",
+            "rank": 3
+          },
+          {
+            "course": 5,
+            "st": ".32",
+            "rank": 6
+          }
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4958": {
+      "name": "溝 口 海義也",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".09",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".05",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".04",
+            "rank": 2
+          },
+          {
+            "course": 6,
+            "st": ".15",
+            "rank": 6
+          }
+        ]
+      ]
+    },
+    "4835": {
+      "name": "橋 本 明",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 2
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".18",
+            "rank": 6
+          },
+          {
+            "course": 6,
+            "st": ".15",
+            "rank": 6
+          }
+        ]
+      ]
+    },
+    "4632": {
+      "name": "長 尾 京志郎",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".17",
+            "rank": 3
+          },
+          {
+            "course": 4,
+            "st": ".19",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 3
+          },
+          null
+        ]
+      ]
+    },
+    "3233": {
+      "name": "小 畑 実 成",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".14",
+            "rank": 4
+          },
+          {
+            "course": 1,
+            "st": ".18",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".21",
+            "rank": 5
+          },
+          null
+        ]
+      ]
+    },
+    "3455": {
+      "name": "谷 本 幸 司",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".21",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".16",
+            "rank": 4
+          },
+          null
+        ]
+      ]
+    },
+    "3478": {
+      "name": "嶋 田 貴 支",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".26",
+            "rank": 6
+          },
+          {
+            "course": 2,
+            "st": ".19",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 3
+          },
+          null
+        ]
+      ]
+    },
+    "4772": {
+      "name": "石 丸 海 渡",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".21",
+            "rank": 1
+          },
+          {
+            "course": 6,
+            "st": ".12",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".08",
+            "rank": 1
+          },
+          null
+        ]
+      ]
+    },
+    "4988": {
+      "name": "牟 田 奨 太",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".21",
+            "rank": 2
+          },
+          {
+            "course": 6,
+            "st": ".22",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".07",
+            "rank": 3
+          },
+          null
+        ]
+      ]
+    },
+    "4396": {
+      "name": "大 田 直 弥",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".23",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".19",
+            "rank": 2
+          },
+          null
+        ]
+      ]
+    },
+    "4007": {
+      "name": "榮 田 将 彦",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".29",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".11",
+            "rank": 5
+          }
+        ],
+        [
+          null,
+          null
+        ]
+      ]
+    },
+    "4216": {
+      "name": "星 栄 爾",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".27",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".11",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".10",
+            "rank": 1
+          },
+          null
+        ]
+      ]
+    },
+    "4580": {
+      "name": "長谷川 雅 和",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".26",
+            "rank": 6
+          },
+          {
+            "course": 3,
+            "st": ".21",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".05",
+            "rank": 5
+          },
+          null
+        ]
+      ]
+    },
+    "4537": {
+      "name": "渡 邉 和 将",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".21",
+            "rank": 1
+          },
+          {
+            "course": 5,
+            "st": ".15",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".14",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 4
+          }
+        ]
+      ]
+    },
+    "4413": {
+      "name": "水 摩 敦",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".24",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".13",
+            "rank": 6
+          },
+          null
+        ]
+      ]
+    },
+    "4062": {
+      "name": "後 藤 陽 介",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".29",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".15",
+            "rank": 4
+          },
+          {
+            "course": 5,
+            "st": ".07",
+            "rank": 4
+          }
+        ]
+      ]
+    },
+    "4005": {
+      "name": "瀬 川 公 則",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".33",
+            "rank": 4
+          },
+          {
+            "course": 3,
+            "st": ".15",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".17",
+            "rank": 5
+          },
+          null
+        ]
+      ]
+    },
+    "4403": {
+      "name": "木 下 大 將",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".22",
+            "rank": 5
+          },
+          {
+            "course": 4,
+            "st": ".03",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".11",
+            "rank": 3
+          },
+          null
+        ]
+      ]
+    },
+    "3568": {
+      "name": "木 村 光 宏",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".34",
+            "rank": 6
+          },
+          {
+            "course": 2,
+            "st": ".11",
+            "rank": 5
+          }
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".17",
+            "rank": 6
+          },
+          null
+        ]
+      ]
+    },
+    "4172": {
+      "name": "森 定 晃 史",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".16",
+            "rank": 2
+          },
+          {
+            "course": 6,
+            "st": ".15",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".11",
+            "rank": 4
+          },
+          null
+        ]
+      ]
+    },
+    "4042": {
+      "name": "丸 岡 正 典",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 3
+          },
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 4
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".13",
+            "rank": 1
+          },
+          {
+            "course": 2,
+            "st": ".12",
+            "rank": 1
+          }
+        ]
+      ]
+    },
+    "4273": {
+      "name": "佐 藤 旭",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".19",
+            "rank": 4
+          },
+          {
+            "course": 3,
+            "st": ".18",
+            "rank": 3
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".05",
+            "rank": 1
+          },
+          null
+        ]
+      ]
+    },
+    "4463": {
+      "name": "三 苫 晃 幸",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".16",
+            "rank": 5
+          },
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".13",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".12",
+            "rank": 1
+          }
+        ]
+      ]
+    },
+    "5114": {
+      "name": "小 林 孝 彰",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".19",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".05",
+            "rank": 4
+          },
+          {
+            "course": 2,
+            "st": ".06",
+            "rank": 1
+          }
+        ]
+      ]
+    },
+    "4402": {
+      "name": "乙 藤 智 史",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".18",
+            "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".17",
+            "rank": 3
+          },
+          {
+            "course": 4,
+            "st": ".24",
+            "rank": 6
+          }
+        ]
+      ]
+    },
+    "3908": {
+      "name": "重 成 一 人",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 2
+          },
+          {
+            "course": 2,
+            "st": ".09",
+            "rank": 6
+          }
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".14",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".14",
+            "rank": 1
+          }
+        ]
+      ]
+    },
+    "3708": {
+      "name": "岡 部 貴 司",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".17",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".04",
+            "rank": 2
+          },
+          {
+            "course": 4,
+            "st": ".06",
+            "rank": 5
+          }
+        ]
+      ]
+    },
+    "4437": {
+      "name": "中 田 元 泰",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".22",
+            "rank": 5
+          },
+          {
+            "course": 1,
+            "st": ".16",
+            "rank": 2
+          }
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".14",
+            "rank": 4
+          },
+          null
+        ]
+      ]
+    },
+    "5034": {
+      "name": "若 林 義 人",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".14",
+            "rank": 6
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".09",
+            "rank": 4
+          },
+          {
+            "course": 2,
+            "st": ".18",
+            "rank": 2
+          }
+        ]
+      ]
+    },
+    "4148": {
+      "name": "枝 尾 賢",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".14",
+            "rank": 2
+          },
+          {
+            "course": 1,
+            "st": ".11",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".16",
+            "rank": 5
+          }
+        ]
+      ]
+    },
+    "3731": {
+      "name": "高 濱 芳 久",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".17",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 3,
+            "st": ".24",
+            "rank": 3
+          },
+          {
+            "course": 4,
+            "st": ".11",
+            "rank": 4
+          }
+        ]
+      ]
+    },
+    "4184": {
+      "name": "渡 邊 雄一郎",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".12",
+            "rank": 5
+          },
+          {
+            "course": 5,
+            "st": ".01",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".12",
+            "rank": 2
+          },
+          {
+            "course": 5,
+            "st": ".13",
+            "rank": 3
+          }
+        ]
+      ]
+    },
+    "4549": {
+      "name": "小 林 文 彦",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".15",
+            "rank": 6
+          },
+          {
+            "course": 4,
+            "st": ".08",
+            "rank": 1
+          }
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".13",
+            "rank": 2
+          },
+          null
+        ]
+      ]
+    },
+    "3662": {
+      "name": "大 庭 元 明",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 1,
+            "st": ".19",
+            "rank": 1
+          },
+          null
+        ],
+        [
+          {
+            "course": 6,
+            "st": ".02",
+            "rank": 3
+          },
+          {
+            "course": 2,
+            "st": ".06",
+            "rank": 3
+          }
+        ]
+      ]
+    },
+    "4314": {
+      "name": "青 木 幸太郎",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 4,
+            "st": ".15",
+            "rank": 3
+          },
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".16",
+            "rank": 6
+          },
+          {
+            "course": 1,
+            "st": ".07",
+            "rank": 2
+          }
+        ]
+      ]
+    },
+    "3921": {
+      "name": "川 村 正 輝",
+      "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          {
+            "course": 5,
+            "st": ".17",
+            "rank": 4
+          },
+          null
+        ],
+        [
+          {
+            "course": 2,
+            "st": ".04",
+            "rank": 5
+          },
+          {
+            "course": 3,
+            "st": ".13",
+            "rank": 4
+          }
+        ]
+      ]
+    },
     "4545": {
       "name": "岡 村 慶 太",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 6,
@@ -1768,32 +4548,32 @@
             "st": ".09",
             "rank": 3
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "4713": {
       "name": "白 神 優",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 1,
@@ -1817,32 +4597,32 @@
             "st": ".24",
             "rank": 5
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "3663": {
       "name": "木 山 和 幸",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 2,
@@ -1862,32 +4642,32 @@
             "st": ".27",
             "rank": 1
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "3975": {
       "name": "小野寺 智 洋",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 6,
@@ -1907,32 +4687,32 @@
             "st": ".13",
             "rank": 5
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "3024": {
       "name": "西 島 義 則",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 3,
@@ -1952,32 +4732,32 @@
             "st": ".23",
             "rank": 3
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "3442": {
       "name": "宮 武 英 司",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 2,
@@ -1997,32 +4777,32 @@
             "st": ".11",
             "rank": 6
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     },
     "4509": {
       "name": "平 見 真 彦",
       "days": [
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
+        [
+          null,
+          null
+        ],
         [
           {
             "course": 6,
@@ -2042,26 +4822,6 @@
             "st": ".14",
             "rank": 3
           }
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
-        ],
-        [
-          null,
-          null
         ]
       ]
     }
