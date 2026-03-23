@@ -90,13 +90,20 @@ def build_day_label(current_day_no: int) -> str:
 
 
 def main() -> None:
+    if not os.path.exists(INPUT):
+        print(f"missing input: {INPUT}")
+        return
+
     with open(INPUT, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     venues = data.get("venues", [])
+    print(f"venues: {len(venues)}")
+
     reset_output_dir(OUTPUT_DIR)
 
     today = datetime.now(JST).strftime("%Y-%m-%d")
+    print(f"today: {today}")
 
     venues_by_jcd: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for v in venues:
