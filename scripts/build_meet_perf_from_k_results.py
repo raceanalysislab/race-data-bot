@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 from collections import defaultdict
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 
 INPUT = "data/k_results_parsed.json"
@@ -9,6 +10,8 @@ OUTPUT_DIR = "data/meet_perf"
 
 DAY_COUNT = 7
 SLOTS_PER_DAY = 2
+
+JST = timezone(timedelta(hours=9))
 
 
 def create_empty_days() -> List[List[Optional[Dict[str, Any]]]]:
@@ -93,6 +96,8 @@ def main() -> None:
     venues = data.get("venues", [])
     reset_output_dir(OUTPUT_DIR)
 
+    today = datetime.now(JST).strftime("%Y-%m-%d")
+
     venues_by_jcd: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for v in venues:
         jcd = str(v.get("jcd") or "").zfill(2)
@@ -107,12 +112,13 @@ def main() -> None:
 
         for target in items:
             target_date = str(target.get("date") or "").strip()
+
+            if not target_date or target_date != today:
+                continue
+
             day_no = int(target.get("day_no") or 1)
             venue_name = str(target.get("venue") or "").strip()
             event_title = str(target.get("event_title_norm") or target.get("event_title") or "").strip()
-
-            if not target_date:
-                continue
 
             prev_days = pick_previous_days(items, target_date)
             racers = build_racers_from_days(prev_days)
