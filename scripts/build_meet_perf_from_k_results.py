@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 from collections import defaultdict
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 INPUT = "data/k_results_parsed.json"
@@ -36,6 +37,10 @@ def sort_races(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return sorted(races or [], key=lambda x: int(x.get("rno") or 0))
 
 
+def parse_ymd(s: str) -> datetime.date:
+    return datetime.strptime(str(s), "%Y-%m-%d").date()
+
+
 def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
     targets: Dict[str, Dict[str, Any]] = {}
 
@@ -62,7 +67,6 @@ def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
 
             jcd = str(v.get("jcd") or "").zfill(2)
             if not jcd and venue_name:
-                # mbrace に jcd が無いケース保険
                 venue_to_jcd = {
                     "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
                     "多摩川": "05", "浜名湖": "06", "蒲郡": "07", "常滑": "08",
@@ -119,10 +123,12 @@ def build_racers_from_days(days_data: List[Dict[str, Any]]) -> Dict[str, Dict[st
     return racers
 
 
-def pick_previous_days(same_venue_days: List[Dict[str, Any]], target_date: str) -> List[Dict[str, Any]]:
+def pick_previous_days(same_venue_days: List[Dict[str, Any]], mbrace_date: str) -> List[Dict[str, Any]]:
+    target_prev_date = (parse_ymd(mbrace_date) - timedelta(days=1)).strftime("%Y-%m-%d")
+
     prev_days = [
         v for v in same_venue_days
-        if str(v.get("date") or "").strip() < target_date
+        if str(v.get("date") or "").strip() <= target_prev_date
     ]
     prev_days.sort(key=lambda x: str(x.get("date") or ""))
 
@@ -168,12 +174,14 @@ def main() -> None:
     for jcd, target in targets_by_jcd.items():
         items = venues_by_jcd.get(jcd, [])
         if not items:
+            print(f"skip_no_items: {jcd}")
             continue
 
         items.sort(key=lambda x: str(x.get("date") or ""))
 
-        target_date = str(target.get("date") or "").strip()
-        if not target_date:
+        mbrace_date = str(target.get("date") or "").strip()
+        if not mbrace_date:
+            print(f"skip_no_mbrace_date: {jcd}")
             continue
 
         day_no = int(target.get("day_no") or 0)
@@ -181,13 +189,24 @@ def main() -> None:
         event_title = str(target.get("event_title") or "").strip()
         event_title_norm = str(target.get("event_title_norm") or event_title).strip()
 
-        prev_days = pick_previous_days(items, target_date)
+        k_latest_date = str(items[-1].get("date") or "").strip() if items else ""
+        target_prev_date = (parse_ymd(mbrace_date) - timedelta(days=1)).strftime("%Y-%m-%d")
+
+        print(
+            f"target jcd={jcd} venue={venue_name} "
+            f"mbrace_date={mbrace_date} target_prev_date={target_prev_date} "
+            f"k_latest_date={k_latest_date}"
+        )
+
+        prev_days = pick_previous_days(items, mbrace_date)
+        print(f"picked_days: {len(prev_days)}")
+
         racers = build_racers_from_days(prev_days)
 
         out = {
             "jcd": jcd,
             "venue": venue_name,
-            "date": target_date,
+            "date": mbrace_date,
             "day_no": day_no,
             "day_label": build_day_label(day_no),
             "total_days": None,
@@ -196,7 +215,7 @@ def main() -> None:
             "racers": racers,
         }
 
-        filename = os.path.join(OUTPUT_DIR, f"{target_date}_{jcd}.json")
+        filename = os.path.join(OUTPUT_DIR, f"{mbrace_date}_{jcd}.json")
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, indent=2)
 
