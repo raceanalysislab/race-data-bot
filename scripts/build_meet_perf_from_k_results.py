@@ -44,6 +44,15 @@ def parse_ymd(s: str) -> datetime.date:
 def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
     targets: Dict[str, Dict[str, Any]] = {}
 
+    venue_to_jcd = {
+        "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
+        "多摩川": "05", "浜名湖": "06", "蒲郡": "07", "常滑": "08",
+        "津": "09", "三国": "10", "びわこ": "11", "住之江": "12",
+        "尼崎": "13", "鳴門": "14", "丸亀": "15", "児島": "16",
+        "宮島": "17", "徳山": "18", "下関": "19", "若松": "20",
+        "芦屋": "21", "福岡": "22", "唐津": "23", "大村": "24",
+    }
+
     for path in sorted(glob.glob(MBRACE_GLOB)):
         if not os.path.isfile(path):
             continue
@@ -65,16 +74,10 @@ def load_target_dates_by_jcd() -> Dict[str, Dict[str, Any]]:
             event_title = str(v.get("event_title") or "").strip()
             event_title_norm = str(v.get("event_title_norm") or event_title).strip()
 
-            jcd = str(v.get("jcd") or "").zfill(2)
+            raw_jcd = str(v.get("jcd") or "").strip()
+            jcd = raw_jcd.zfill(2) if raw_jcd else ""
+
             if not jcd and venue_name:
-                venue_to_jcd = {
-                    "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
-                    "多摩川": "05", "浜名湖": "06", "蒲郡": "07", "常滑": "08",
-                    "津": "09", "三国": "10", "びわこ": "11", "住之江": "12",
-                    "尼崎": "13", "鳴門": "14", "丸亀": "15", "児島": "16",
-                    "宮島": "17", "徳山": "18", "下関": "19", "若松": "20",
-                    "芦屋": "21", "福岡": "22", "唐津": "23", "大村": "24",
-                }
                 jcd = venue_to_jcd.get(venue_name, "")
 
             if not jcd or not target_date:
@@ -164,7 +167,8 @@ def main() -> None:
 
     venues_by_jcd: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for v in venues:
-        jcd = str(v.get("jcd") or "").zfill(2)
+        raw_jcd = str(v.get("jcd") or "").strip()
+        jcd = raw_jcd.zfill(2) if raw_jcd else ""
         if not jcd:
             continue
         venues_by_jcd[jcd].append(v)
