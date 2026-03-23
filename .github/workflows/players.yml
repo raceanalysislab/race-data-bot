@@ -34,8 +34,8 @@ jobs:
       - name: Run k results fetch
         run: python scripts/fetch_k_results.py
 
-      - name: Parse races
-        run: python scripts/parse_mbrace_txt.py
+      - name: Parse k results txt
+        run: python scripts/parse_k_results_txt.py
 
       - name: Check after parse
         run: |
@@ -44,6 +44,21 @@ jobs:
           echo "=== data files ==="
           ls -la data || true
           find data -maxdepth 3 -type f | sort || true
+          echo "=== k_results_parsed preview ==="
+          python - <<'PY'
+          import json
+          path = "data/k_results_parsed.json"
+          try:
+              with open(path, "r", encoding="utf-8") as f:
+                  data = json.load(f)
+              venues = data.get("venues", [])
+              print("venues:", len(venues))
+              if venues:
+                  print("first:", venues[0].get("date"), venues[0].get("jcd"), venues[0].get("venue"))
+                  print("last:", venues[-1].get("date"), venues[-1].get("jcd"), venues[-1].get("venue"))
+          except Exception as e:
+              print("preview error:", e)
+          PY
 
       - name: Build race json
         run: python scripts/build_race_json.py
