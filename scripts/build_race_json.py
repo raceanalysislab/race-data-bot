@@ -7,6 +7,8 @@
 #   data/master/merged_players.json を読み込み、
 #   各艇に avg_st / st_count を付与する
 #   各艇の name を正式名で上書きする
+#   data/fl_map.json を読み込み、
+#   各艇に f_count / l_count を付与する
 
 import json
 import os
@@ -17,6 +19,9 @@ SRC_DIR = "data"
 OUT_RACES_BASE = "data/site/races"
 OUT_VENUES_BASE = "data/site/venues"
 MERGED_PLAYERS_PATH = "data/master/merged_players.json"
+PLAYER_COURSE_STATS_1Y_PATH = "data/player_course_stats_1y.json"
+MEET_PERF_BASE = "data/meet_perf"
+FL_MAP_PATH = "data/fl_map.json"
 
 VENUE_TO_JCD = {
     "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
@@ -47,6 +52,93 @@ def _load_json(path: str) -> Dict[str, Any]:
         return json.load(f)
 
 
+def _load_meet_perf(date_str: str, jcd: str) -> Dict[str, Any]:
+    if not date_str or not jcd:
+        return {}
+
+    path = os.path.join(MEET_PERF_BASE, f"{date_str}_{jcd}.json")
+    if not os.path.exists(path):
+        return {}
+
+    try:
+        return _load_json(path)
+    except Exception:
+        return {}
+
+
+def _normalize_days(raw_days: Any) -> List[List[Any]]:
+    out: List[List[Any]] = []
+
+    if not isinstance(raw_days, list):
+        return out
+
+    for day in raw_days:
+        if not isinstance(day, list):
+            out.append([None, None])
+            continue
+
+        pair = []
+        for i in range(2):
+            slot = day[i] if i < len(day) else None
+            if isinstance(slot, dict):
+                pair.append({
+                    "course": slot.get("course"),
+                    "st": slot.get("st"),
+                    "rank": slot.get("rank"),
+                })
+            else:
+                pair.append(None)
+        out.append(pair)
+
+    return out
+
+
+def _find_meet_perf_for_boat(boat: Dict[str, Any], racers: Dict[str, Any]) -> List[List[Any]]:
+    reg_key = _to_reg_key(boat.get("regno"))
+    if reg_key and isinstance(racers.get(reg_key), dict):
+        return _normalize_days(racers[reg_key].get("days"))
+
+    boat_name = str(boat.get("name") or "").replace(" ", "").replace("　", "").strip()
+    if not boat_name:
+        return []
+
+    for value in racers.values():
+        if not isinstance(value, dict):
+            continue
+        racer_name = str(value.get("name") or "").replace(" ", "").replace("　", "").strip()
+        if racer_name == boat_name:
+            return _normalize_days(value.get("days"))
+
+    return []
+
+
+def _attach_meet_perf_to_race(out: Dict[str, Any], meet_perf_json: Dict[str, Any]) -> Dict[str, Any]:
+    race = dict(out.get("race") or {})
+    boats = race.get("boats") or []
+    racers = meet_perf_json.get("racers") or {}
+    day_no = meet_perf_json.get("day_no", 0)
+
+    if not isinstance(boats, list):
+        out["race"] = race
+        out["meet_day_no"] = day_no
+        return out
+
+    new_boats = []
+    for boat in boats:
+        if not isinstance(boat, dict):
+            new_boats.append(boat)
+            continue
+
+        b = dict(boat)
+        b["meet_perf"] = _find_meet_perf_for_boat(b, racers)
+        new_boats.append(b)
+
+    race["boats"] = new_boats
+    out["race"] = race
+    out["meet_day_no"] = day_no
+    return out
+
+
 def _load_merged_players() -> Dict[str, Any]:
     if not os.path.exists(MERGED_PLAYERS_PATH):
         print(f"warn: merged players not found: {MERGED_PLAYERS_PATH}")
@@ -58,12 +150,36 @@ def _load_merged_players() -> Dict[str, Any]:
         return {}
 
 
+def _load_fl_map() -> Dict[str, Any]:
+    if not os.path.exists(FL_MAP_PATH):
+        return {}
+    try:
+        with open(FL_MAP_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        print(f"warn: failed to load fl_map: {e}")
+        return {}
+
+
+def load_player_course_stats_1y():
+    if not os.path.exists(PLAYER_COURSE_STATS_1Y_PATH):
+        return {}
+
+    try:
+        with open(PLAYER_COURSE_STATS_1Y_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("players", {}) if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
 def _to_reg_key(v: Any) -> str:
     s = str(v or "").strip()
     return s if s.isdigit() else ""
 
 
-def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any]) -> Dict[str, Any]:
+def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(boat)
     reg_key = _to_reg_key(out.get("regno"))
 
@@ -78,18 +194,49 @@ def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any]) -> D
     if master_name:
         out["name"] = master_name
 
-    avg_st = mp.get("avg_st")
+    players_1y = player_course_stats_1y
+    p = players_1y.get(reg_key, {}) if isinstance(players_1y, dict) else {}
     st_count = mp.get("st_count")
+    player_avg_st = None
 
-    if avg_st is not None:
-        out["avg_st"] = avg_st
+    if isinstance(p, dict):
+        player_avg_st = p.get("avg_st")
+
+    if player_avg_st is None:
+        player_avg_st = mp.get("avg_st")
+
+    if player_avg_st is None:
+        player_avg_st = mp.get("st")
+
+    if player_avg_st is not None:
+        out["avg_st"] = player_avg_st
+
     if st_count is not None:
         out["st_count"] = st_count
 
+    course_key = str(int(out.get("waku"))) if out.get("waku") else ""
+    courses = p.get("courses", {}) if isinstance(p, dict) else {}
+
+    course = (
+        courses.get(course_key)
+        or courses.get(str(out.get("waku")))
+        or {}
+    ) if isinstance(courses, dict) else {}
+
+    kimarite = course.get("kimarite", {}) if isinstance(course, dict) else {}
+
+    out["course_starts"] = course.get("starts")
+    out["course_win"] = course.get("win_rate")
+    out["course_2ren"] = course.get("ren2_rate")
+    out["course_3ren"] = course.get("ren3_rate")
+    out["course_avg_st"] = course.get("avg_st")
+    out["course_sashi"] = kimarite.get("差し", 0)
+    out["course_makuri"] = kimarite.get("まくり", 0)
+    out["course_makurisashi"] = kimarite.get("まくり差し", 0)
     return out
 
 
-def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any]) -> Dict[str, Any]:
+def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(race)
     boats = out.get("boats") or []
     if not isinstance(boats, list):
@@ -97,9 +244,36 @@ def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any]) -> D
         return out
 
     out["boats"] = [
-        _merge_boat_stats(b, merged_players) if isinstance(b, dict) else b
+        _merge_boat_stats(b, merged_players, player_course_stats_1y) if isinstance(b, dict) else b
         for b in boats
     ]
+    return out
+
+
+def _attach_fl_to_race(race: Dict[str, Any], fl_map: Dict[str, Any]) -> Dict[str, Any]:
+    out = dict(race)
+    boats = out.get("boats") or []
+
+    if not isinstance(boats, list):
+        out["boats"] = []
+        return out
+
+    new_boats = []
+    for boat in boats:
+        if not isinstance(boat, dict):
+            new_boats.append(boat)
+            continue
+
+        b = dict(boat)
+        regno = str(b.get("regno") or "").strip()
+        fl = fl_map.get(regno, {}) if regno else {}
+
+        b["f_count"] = fl.get("F", 0)
+        b["l_count"] = fl.get("L", 0)
+
+        new_boats.append(b)
+
+    out["boats"] = new_boats
     return out
 
 
@@ -185,7 +359,7 @@ def _build_venue_card(v: Dict[str, Any], top_date: str) -> Dict[str, Any]:
     }
 
 
-def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int, int]:
+def build_one(src_path: str, merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any], fl_map: Dict[str, Any]) -> Tuple[int, int, int]:
     if not os.path.exists(src_path):
         print(f"skip: {src_path} not found")
         return 0, 0, 0
@@ -227,7 +401,10 @@ def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int, 
                 skipped += 1
                 continue
 
-            merged_race = _merge_race_stats(race, merged_players)
+            meet_perf_json = _load_meet_perf(date, jcd) if jcd != "00" else {}
+
+            merged_race = _merge_race_stats(race, merged_players, player_course_stats_1y)
+            merged_race = _attach_fl_to_race(merged_race, fl_map)
 
             out: Dict[str, Any] = {
                 "date": date,
@@ -240,6 +417,8 @@ def build_one(src_path: str, merged_players: Dict[str, Any]) -> Tuple[int, int, 
                 "grade_label": grade_label,
                 "race": merged_race,
             }
+
+            out = _attach_meet_perf_to_race(out, meet_perf_json)
 
             stable_fname = f"{jcd}_{rno_i}R.json"
             stable_path = os.path.join(out_race_dir, stable_fname)
@@ -277,7 +456,11 @@ def main():
     total_venues = 0
 
     merged_players = _load_merged_players()
+    player_course_stats_1y = load_player_course_stats_1y()
+    fl_map = _load_fl_map()
+
     print("merged_players:", len(merged_players))
+    print("fl_map:", len(fl_map))
 
     src_files = _collect_sources()
     print("source_files:", len(src_files))
@@ -286,7 +469,7 @@ def main():
     _clear_dir_tree(OUT_VENUES_BASE)
 
     for src_path in src_files:
-        created, skipped, venues_created = build_one(src_path, merged_players)
+        created, skipped, venues_created = build_one(src_path, merged_players, player_course_stats_1y, fl_map)
         total_created += created
         total_skipped += skipped
         total_venues += venues_created
