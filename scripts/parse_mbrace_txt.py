@@ -5,6 +5,11 @@
 # today / tomorrow 方式は廃止し、日付ファイル方式に統一
 # 保持方針:
 #   mbrace_races_*.json は直近365日分だけ保持し、それより古いものだけ削除
+#
+# グレード方針:
+# - 最新日だけ公式サイトをスクレイピング
+# - 過去日はスクレイピングしない
+# - 過去日は event_master → タイトル推定 → 一般 の順で決める
 
 import json
 import os
@@ -230,10 +235,8 @@ def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
     t_compact = compact_event_title(title)
     if not t_compact:
         return None
-
     if t_compact in EVENT_MASTER:
         return EVENT_MASTER[t_compact]
-
     return None
 
 
@@ -357,6 +360,19 @@ def infer_txt_paths() -> List[str]:
         raise FileNotFoundError("no extract txt found")
 
     return cands
+
+
+def infer_latest_target_date(txt_paths: List[str]) -> str:
+    dates: List[str] = []
+
+    for path in txt_paths:
+        m = re.search(r"[bB](\d{2})(\d{2})(\d{2})\.(?:txt|TXT)$", os.path.basename(path))
+        if not m:
+            continue
+        yy, mo, dd = m.groups()
+        dates.append(f"20{yy}-{mo}-{dd}")
+
+    return max(dates) if dates else ""
 
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
@@ -558,10 +574,11 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
-def resolve_grade(title: str, venue: str = "", ymd: str = "") -> str:
-    scraped = fetch_grade_from_official(venue, ymd)
-    if scraped:
-        return scraped
+def resolve_grade(title: str, venue: str = "", ymd: str = "", latest_target_date: str = "") -> str:
+    if latest_target_date and ymd == latest_target_date:
+        scraped = fetch_grade_from_official(venue, ymd)
+        if scraped:
+            return scraped
 
     master_hit = lookup_event_master(title)
     if master_hit:
@@ -1009,6 +1026,7 @@ def cleanup_old_outputs(keep_days: int = 365) -> None:
 
 def main():
     txt_paths = infer_txt_paths()
+    latest_target_date = infer_latest_target_date(txt_paths)
 
     total_files = 0
     total_venues = 0
@@ -1032,7 +1050,7 @@ def main():
 
             total_days = resolve_total_days(event_title, parsed_total_days)
             day_label = format_day_label(current_day, total_days)
-            grade_label = resolve_grade(event_title, venue, ymd)
+            grade_label = resolve_grade(event_title, venue, ymd, latest_target_date)
             races = parse_races(b)
 
             if not venue or not races:
@@ -1091,6 +1109,7 @@ def main():
 
     cleanup_old_outputs(365)
 
+    print("latest_target_date:", latest_target_date)
     print("done")
     print("total_files:", total_files)
     print("total_venues:", total_venues)
