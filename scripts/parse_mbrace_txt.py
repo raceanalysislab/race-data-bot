@@ -341,15 +341,22 @@ def read_text_auto(path: str) -> List[str]:
         return f.readlines()
 
 
-def infer_txt_path() -> str:
+def infer_txt_paths() -> List[str]:
     exdir = os.path.join("data", "extract")
-    if os.path.isdir(exdir):
-        cands = [fn for fn in os.listdir(exdir) if re.match(r"^b\d{6}\.txt$", fn, re.IGNORECASE)]
-        if cands:
-            cands.sort()
-            return os.path.join(exdir, cands[-1])
+    if not os.path.isdir(exdir):
+        raise FileNotFoundError("no extract dir found")
 
-    raise FileNotFoundError("no extract txt found")
+    cands = [
+        os.path.join(exdir, fn)
+        for fn in os.listdir(exdir)
+        if re.match(r"^b\d{6}\.txt$", fn, re.IGNORECASE)
+    ]
+    cands.sort()
+
+    if not cands:
+        raise FileNotFoundError("no extract txt found")
+
+    return cands
 
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
@@ -1001,98 +1008,95 @@ def cleanup_old_outputs(keep_days: int = 365) -> None:
 
 
 def main():
-    txt_path = infer_txt_path()
-    lines_raw = read_text_auto(txt_path)
-    blocks = split_blocks(lines_raw)
+    txt_paths = infer_txt_paths()
 
-    venues_out: List[Dict[str, Any]] = []
-    warnings: List[str] = []
+    total_files = 0
+    total_venues = 0
+    total_warnings = 0
 
-    for b in blocks:
-        venue = parse_venue(b)
-        ymd = parse_date(b, txt_path)
-        current_day, parsed_total_days = parse_day_info(b)
+    for txt_path in txt_paths:
+        lines_raw = read_text_auto(txt_path)
+        blocks = split_blocks(lines_raw)
 
-        raw_event_title = parse_event_title(b)
-        event_title = normalize_event_title(raw_event_title)
-        event_title_norm = event_title
+        venues_out: List[Dict[str, Any]] = []
+        warnings: List[str] = []
 
-        total_days = resolve_total_days(event_title, parsed_total_days)
-        day_label = format_day_label(current_day, total_days)
-        grade_label = resolve_grade(event_title, venue, ymd)
-        races = parse_races(b)
+        for b in blocks:
+            venue = parse_venue(b)
+            ymd = parse_date(b, txt_path)
+            current_day, parsed_total_days = parse_day_info(b)
 
-        if not venue or not races:
+            raw_event_title = parse_event_title(b)
+            event_title = normalize_event_title(raw_event_title)
+            event_title_norm = event_title
+
+            total_days = resolve_total_days(event_title, parsed_total_days)
+            day_label = format_day_label(current_day, total_days)
+            grade_label = resolve_grade(event_title, venue, ymd)
+            races = parse_races(b)
+
+            if not venue or not races:
+                continue
+
+            for r in races:
+                r["tags"] = classify_race(r)
+                missing = sum(1 for bb in (r.get("boats") or []) if bb.get("_missing"))
+                if missing:
+                    warnings.append(f"{venue} {r.get('rno')}R missing={missing} race_name={r.get('name')}")
+
+            venue_payload: Dict[str, Any] = {
+                "venue": venue,
+                "date": ymd,
+                "event_title": event_title,
+                "event_title_norm": event_title_norm,
+                "grade_label": grade_label,
+            }
+            if current_day is not None:
+                venue_payload["day"] = current_day
+            if total_days is not None:
+                venue_payload["total_days"] = total_days
+            if day_label is not None:
+                venue_payload["day_label"] = day_label
+            venue_payload["races"] = races
+
+            venues_out.append(venue_payload)
+
+        top_date = max(v["date"] for v in venues_out) if venues_out else ""
+        if not top_date:
+            print("skip:", txt_path, "no valid venues")
             continue
 
-        for r in races:
-            r["tags"] = classify_race(r)
-            missing = sum(1 for bb in (r.get("boats") or []) if bb.get("_missing"))
-            if missing:
-                warnings.append(f"{venue} {r.get('rno')}R missing={missing} race_name={r.get('name')}")
+        out_path = build_output_path(top_date)
 
-        venue_payload: Dict[str, Any] = {
-            "venue": venue,
-            "date": ymd,
-            "event_title": event_title,
-            "event_title_norm": event_title_norm,
-            "grade_label": grade_label,
+        payload: Dict[str, Any] = {
+            "source": os.path.basename(txt_path),
+            "date": top_date,
+            "parsed_at": datetime.now(JST).isoformat(),
+            "venue_count": len(venues_out),
+            "venues": venues_out,
+            "warnings": warnings,
         }
-        if current_day is not None:
-            venue_payload["day"] = current_day
-        if total_days is not None:
-            venue_payload["total_days"] = total_days
-        if day_label is not None:
-            venue_payload["day_label"] = day_label
-        venue_payload["races"] = races
 
-        venues_out.append(venue_payload)
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    top_date = max(v["date"] for v in venues_out) if venues_out else ""
-    out_path = build_output_path(top_date)
+        total_files += 1
+        total_venues += len(venues_out)
+        total_warnings += len(warnings)
 
-    payload: Dict[str, Any] = {
-        "source": os.path.basename(txt_path),
-        "date": top_date,
-        "parsed_at": datetime.now(JST).isoformat(),
-        "venue_count": len(venues_out),
-        "venues": venues_out,
-        "warnings": warnings,
-    }
-
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+        print("txt:", txt_path)
+        print("out:", out_path)
+        print("venues:", len(venues_out))
 
     cleanup_old_outputs(365)
 
-    print("txt:", txt_path)
-    print("out:", out_path)
-    print("venues:", len(venues_out))
+    print("done")
+    print("total_files:", total_files)
+    print("total_venues:", total_venues)
+    print("total_warnings:", total_warnings)
     print("event_master_loaded:", len(EVENT_MASTER))
     print("official_grade_cache:", len([k for k, v in OFFICIAL_GRADE_CACHE.items() if v]))
-    if venues_out:
-        print(
-            "first_venue:",
-            venues_out[0]["venue"],
-            "day:",
-            venues_out[0].get("day"),
-            "label:",
-            venues_out[0].get("day_label"),
-            "grade:",
-            venues_out[0].get("grade_label"),
-            "title:",
-            venues_out[0].get("event_title"),
-            "title_norm:",
-            venues_out[0].get("event_title_norm"),
-        )
-        print("first_venue_races:", len(venues_out[0]["races"]))
-    if warnings:
-        print("WARNINGS:")
-        for w in warnings[:120]:
-            print(" -", w)
-        if len(warnings) > 120:
-            print(" - ...", len(warnings) - 120, "more")
 
 
 if __name__ == "__main__":
