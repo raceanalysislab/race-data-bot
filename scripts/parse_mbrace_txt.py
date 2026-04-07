@@ -3,12 +3,18 @@
 # 出力:
 #   data/mbrace_races_YYYY-MM-DD.json
 # today / tomorrow 方式は廃止し、日付ファイル方式に統一
+# 保持方針:
+#   mbrace_races_*.json は直近365日分だけ保持し、それより古いものだけ削除
 
 import json
 import os
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
+
+import requests
+from bs4 import BeautifulSoup
 
 JST = timezone(timedelta(hours=9))
 
@@ -51,6 +57,33 @@ VENUE_NAMES = [
     "宮島", "徳山", "下関", "若松", "芦屋", "福岡", "唐津", "大村"
 ]
 
+VENUE_TO_JCD = {
+    "桐生": "01",
+    "戸田": "02",
+    "江戸川": "03",
+    "平和島": "04",
+    "多摩川": "05",
+    "浜名湖": "06",
+    "蒲郡": "07",
+    "常滑": "08",
+    "津": "09",
+    "三国": "10",
+    "びわこ": "11",
+    "住之江": "12",
+    "尼崎": "13",
+    "鳴門": "14",
+    "丸亀": "15",
+    "児島": "16",
+    "宮島": "17",
+    "徳山": "18",
+    "下関": "19",
+    "若松": "20",
+    "芦屋": "21",
+    "福岡": "22",
+    "唐津": "23",
+    "大村": "24",
+}
+
 BRANCH_PATTERN = "|".join(sorted(map(re.escape, BRANCHES), key=len, reverse=True))
 
 RE_RACE_HEAD = re.compile(
@@ -61,8 +94,35 @@ RE_MD = re.compile(r"([0-9]{1,2})月\s*([0-9]{1,2})日")
 RE_BBGN = re.compile(r"\b\d{2}BBGN\b")
 RE_BEND = re.compile(r"\b\d{2}BEND\b")
 RE_BOAT_PREFIX = re.compile(r"^\s*([1-6])\s+(\d{4})\s*(.*)$")
+RE_BOAT_COMPACT = re.compile(
+    rf"^\s*([1-6])\s*(\d{{4}})\s*(.+?)(\d{{1,2}})({BRANCH_PATTERN})(\d{{2}})(A1|A2|B1|B2)\s+(.*)$"
+)
 
 EVENT_MASTER_PATH = os.path.join("data", "event_master.json")
+OFFICIAL_GRADE_CACHE_PATH = os.path.join("data", "official_grade_cache.json")
+OFFICIAL_GRADE_CACHE: Dict[str, Optional[str]] = {}
+
+
+def load_official_grade_cache() -> Dict[str, Optional[str]]:
+    if not os.path.exists(OFFICIAL_GRADE_CACHE_PATH):
+        return {}
+    try:
+        with open(OFFICIAL_GRADE_CACHE_PATH, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        if isinstance(raw, dict):
+            return {str(k): (str(v) if v is not None else None) for k, v in raw.items()}
+    except Exception:
+        pass
+    return {}
+
+
+def save_official_grade_cache(cache: Dict[str, Optional[str]]) -> None:
+    try:
+        os.makedirs(os.path.dirname(OFFICIAL_GRADE_CACHE_PATH), exist_ok=True)
+        with open(OFFICIAL_GRADE_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 def norm(s: str) -> str:
@@ -92,27 +152,13 @@ def _dedupe_venue_prefix(s: str) -> str:
 
 def normalize_event_title(s: str) -> str:
     s = norm(s)
-
-    # 波ダッシュ系を統一
     s = s.replace("～", "〜").replace("~", "〜")
-
-    # グレード表記だけは照合ノイズとして除去
     s = re.sub(r"\bSG\b", "", s)
     s = re.sub(r"\bG[123]\b", "", s)
-
-    # 回数表記は年で変わるので除去
     s = re.sub(r"第\s*\d+\s*回", "", s)
-
-    # 括弧だけ整理
     s = re.sub(r"[()]", " ", s)
-
-    # 会場名重複吸収
     s = _dedupe_venue_prefix(s)
-
-    # 末尾にぶら下がる孤立数字を削る
-    # 例: "ミッドナイトボートレースin大村 12" -> "ミッドナイトボートレースin大村"
     s = re.sub(r"\s+\d{1,2}$", "", s)
-
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
@@ -177,13 +223,79 @@ def load_event_master() -> Dict[str, Dict[str, Any]]:
 
 
 EVENT_MASTER = load_event_master()
+OFFICIAL_GRADE_CACHE = load_official_grade_cache()
 
 
 def lookup_event_master(title: str) -> Optional[Dict[str, Any]]:
     t_compact = compact_event_title(title)
     if not t_compact:
         return None
-    return EVENT_MASTER.get(t_compact)
+
+    if t_compact in EVENT_MASTER:
+        return EVENT_MASTER[t_compact]
+
+    return None
+
+
+def fetch_grade_from_official(venue: str, ymd: str) -> Optional[str]:
+    venue = str(venue or "").strip()
+    ymd = str(ymd or "").strip()
+
+    if not venue or not ymd:
+        return None
+
+    jcd = VENUE_TO_JCD.get(venue)
+    if not jcd:
+        return None
+
+    cache_key = f"{jcd}_{ymd}"
+    if cache_key in OFFICIAL_GRADE_CACHE:
+        return OFFICIAL_GRADE_CACHE[cache_key]
+
+    hd = ymd.replace("-", "")
+    url = f"https://www.boatrace.jp/owpc/pc/race/raceindex?jcd={jcd}&hd={hd}"
+
+    try:
+        time.sleep(0.5)
+
+        res = requests.get(
+            url,
+            timeout=15,
+            headers={"User-Agent": "Mozilla/5.0"}
+        )
+        res.raise_for_status()
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        el = soup.select_one(".heading2_title")
+        if not el:
+            OFFICIAL_GRADE_CACHE[cache_key] = None
+            save_official_grade_cache(OFFICIAL_GRADE_CACHE)
+            return None
+
+        cls_list = [str(x).strip() for x in el.get("class", []) if str(x).strip()]
+        cls_norm = [x.lower() for x in cls_list]
+
+        if any(x.startswith("is-sg") for x in cls_norm):
+            grade = "SG"
+        elif any(x.startswith("is-g1") for x in cls_norm):
+            grade = "G1"
+        elif any(x.startswith("is-g2") for x in cls_norm):
+            grade = "G2"
+        elif any(x.startswith("is-g3") for x in cls_norm):
+            grade = "G3"
+        elif any(x.startswith("is-ippan") for x in cls_norm):
+            grade = "一般"
+        else:
+            grade = None
+
+        OFFICIAL_GRADE_CACHE[cache_key] = grade
+        save_official_grade_cache(OFFICIAL_GRADE_CACHE)
+        return grade
+
+    except Exception:
+        OFFICIAL_GRADE_CACHE[cache_key] = None
+        save_official_grade_cache(OFFICIAL_GRADE_CACHE)
+        return None
 
 
 def infer_grade_from_title(title: str) -> str:
@@ -193,7 +305,6 @@ def infer_grade_from_title(title: str) -> str:
     if not c:
         return "一般"
 
-    # 明示グレード
     if "SG" in s or "SG" in c:
         return "SG"
     if "G1" in s or "G1" in c:
@@ -203,15 +314,12 @@ def infer_grade_from_title(title: str) -> str:
     if "G3" in s or "G3" in c:
         return "G3"
 
-    # 開設○周年記念だけG1扱い
     if re.search(r"開設\s*\d+\s*周年記念", s):
         return "G1"
 
-    # 市制○周年記念などは一般のまま
     if re.search(r"[市町村]制\s*\d+\s*周年記念", s):
         return "一般"
 
-    # シリーズ系
     if "ヴィーナスシリーズ" in s:
         return "ヴィーナス"
     if "ルーキーシリーズ" in s:
@@ -234,19 +342,6 @@ def read_text_auto(path: str) -> List[str]:
 
 
 def infer_txt_path() -> str:
-    p = os.path.join("data", "source_final_url.txt")
-    if os.path.exists(p):
-        try:
-            url = (open(p, "r", encoding="utf-8", errors="ignore").read() or "").strip()
-            m = re.search(r"/b(\d{6})\.lzh", url)
-            if m:
-                yymmdd = m.group(1)
-                guess = os.path.join("data", "extract", f"b{yymmdd}.txt")
-                if os.path.exists(guess):
-                    return guess
-        except Exception:
-            pass
-
     exdir = os.path.join("data", "extract")
     if os.path.isdir(exdir):
         cands = [fn for fn in os.listdir(exdir) if re.match(r"^b\d{6}\.txt$", fn, re.IGNORECASE)]
@@ -254,7 +349,7 @@ def infer_txt_path() -> str:
             cands.sort()
             return os.path.join(exdir, cands[-1])
 
-    return os.path.join("data", "extract", "b260303.txt")
+    raise FileNotFoundError("no extract txt found")
 
 
 def split_blocks(lines_raw: List[str]) -> List[List[str]]:
@@ -301,7 +396,12 @@ def parse_venue(block: List[str]) -> str:
     return ""
 
 
-def parse_date(block: List[str]) -> str:
+def parse_date(block: List[str], src_path: str = "") -> str:
+    mfile = re.search(r"[bB](\d{2})(\d{2})(\d{2})\.(?:txt|TXT)$", src_path)
+    if mfile:
+        yy, mo, d = mfile.groups()
+        return f"20{yy}-{mo}-{d}"
+
     for l in block[:300]:
         m = RE_YMD.search(l)
         if m:
@@ -377,24 +477,20 @@ def _is_event_title_noise(line: str) -> bool:
 
     if not c:
         return True
-
     if re.fullmatch(r"[-=]+", c):
         return True
     if c.startswith("----"):
         return True
-
     if "番組表" in c:
         return True
     if "主催者発行" in c:
         return True
     if "内容については主催者発行のものと照合して下さい" in c:
         return True
-
     if re.search(r"第[0-9]+日", c) and re.search(r"[0-9]{4}年", c):
         return True
     if re.search(r"[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日", c):
         return True
-
     if RE_RACE_HEAD.search(s):
         return True
     if "締切予定" in c:
@@ -425,7 +521,6 @@ def parse_event_title(block: List[str]) -> str:
     if not cleaned:
         return ""
 
-    # 最優先: 「番組表」の直後にある正式タイトル行
     for i, line in enumerate(cleaned[:80]):
         c = compact(line)
         if "番組表" not in c:
@@ -435,7 +530,6 @@ def parse_event_title(block: List[str]) -> str:
             cand = norm(cleaned[j])
             if _is_event_title_noise(cand):
                 continue
-
             if len(compact(cand)) < 4:
                 continue
 
@@ -443,7 +537,6 @@ def parse_event_title(block: List[str]) -> str:
             if title and not _is_event_title_noise(title):
                 return title
 
-    # 次善: 先頭の会場・日付行から開催名を補助抽出
     for line in cleaned[:12]:
         if "ボートレース" not in line:
             continue
@@ -458,7 +551,11 @@ def parse_event_title(block: List[str]) -> str:
     return ""
 
 
-def resolve_grade(title: str) -> str:
+def resolve_grade(title: str, venue: str = "", ymd: str = "") -> str:
+    scraped = fetch_grade_from_official(venue, ymd)
+    if scraped:
+        return scraped
+
     master_hit = lookup_event_master(title)
     if master_hit:
         grade = str(master_hit.get("grade") or "").strip()
@@ -572,8 +669,8 @@ def _parse_stats_tail(tail: str) -> Optional[Tuple[float, float, float, float, i
         r"^\s*"
         r"(\d{1,3})\s*"
         r"(\d{1,3}\.\d{2})\s*"
-        r"(\d{1,3})\s+"
-        r"([0-9]+\.[0-9]{1,2})"
+        r"(\d{1,3})\s*"
+        r"([0-9]{1,3}\.\d{2})"
         r"(?:\s+(.*))?$",
         rest,
     )
@@ -669,8 +766,56 @@ def _parse_boat_line_main(line: str) -> Optional[Dict[str, Any]]:
     )
 
 
+def _parse_boat_line_fallback_compact(line: str) -> Optional[Dict[str, Any]]:
+    s = _normalize_boat_line(line)
+    s_compact = compact(s)
+    if not s_compact:
+        return None
+
+    m = RE_BOAT_COMPACT.match(s_compact)
+    if not m:
+        return None
+
+    waku = _to_int(m.group(1))
+    regno = _to_int(m.group(2))
+    name = re.sub(r"\s+", "", m.group(3) or "")
+    age = _to_int(m.group(4))
+    branch = m.group(5)
+    weight = _to_int(m.group(6))
+    grade = m.group(7)
+    tail = m.group(8)
+
+    if not waku or not regno or not name or age is None or weight is None:
+        return None
+
+    parsed_tail = _parse_stats_tail(tail)
+    if not parsed_tail:
+        return None
+
+    nat_win, nat_2, loc_win, loc_2, motor_no, motor_2, boat_no, boat_2, note = parsed_tail
+
+    return _build_boat_dict(
+        waku=int(waku),
+        regno=int(regno),
+        name=name,
+        age=int(age),
+        branch=branch,
+        weight=int(weight),
+        grade=grade,
+        nat_win=float(nat_win),
+        nat_2=float(nat_2),
+        loc_win=float(loc_win),
+        loc_2=float(loc_2),
+        motor_no=int(motor_no),
+        motor_2=float(motor_2),
+        boat_no=int(boat_no),
+        boat_2=float(boat_2),
+        note=note,
+    )
+
+
 def _parse_boat_line(line: str) -> Optional[Dict[str, Any]]:
-    return _parse_boat_line_main(line)
+    return _parse_boat_line_main(line) or _parse_boat_line_fallback_compact(line)
 
 
 def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -704,7 +849,7 @@ def _fill_missing_waku(boats: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def _is_boat_candidate(line: str) -> bool:
     s = _normalize_boat_line(line)
-    return bool(RE_BOAT_PREFIX.match(s))
+    return bool(RE_BOAT_PREFIX.match(s) or RE_BOAT_COMPACT.match(compact(s)))
 
 
 def parse_races(block: List[str]) -> List[Dict[str, Any]]:
@@ -829,22 +974,30 @@ def build_output_path(date_str: str) -> str:
     return os.path.join("data", f"mbrace_races_{safe_date}.json")
 
 
-def cleanup_old_outputs(current_out_path: str) -> None:
+def cleanup_old_outputs(keep_days: int = 365) -> None:
     if not os.path.isdir("data"):
         return
 
+    today = datetime.now(JST).date()
+    limit_date = today - timedelta(days=keep_days)
+
     for name in os.listdir("data"):
-        if not re.match(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$", name):
+        m = re.match(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$", name)
+        if not m:
             continue
 
         path = os.path.join("data", name)
-        if os.path.abspath(path) == os.path.abspath(current_out_path):
-            continue
 
         try:
-            os.remove(path)
+            file_date = datetime.strptime(m.group(1), "%Y-%m-%d").date()
         except Exception:
-            pass
+            continue
+
+        if file_date < limit_date:
+            try:
+                os.remove(path)
+            except Exception:
+                pass
 
 
 def main():
@@ -857,7 +1010,7 @@ def main():
 
     for b in blocks:
         venue = parse_venue(b)
-        ymd = parse_date(b)
+        ymd = parse_date(b, txt_path)
         current_day, parsed_total_days = parse_day_info(b)
 
         raw_event_title = parse_event_title(b)
@@ -866,7 +1019,7 @@ def main():
 
         total_days = resolve_total_days(event_title, parsed_total_days)
         day_label = format_day_label(current_day, total_days)
-        grade_label = resolve_grade(event_title)
+        grade_label = resolve_grade(event_title, venue, ymd)
         races = parse_races(b)
 
         if not venue or not races:
@@ -895,7 +1048,7 @@ def main():
 
         venues_out.append(venue_payload)
 
-    top_date = venues_out[0]["date"] if venues_out else ""
+    top_date = max(v["date"] for v in venues_out) if venues_out else ""
     out_path = build_output_path(top_date)
 
     payload: Dict[str, Any] = {
@@ -911,12 +1064,13 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    cleanup_old_outputs(out_path)
+    cleanup_old_outputs(365)
 
     print("txt:", txt_path)
     print("out:", out_path)
     print("venues:", len(venues_out))
     print("event_master_loaded:", len(EVENT_MASTER))
+    print("official_grade_cache:", len([k for k, v in OFFICIAL_GRADE_CACHE.items() if v]))
     if venues_out:
         print(
             "first_venue:",
