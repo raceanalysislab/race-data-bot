@@ -1,6 +1,6 @@
 {
-  "date": "2026-04-07",
-  "checked_at": "2026-04-07T21:44:31.217176+09:00",
+  "date": "2026-04-08",
+  "checked_at": "2026-04-08T00:53:45.761374+09:00",
   "blocked": false,
   "held_places": [
     "戸田",
@@ -21,9 +21,9 @@
       "name": "戸田",
       "jcd": "02",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-08T10:47:00+09:00",
+      "next_display": "1R 10:47",
       "cutoffs": [
         {
           "rno": 1,
@@ -88,9 +88,9 @@
       "name": "平和島",
       "jcd": "04",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-08T10:55:00+09:00",
+      "next_display": "1R 10:55",
       "cutoffs": [
         {
           "rno": 1,
@@ -185,56 +185,7 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "10:41"
-        },
-        {
-          "rno": 2,
-          "time": "11:10"
-        },
-        {
-          "rno": 3,
-          "time": "11:39"
-        },
-        {
-          "rno": 4,
-          "time": "12:09"
-        },
-        {
-          "rno": 5,
-          "time": "12:39"
-        },
-        {
-          "rno": 6,
-          "time": "13:09"
-        },
-        {
-          "rno": 7,
-          "time": "13:40"
-        },
-        {
-          "rno": 8,
-          "time": "14:11"
-        },
-        {
-          "rno": 9,
-          "time": "14:45"
-        },
-        {
-          "rno": 10,
-          "time": "15:21"
-        },
-        {
-          "rno": 11,
-          "time": "15:56"
-        },
-        {
-          "rno": 12,
-          "time": "16:35"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "三国",
