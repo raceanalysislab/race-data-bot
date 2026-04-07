@@ -2,17 +2,20 @@
 # data/mbrace_races_YYYY-MM-DD.json
 # → data/site/races/YYYY-MM-DD/{jcd}_{rno}R.json
 # → data/site/venues/YYYY-MM-DD.json
-# 互換：会場名ファイルも同時に出す
-# 追加：
-#   data/master/merged_players.json を読み込み、
-#   各艇に avg_st / st_count を付与する
-#   各艇の name を正式名で上書きする
-#   data/fl_map.json を読み込み、
-#   各艇に f_count / l_count を付与する
+#
+# 方針:
+# - 通常運用では mbrace_races_*.json のうち最新1件だけを処理する
+# - data/site/races, data/site/venues は全消ししない
+# - 最新日だけ更新し、365日より古い site データだけ削除する
+# - 前回使用者の支部/年齢は source files(mbrace_races_YYYY-MM-DD.json)を
+#   新しい日付から順に見て最初に見つかった最新情報を使う
 
 import json
 import os
 import re
+import unicodedata
+from collections import defaultdict
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 
 SRC_DIR = "data"
@@ -22,6 +25,11 @@ MERGED_PLAYERS_PATH = "data/master/merged_players.json"
 PLAYER_COURSE_STATS_1Y_PATH = "data/player_course_stats_1y.json"
 MEET_PERF_BASE = "data/meet_perf"
 FL_MAP_PATH = "data/fl_map.json"
+WAKU_RECENT_PATH = "data/waku_recent.json"
+WAKU_RECENT_LOCAL_PATH = "data/waku_recent_local.json"
+MOTOR_HISTORY_PATH = "data/motor_history.json"
+
+KEEP_DAYS = 365
 
 VENUE_TO_JCD = {
     "桐生": "01", "戸田": "02", "江戸川": "03", "平和島": "04",
@@ -33,6 +41,8 @@ VENUE_TO_JCD = {
 }
 
 RE_SRC = re.compile(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$")
+RE_DATE_DIR = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+RE_DATE_JSON = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
 
 
 def safe_name(s: str) -> str:
@@ -162,6 +172,39 @@ def _load_fl_map() -> Dict[str, Any]:
         return {}
 
 
+def _load_waku_recent() -> Dict[str, Any]:
+    if not os.path.exists(WAKU_RECENT_PATH):
+        return {}
+    try:
+        return _load_json(WAKU_RECENT_PATH)
+    except Exception as e:
+        print(f"warn: failed to load waku_recent: {e}")
+        return {}
+
+
+def _load_waku_recent_local() -> Dict[str, Any]:
+    if not os.path.exists(WAKU_RECENT_LOCAL_PATH):
+        return {}
+    try:
+        return _load_json(WAKU_RECENT_LOCAL_PATH)
+    except Exception as e:
+        print(f"warn: failed to load waku_recent_local: {e}")
+        return {}
+
+
+def _load_motor_history() -> Dict[str, Any]:
+    if not os.path.exists(MOTOR_HISTORY_PATH):
+        print(f"warn: motor history not found: {MOTOR_HISTORY_PATH}")
+        return {}
+    try:
+        with open(MOTOR_HISTORY_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        print(f"warn: failed to load motor_history: {e}")
+        return {}
+
+
 def load_player_course_stats_1y():
     if not os.path.exists(PLAYER_COURSE_STATS_1Y_PATH):
         return {}
@@ -179,7 +222,299 @@ def _to_reg_key(v: Any) -> str:
     return s if s.isdigit() else ""
 
 
-def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any]) -> Dict[str, Any]:
+def _to_float_or_none(v: Any) -> Any:
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except Exception:
+        return None
+
+
+def _normalize_st_for_output(v: Any) -> str:
+    s = str(v or "").strip()
+    if not s:
+        return ""
+
+    try:
+        n = float(s)
+        return f"{n:.2f}".replace("0.", ".")
+    except Exception:
+        return s
+
+
+def _to_motor_key(v: Any) -> str:
+    s = str(v or "").strip()
+    if not s:
+        return ""
+    if s.isdigit():
+        return str(int(s))
+    return s
+
+
+def _normalize_title(v: Any) -> str:
+    return str(v or "").replace(" ", "").replace("　", "").strip()
+
+
+def _normalize_meet_key(v: Any) -> str:
+    s = str(v or "").strip()
+    if not s:
+        return ""
+
+    s = unicodedata.normalize("NFKC", s)
+    s = s.replace(" ", "").replace("　", "")
+    s = s.replace("〜", "ー").replace("～", "ー")
+    s = s.replace("（", "(").replace("）", ")")
+
+    if "_" in s:
+        head, tail = s.split("_", 1)
+        if head.isdigit():
+            head = head.zfill(2)
+        s = f"{head}_{tail}"
+
+    return s
+
+
+def _same_meet_key(a: Any, b: Any) -> bool:
+    na = _normalize_meet_key(a)
+    nb = _normalize_meet_key(b)
+    return bool(na and nb and na == nb)
+
+
+def _build_meet_key(jcd: str, event_title: str) -> str:
+    j = str(jcd or "").zfill(2)
+    title = _normalize_title(event_title)
+    return _normalize_meet_key(f"{j}_{title}") if j and title else ""
+
+
+def _build_recent_player_map(src_files: List[str]) -> Dict[str, Dict[str, Any]]:
+    recent_map: Dict[str, Dict[str, Any]] = {}
+
+    for src_path in sorted(src_files, reverse=True):
+        try:
+            data = _load_json(src_path)
+        except Exception:
+            continue
+
+        venues = data.get("venues") or []
+        if not isinstance(venues, list):
+            continue
+
+        for venue in venues:
+            races = venue.get("races") or []
+            if not isinstance(races, list):
+                continue
+
+            for race in races:
+                boats = race.get("boats") or []
+                if not isinstance(boats, list):
+                    continue
+
+                for boat in boats:
+                    if not isinstance(boat, dict):
+                        continue
+
+                    reg_key = _to_reg_key(boat.get("regno"))
+                    if not reg_key or reg_key in recent_map:
+                        continue
+
+                    recent_map[reg_key] = {
+                        "regno": reg_key,
+                        "name": str(boat.get("name") or "").strip(),
+                        "branch": str(boat.get("branch") or "").strip(),
+                        "age": boat.get("age"),
+                    }
+
+    return recent_map
+
+
+def _empty_motor_prev(motor_key: str) -> Dict[str, Any]:
+    return {
+        "motor_no": int(motor_key) if motor_key and motor_key.isdigit() else (motor_key or None),
+        "prev_date": "",
+        "prev_rider": "",
+        "prev_rider_name": "",
+        "prev_rider_regno": "",
+        "prev_rider_branch": "",
+        "prev_rider_age": None,
+        "records": [],
+        "days": [[None, None] for _ in range(7)],
+        "day_labels": ["1日目", "2日目", "3日目", "4日目", "5日目", "6日目", "7日目"],
+        "avg_st": None,
+        "win_rate": None,
+    }
+
+
+def _build_motor_prev(
+    boat: Dict[str, Any],
+    motor_history: Dict[str, Any],
+    race_date: str,
+    jcd: str,
+    current_meet_key: str,
+    recent_player_map: Dict[str, Dict[str, Any]],
+) -> Dict[str, Any]:
+    motor_key = _to_motor_key(boat.get("motor_no"))
+    if not motor_key:
+        return _empty_motor_prev(motor_key)
+
+    target_jcd = str(jcd or "").zfill(2)
+    history_key = f"{target_jcd}_{motor_key}"
+
+    rows = motor_history.get(history_key)
+    if not isinstance(rows, list) or not rows:
+        return _empty_motor_prev(motor_key)
+
+    target_date = str(race_date or "").strip()
+    normalized_current_meet_key = _normalize_meet_key(current_meet_key)
+
+    filtered: List[Dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+
+        row_date = str(row.get("date") or "").strip()
+        if target_date and row_date >= target_date:
+            continue
+
+        row_jcd = str(row.get("jcd") or "").zfill(2)
+        if target_jcd and row_jcd and row_jcd != target_jcd:
+            continue
+
+        row_meet_key = str(row.get("meet_key") or "").strip()
+
+        if normalized_current_meet_key and _same_meet_key(row_meet_key, normalized_current_meet_key):
+            continue
+
+        filtered.append(row)
+
+    if not filtered:
+        return _empty_motor_prev(motor_key)
+
+    filtered.sort(
+        key=lambda x: (
+            str(x.get("date") or ""),
+            int(x.get("rno") or 0),
+        ),
+        reverse=True,
+    )
+
+    latest_prev = filtered[0]
+    prev_meet_key = str(latest_prev.get("meet_key") or "").strip()
+    normalized_prev_meet_key = _normalize_meet_key(prev_meet_key)
+
+    if normalized_prev_meet_key:
+        prev_segment = [
+            row for row in filtered
+            if _same_meet_key(str(row.get("meet_key") or "").strip(), normalized_prev_meet_key)
+        ]
+    else:
+        fallback_date = str(latest_prev.get("date") or "").strip()
+        prev_segment = [row for row in filtered if str(row.get("date") or "").strip() == fallback_date]
+
+    if not prev_segment:
+        return _empty_motor_prev(motor_key)
+
+    prev_segment.sort(
+        key=lambda x: (
+            str(x.get("date") or ""),
+            int(x.get("rno") or 0),
+        )
+    )
+
+    unique_dates = sorted({
+        str(r.get("date") or "").strip()
+        for r in prev_segment
+        if str(r.get("date") or "").strip()
+    })
+
+    date_to_day_index = {d: i for i, d in enumerate(unique_dates[:7])}
+
+    days: List[List[Any]] = [[None, None] for _ in range(7)]
+    normalized_records: List[Dict[str, Any]] = []
+    st_vals: List[float] = []
+    finish_nums: List[int] = []
+
+    prev_date = unique_dates[-1] if unique_dates else ""
+    prev_name = str(latest_prev.get("name") or "").strip()
+    prev_regno = str(latest_prev.get("regno") or latest_prev.get("reg") or "").strip()
+
+    prev_player = recent_player_map.get(prev_regno, {}) if prev_regno else {}
+    prev_branch = str(prev_player.get("branch") or "").strip()
+    prev_age = prev_player.get("age")
+
+    day_grouped: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+
+    for r in prev_segment:
+        row_date = str(r.get("date") or "").strip()
+        if row_date not in date_to_day_index:
+            continue
+
+        finish = r.get("finish")
+        st_raw = r.get("st_raw", r.get("st", ""))
+        waku = r.get("boat")
+        course = r.get("course", r.get("boat"))
+
+        slot = {
+            "race": r.get("rno"),
+            "waku": waku,
+            "finish": finish,
+            "st": _normalize_st_for_output(st_raw),
+            "course": course,
+            "rank": finish,
+        }
+
+        day_grouped[row_date].append(slot)
+        normalized_records.append(slot)
+
+        st_num = _to_float_or_none(st_raw)
+        if st_num is not None:
+            st_vals.append(st_num)
+
+        try:
+            finish_int = int(finish)
+            finish_nums.append(finish_int)
+        except Exception:
+            pass
+
+    for date_key, items in day_grouped.items():
+        items.sort(key=lambda x: int(x.get("race") or 0))
+        day_index = date_to_day_index[date_key]
+
+        pair: List[Any] = [None, None]
+        if len(items) >= 1:
+            pair[0] = items[0]
+        if len(items) >= 2:
+            pair[1] = items[1]
+
+        days[day_index] = pair
+
+    avg_st = round(sum(st_vals) / len(st_vals), 2) if st_vals else None
+    win_rate = round(sum(1 for x in finish_nums if x == 1) / len(finish_nums) * 100, 2) if finish_nums else None
+
+    return {
+        "motor_no": int(motor_key) if motor_key.isdigit() else motor_key,
+        "prev_date": prev_date,
+        "prev_rider": prev_name,
+        "prev_rider_name": prev_name,
+        "prev_rider_regno": prev_regno,
+        "prev_rider_branch": prev_branch,
+        "prev_rider_age": prev_age,
+        "records": normalized_records,
+        "days": days,
+        "day_labels": ["1日目", "2日目", "3日目", "4日目", "5日目", "6日目", "7日目"],
+        "avg_st": avg_st,
+        "win_rate": win_rate,
+    }
+
+
+def _merge_boat_stats(
+    boat: Dict[str, Any],
+    merged_players: Dict[str, Any],
+    player_course_stats_1y,
+    waku_recent_map,
+    waku_recent_local_map,
+    jcd: str,
+):
     out = dict(boat)
     reg_key = _to_reg_key(out.get("regno"))
 
@@ -233,10 +568,32 @@ def _merge_boat_stats(boat: Dict[str, Any], merged_players: Dict[str, Any], play
     out["course_sashi"] = kimarite.get("差し", 0)
     out["course_makuri"] = kimarite.get("まくり", 0)
     out["course_makurisashi"] = kimarite.get("まくり差し", 0)
+
+    waku = str(out.get("waku") or "").strip()
+
+    key = f"{reg_key}_{waku}"
+    wr = waku_recent_map.get(key)
+    if isinstance(wr, dict):
+        out["waku_recent"] = wr.get("records", [])
+        out["waku_recent_avg_st"] = wr.get("avg_st")
+
+    local_key = f"{reg_key}_{waku}_{str(jcd or '').zfill(2)}"
+    wr_local = waku_recent_local_map.get(local_key)
+    if isinstance(wr_local, dict):
+        out["waku_recent_local"] = wr_local.get("records", [])
+        out["waku_recent_local_avg_st"] = wr_local.get("avg_st")
+
     return out
 
 
-def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any]) -> Dict[str, Any]:
+def _merge_race_stats(
+    race,
+    merged_players,
+    player_course_stats_1y,
+    waku_recent_map,
+    waku_recent_local_map,
+    jcd: str,
+):
     out = dict(race)
     boats = out.get("boats") or []
     if not isinstance(boats, list):
@@ -244,7 +601,14 @@ def _merge_race_stats(race: Dict[str, Any], merged_players: Dict[str, Any], play
         return out
 
     out["boats"] = [
-        _merge_boat_stats(b, merged_players, player_course_stats_1y) if isinstance(b, dict) else b
+        _merge_boat_stats(
+            b,
+            merged_players,
+            player_course_stats_1y,
+            waku_recent_map,
+            waku_recent_local_map,
+            jcd,
+        ) if isinstance(b, dict) else b
         for b in boats
     ]
     return out
@@ -265,12 +629,48 @@ def _attach_fl_to_race(race: Dict[str, Any], fl_map: Dict[str, Any]) -> Dict[str
             continue
 
         b = dict(boat)
-        regno = str(b.get("regno") or "").strip()
+        regno = str(int(b.get("regno") or 0))
         fl = fl_map.get(regno, {}) if regno else {}
 
-        b["f_count"] = fl.get("F", 0)
-        b["l_count"] = fl.get("L", 0)
+        b["F"] = fl.get("F", 0)
+        b["L"] = fl.get("L", 0)
 
+        new_boats.append(b)
+
+    out["boats"] = new_boats
+    return out
+
+
+def _attach_motor_prev_to_race(
+    race: Dict[str, Any],
+    motor_history: Dict[str, Any],
+    race_date: str,
+    jcd: str,
+    current_meet_key: str,
+    recent_player_map: Dict[str, Dict[str, Any]],
+) -> Dict[str, Any]:
+    out = dict(race)
+    boats = out.get("boats") or []
+
+    if not isinstance(boats, list):
+        out["boats"] = []
+        return out
+
+    new_boats = []
+    for boat in boats:
+        if not isinstance(boat, dict):
+            new_boats.append(boat)
+            continue
+
+        b = dict(boat)
+        b["motor_prev"] = _build_motor_prev(
+            b,
+            motor_history,
+            race_date,
+            jcd,
+            current_meet_key,
+            recent_player_map,
+        )
         new_boats.append(b)
 
     out["boats"] = new_boats
@@ -290,25 +690,82 @@ def _collect_sources() -> List[str]:
     return files
 
 
-def _clear_dir_tree(base_dir: str) -> None:
-    if not os.path.isdir(base_dir):
-        os.makedirs(base_dir, exist_ok=True)
-        return
+def _collect_latest_source(src_files: List[str]) -> List[str]:
+    return src_files[-1:] if src_files else []
 
-    for name in os.listdir(base_dir):
-        path = os.path.join(base_dir, name)
+
+def _clear_day_outputs(date_str: str) -> None:
+    race_dir = os.path.join(OUT_RACES_BASE, date_str)
+    if os.path.isdir(race_dir):
+        for root, dirs, files in os.walk(race_dir, topdown=False):
+            for fn in files:
+                try:
+                    os.remove(os.path.join(root, fn))
+                except Exception:
+                    pass
+            for dn in dirs:
+                try:
+                    os.rmdir(os.path.join(root, dn))
+                except Exception:
+                    pass
         try:
-            if os.path.isdir(path):
-                for root, dirs, files in os.walk(path, topdown=False):
-                    for fn in files:
-                        os.remove(os.path.join(root, fn))
-                    for dn in dirs:
-                        os.rmdir(os.path.join(root, dn))
-                os.rmdir(path)
-            else:
-                os.remove(path)
+            os.rmdir(race_dir)
         except Exception:
             pass
+
+    venue_path = os.path.join(OUT_VENUES_BASE, f"{date_str}.json")
+    if os.path.exists(venue_path):
+        try:
+            os.remove(venue_path)
+        except Exception:
+            pass
+
+
+def _cleanup_old_site_outputs(keep_days: int = KEEP_DAYS) -> None:
+    today = datetime.now().date()
+    limit_date = today - timedelta(days=keep_days)
+
+    if os.path.isdir(OUT_RACES_BASE):
+        for name in os.listdir(OUT_RACES_BASE):
+            if not RE_DATE_DIR.match(name):
+                continue
+            try:
+                d = datetime.strptime(name, "%Y-%m-%d").date()
+            except Exception:
+                continue
+            if d < limit_date:
+                path = os.path.join(OUT_RACES_BASE, name)
+                for root, dirs, files in os.walk(path, topdown=False):
+                    for fn in files:
+                        try:
+                            os.remove(os.path.join(root, fn))
+                        except Exception:
+                            pass
+                    for dn in dirs:
+                        try:
+                            os.rmdir(os.path.join(root, dn))
+                        except Exception:
+                            pass
+                try:
+                    os.rmdir(path)
+                except Exception:
+                    pass
+
+    if os.path.isdir(OUT_VENUES_BASE):
+        for name in os.listdir(OUT_VENUES_BASE):
+            m = RE_DATE_JSON.match(name)
+            if not m:
+                continue
+            try:
+                d = datetime.strptime(m.group(1), "%Y-%m-%d").date()
+            except Exception:
+                continue
+            if d < limit_date:
+                path = os.path.join(OUT_VENUES_BASE, name)
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
 
 
 def _build_race_times(races: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -359,7 +816,16 @@ def _build_venue_card(v: Dict[str, Any], top_date: str) -> Dict[str, Any]:
     }
 
 
-def build_one(src_path: str, merged_players: Dict[str, Any], player_course_stats_1y: Dict[str, Any], fl_map: Dict[str, Any]) -> Tuple[int, int, int]:
+def build_one(
+    src_path: str,
+    merged_players: Dict[str, Any],
+    player_course_stats_1y,
+    fl_map,
+    waku_recent_map,
+    waku_recent_local_map,
+    motor_history,
+    recent_player_map,
+):
     if not os.path.exists(src_path):
         print(f"skip: {src_path} not found")
         return 0, 0, 0
@@ -371,8 +837,11 @@ def build_one(src_path: str, merged_players: Dict[str, Any], player_course_stats
         print(f"skip: no top date in {src_path}")
         return 0, 0, 0
 
+    _clear_day_outputs(top_date)
+
     out_race_dir = os.path.join(OUT_RACES_BASE, top_date)
     os.makedirs(out_race_dir, exist_ok=True)
+    os.makedirs(OUT_VENUES_BASE, exist_ok=True)
 
     venues: List[Dict[str, Any]] = data.get("venues") or []
     created = 0
@@ -390,6 +859,7 @@ def build_one(src_path: str, merged_players: Dict[str, Any], player_course_stats
         races = v.get("races") or []
 
         jcd = VENUE_TO_JCD.get(venue_name, "") or "00"
+        current_meet_key = _build_meet_key(jcd, event_title)
 
         venue_cards.append(_build_venue_card(v, top_date))
 
@@ -403,8 +873,24 @@ def build_one(src_path: str, merged_players: Dict[str, Any], player_course_stats
 
             meet_perf_json = _load_meet_perf(date, jcd) if jcd != "00" else {}
 
-            merged_race = _merge_race_stats(race, merged_players, player_course_stats_1y)
+            merged_race = _merge_race_stats(
+                race,
+                merged_players,
+                player_course_stats_1y,
+                waku_recent_map,
+                waku_recent_local_map,
+                jcd,
+            )
+
             merged_race = _attach_fl_to_race(merged_race, fl_map)
+            merged_race = _attach_motor_prev_to_race(
+                merged_race,
+                motor_history,
+                date,
+                jcd,
+                current_meet_key,
+                recent_player_map,
+            )
 
             out: Dict[str, Any] = {
                 "date": date,
@@ -458,21 +944,43 @@ def main():
     merged_players = _load_merged_players()
     player_course_stats_1y = load_player_course_stats_1y()
     fl_map = _load_fl_map()
+    waku_recent_map = _load_waku_recent()
+    waku_recent_local_map = _load_waku_recent_local()
+    motor_history = _load_motor_history()
 
     print("merged_players:", len(merged_players))
     print("fl_map:", len(fl_map))
+    print("waku_recent:", len(waku_recent_map))
+    print("waku_recent_local:", len(waku_recent_local_map))
+    print("motor_history:", len(motor_history))
 
     src_files = _collect_sources()
     print("source_files:", len(src_files))
 
-    _clear_dir_tree(OUT_RACES_BASE)
-    _clear_dir_tree(OUT_VENUES_BASE)
+    recent_player_map = _build_recent_player_map(src_files)
+    print("recent_player_map:", len(recent_player_map))
 
-    for src_path in src_files:
-        created, skipped, venues_created = build_one(src_path, merged_players, player_course_stats_1y, fl_map)
+    target_files = _collect_latest_source(src_files)
+    print("target_files:", len(target_files))
+    if target_files:
+        print("target_source:", target_files[0])
+
+    for src_path in target_files:
+        created, skipped, venues_created = build_one(
+            src_path,
+            merged_players,
+            player_course_stats_1y,
+            fl_map,
+            waku_recent_map,
+            waku_recent_local_map,
+            motor_history,
+            recent_player_map,
+        )
         total_created += created
         total_skipped += skipped
         total_venues += venues_created
+
+    _cleanup_old_site_outputs(KEEP_DAYS)
 
     print("done")
     print("total_created_races:", total_created)
