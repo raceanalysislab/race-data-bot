@@ -1,7 +1,7 @@
 {
   "source": "b260407.txt",
   "date": "2026-04-07",
-  "parsed_at": "2026-04-07T20:40:58.231753+09:00",
+  "parsed_at": "2026-04-07T21:47:10.321756+09:00",
   "venue_count": 11,
   "venues": [
     {
@@ -9,7 +9,7 @@
       "date": "2026-04-07",
       "event_title": "BTS鹿島開設11周年記念 肥前鹿島干潟杯",
       "event_title_norm": "BTS鹿島開設11周年記念 肥前鹿島干潟杯",
-      "grade_label": "G1",
+      "grade_label": "一般",
       "day": 1,
       "day_label": "初日",
       "races": [
@@ -7315,22 +7315,21 @@
             },
             {
               "waku": 3,
-              "regno": null,
-              "name": "取得失敗",
-              "age": null,
-              "branch": "",
-              "weight": null,
-              "grade": "",
-              "nat_win": null,
-              "nat_2": null,
-              "loc_win": null,
-              "loc_2": null,
-              "motor_no": null,
-              "motor_2": null,
-              "boat_no": null,
-              "boat_2": null,
-              "note": "WARNING: missing row (parser could not extract this boat line)",
-              "_missing": true
+              "regno": 3718,
+              "name": "伊達正利",
+              "age": 51,
+              "branch": "静岡",
+              "weight": 56,
+              "grade": "B1",
+              "nat_win": 4.46,
+              "nat_2": 26.97,
+              "loc_win": 4.33,
+              "loc_2": 22.22,
+              "motor_no": 14,
+              "motor_2": 50.0,
+              "boat_no": 461,
+              "boat_2": 0.0,
+              "note": "414 12"
             },
             {
               "waku": 4,
@@ -7387,9 +7386,7 @@
               "note": "5 36"
             }
           ],
-          "tags": [
-            "要確認"
-          ]
+          "tags": []
         },
         {
           "rno": 3,
@@ -8552,27 +8549,24 @@
             },
             {
               "waku": 6,
-              "regno": null,
-              "name": "取得失敗",
-              "age": null,
-              "branch": "",
-              "weight": null,
-              "grade": "",
-              "nat_win": null,
-              "nat_2": null,
-              "loc_win": null,
-              "loc_2": null,
-              "motor_no": null,
-              "motor_2": null,
-              "boat_no": null,
-              "boat_2": null,
-              "note": "WARNING: missing row (parser could not extract this boat line)",
-              "_missing": true
+              "regno": 3718,
+              "name": "伊達正利",
+              "age": 51,
+              "branch": "静岡",
+              "weight": 56,
+              "grade": "B1",
+              "nat_win": 4.46,
+              "nat_2": 26.97,
+              "loc_win": 4.33,
+              "loc_2": 22.22,
+              "motor_no": 14,
+              "motor_2": 50.0,
+              "boat_no": 461,
+              "boat_2": 0.0,
+              "note": "414 2"
             }
           ],
-          "tags": [
-            "要確認"
-          ]
+          "tags": []
         }
       ]
     },
@@ -8581,7 +8575,7 @@
       "date": "2026-04-07",
       "event_title": "津ダイヤモンドカップ",
       "event_title_norm": "津ダイヤモンドカップ",
-      "grade_label": "一般",
+      "grade_label": "G1",
       "day": 6,
       "day_label": "6日目",
       "races": [
@@ -15714,8 +15708,5 @@
       ]
     }
   ],
-  "warnings": [
-    "三国 2R missing=1 race_name=みくにあさガ",
-    "三国 12R missing=1 race_name=カニ坊選抜"
-  ]
+  "warnings": []
 }
