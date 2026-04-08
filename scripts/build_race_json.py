@@ -9,6 +9,10 @@
 # - 最新日だけ更新し、365日より古い site データだけ削除する
 # - 前回使用者の支部/年齢は source files(mbrace_races_YYYY-MM-DD.json)を
 #   新しい日付から順に見て最初に見つかった最新情報を使う
+# - モーター世代切替対応:
+#   race_date が会場ごとの reset_date 以降なら、
+#   その日以降の履歴だけを現世代として扱う
+#   reset_date 以降の履歴が0件なら is_new_motor = true
 
 import json
 import os
@@ -28,6 +32,7 @@ FL_MAP_PATH = "data/fl_map.json"
 WAKU_RECENT_PATH = "data/waku_recent.json"
 WAKU_RECENT_LOCAL_PATH = "data/waku_recent_local.json"
 MOTOR_HISTORY_PATH = "data/motor_history.json"
+MOTOR_RESET_DATES_PATH = "data/motor_reset_dates.json"
 
 KEEP_DAYS = 365
 
@@ -38,6 +43,33 @@ VENUE_TO_JCD = {
     "尼崎": "13", "鳴門": "14", "丸亀": "15", "児島": "16",
     "宮島": "17", "徳山": "18", "下関": "19", "若松": "20",
     "芦屋": "21", "福岡": "22", "唐津": "23", "大村": "24",
+}
+
+JCD_TO_VENUE_KEY = {
+    "01": "kiryu",
+    "02": "toda",
+    "03": "edogawa",
+    "04": "heiwajima",
+    "05": "tamagawa",
+    "06": "hamanako",
+    "07": "gamagori",
+    "08": "tokoname",
+    "09": "tsu",
+    "10": "mikuni",
+    "11": "biwako",
+    "12": "suminoe",
+    "13": "amagasaki",
+    "14": "naruto",
+    "15": "marugame",
+    "16": "kojima",
+    "17": "miyajima",
+    "18": "tokuyama",
+    "19": "shimonoseki",
+    "20": "wakamatsu",
+    "21": "ashiya",
+    "22": "fukuoka",
+    "23": "karatsu",
+    "24": "omura",
 }
 
 RE_SRC = re.compile(r"^mbrace_races_(\d{4}-\d{2}-\d{2})\.json$")
@@ -205,6 +237,19 @@ def _load_motor_history() -> Dict[str, Any]:
         return {}
 
 
+def _load_motor_reset_dates() -> Dict[str, Any]:
+    if not os.path.exists(MOTOR_RESET_DATES_PATH):
+        print(f"warn: motor reset dates not found: {MOTOR_RESET_DATES_PATH}")
+        return {}
+    try:
+        with open(MOTOR_RESET_DATES_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        print(f"warn: failed to load motor_reset_dates: {e}")
+        return {}
+
+
 def load_player_course_stats_1y():
     if not os.path.exists(PLAYER_COURSE_STATS_1Y_PATH):
         return {}
@@ -328,7 +373,27 @@ def _build_recent_player_map(src_files: List[str]) -> Dict[str, Dict[str, Any]]:
     return recent_map
 
 
-def _empty_motor_prev(motor_key: str) -> Dict[str, Any]:
+def _effective_reset_date(
+    race_date: str,
+    jcd: str,
+    motor_reset_dates: Dict[str, Any],
+) -> str:
+    target_date = str(race_date or "").strip()
+    target_jcd = str(jcd or "").zfill(2)
+    venue_key = JCD_TO_VENUE_KEY.get(target_jcd, "")
+    reset_date = str(motor_reset_dates.get(venue_key) or "").strip()
+
+    if not target_date or not reset_date:
+        return ""
+
+    # reset_date が未来なら、まだ旧世代期間なので適用しない
+    if target_date < reset_date:
+        return ""
+
+    return reset_date
+
+
+def _empty_motor_prev(motor_key: str, is_new_motor: bool = False, reset_date: str = "") -> Dict[str, Any]:
     return {
         "motor_no": int(motor_key) if motor_key and motor_key.isdigit() else (motor_key or None),
         "prev_date": "",
@@ -342,12 +407,15 @@ def _empty_motor_prev(motor_key: str) -> Dict[str, Any]:
         "day_labels": ["1日目", "2日目", "3日目", "4日目", "5日目", "6日目", "7日目"],
         "avg_st": None,
         "win_rate": None,
+        "is_new_motor": is_new_motor,
+        "reset_date": reset_date,
     }
 
 
 def _build_motor_prev(
     boat: Dict[str, Any],
     motor_history: Dict[str, Any],
+    motor_reset_dates: Dict[str, Any],
     race_date: str,
     jcd: str,
     current_meet_key: str,
@@ -361,11 +429,11 @@ def _build_motor_prev(
     history_key = f"{target_jcd}_{motor_key}"
 
     rows = motor_history.get(history_key)
-    if not isinstance(rows, list) or not rows:
-        return _empty_motor_prev(motor_key)
+    rows = rows if isinstance(rows, list) else []
 
     target_date = str(race_date or "").strip()
     normalized_current_meet_key = _normalize_meet_key(current_meet_key)
+    reset_date = _effective_reset_date(target_date, target_jcd, motor_reset_dates)
 
     filtered: List[Dict[str, Any]] = []
     for row in rows:
@@ -385,10 +453,15 @@ def _build_motor_prev(
         if normalized_current_meet_key and _same_meet_key(row_meet_key, normalized_current_meet_key):
             continue
 
+        if reset_date and row_date and row_date < reset_date:
+            continue
+
         filtered.append(row)
 
+    is_new_motor = bool(reset_date) and len(filtered) == 0
+
     if not filtered:
-        return _empty_motor_prev(motor_key)
+        return _empty_motor_prev(motor_key, is_new_motor=is_new_motor, reset_date=reset_date)
 
     filtered.sort(
         key=lambda x: (
@@ -412,7 +485,7 @@ def _build_motor_prev(
         prev_segment = [row for row in filtered if str(row.get("date") or "").strip() == fallback_date]
 
     if not prev_segment:
-        return _empty_motor_prev(motor_key)
+        return _empty_motor_prev(motor_key, is_new_motor=is_new_motor, reset_date=reset_date)
 
     prev_segment.sort(
         key=lambda x: (
@@ -504,6 +577,8 @@ def _build_motor_prev(
         "day_labels": ["1日目", "2日目", "3日目", "4日目", "5日目", "6日目", "7日目"],
         "avg_st": avg_st,
         "win_rate": win_rate,
+        "is_new_motor": is_new_motor,
+        "reset_date": reset_date,
     }
 
 
@@ -644,6 +719,7 @@ def _attach_fl_to_race(race: Dict[str, Any], fl_map: Dict[str, Any]) -> Dict[str
 def _attach_motor_prev_to_race(
     race: Dict[str, Any],
     motor_history: Dict[str, Any],
+    motor_reset_dates: Dict[str, Any],
     race_date: str,
     jcd: str,
     current_meet_key: str,
@@ -663,14 +739,17 @@ def _attach_motor_prev_to_race(
             continue
 
         b = dict(boat)
-        b["motor_prev"] = _build_motor_prev(
+        motor_prev = _build_motor_prev(
             b,
             motor_history,
+            motor_reset_dates,
             race_date,
             jcd,
             current_meet_key,
             recent_player_map,
         )
+        b["motor_prev"] = motor_prev
+        b["is_new_motor"] = bool(motor_prev.get("is_new_motor"))
         new_boats.append(b)
 
     out["boats"] = new_boats
@@ -824,6 +903,7 @@ def build_one(
     waku_recent_map,
     waku_recent_local_map,
     motor_history,
+    motor_reset_dates,
     recent_player_map,
 ):
     if not os.path.exists(src_path):
@@ -886,6 +966,7 @@ def build_one(
             merged_race = _attach_motor_prev_to_race(
                 merged_race,
                 motor_history,
+                motor_reset_dates,
                 date,
                 jcd,
                 current_meet_key,
@@ -947,12 +1028,14 @@ def main():
     waku_recent_map = _load_waku_recent()
     waku_recent_local_map = _load_waku_recent_local()
     motor_history = _load_motor_history()
+    motor_reset_dates = _load_motor_reset_dates()
 
     print("merged_players:", len(merged_players))
     print("fl_map:", len(fl_map))
     print("waku_recent:", len(waku_recent_map))
     print("waku_recent_local:", len(waku_recent_local_map))
     print("motor_history:", len(motor_history))
+    print("motor_reset_dates:", len(motor_reset_dates))
 
     src_files = _collect_sources()
     print("source_files:", len(src_files))
@@ -974,6 +1057,7 @@ def main():
             waku_recent_map,
             waku_recent_local_map,
             motor_history,
+            motor_reset_dates,
             recent_player_map,
         )
         total_created += created
