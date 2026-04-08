@@ -12,7 +12,7 @@
 # - モーター世代切替対応:
 #   race_date が会場ごとの reset_date 以降なら、
 #   その日以降の履歴だけを現世代として扱う
-#   reset_date 以降の履歴が0件なら is_new_motor = true
+# - reset当日は強制で is_new_motor = true にする
 
 import json
 import os
@@ -386,7 +386,6 @@ def _effective_reset_date(
     if not target_date or not reset_date:
         return ""
 
-    # reset_date が未来なら、まだ旧世代期間なので適用しない
     if target_date < reset_date:
         return ""
 
@@ -458,10 +457,18 @@ def _build_motor_prev(
 
         filtered.append(row)
 
-    is_new_motor = bool(reset_date) and len(filtered) == 0
+    is_new_motor = False
+    if reset_date:
+        if target_date == reset_date:
+            is_new_motor = True
+        elif len(filtered) == 0:
+            is_new_motor = True
+
+    if is_new_motor:
+        return _empty_motor_prev(motor_key, is_new_motor=True, reset_date=reset_date)
 
     if not filtered:
-        return _empty_motor_prev(motor_key, is_new_motor=is_new_motor, reset_date=reset_date)
+        return _empty_motor_prev(motor_key, is_new_motor=False, reset_date=reset_date)
 
     filtered.sort(
         key=lambda x: (
@@ -485,7 +492,7 @@ def _build_motor_prev(
         prev_segment = [row for row in filtered if str(row.get("date") or "").strip() == fallback_date]
 
     if not prev_segment:
-        return _empty_motor_prev(motor_key, is_new_motor=is_new_motor, reset_date=reset_date)
+        return _empty_motor_prev(motor_key, is_new_motor=False, reset_date=reset_date)
 
     prev_segment.sort(
         key=lambda x: (
