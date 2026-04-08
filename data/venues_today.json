@@ -1,15 +1,15 @@
 {
-  "date": "2026-04-08",
-  "checked_at": "2026-04-08T23:00:22.651096+09:00",
+  "date": "2026-04-09",
+  "checked_at": "2026-04-09T00:24:07.083175+09:00",
   "blocked": false,
   "held_places": [
     "戸田",
-    "平和島",
+    "浜名湖",
     "蒲郡",
     "常滑",
     "三国",
     "びわこ",
-    "住之江",
+    "丸亀",
     "児島",
     "唐津",
     "大村"
@@ -28,9 +28,9 @@
       "name": "戸田",
       "jcd": "02",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T10:47:00+09:00",
+      "next_display": "1R 10:47",
       "cutoffs": [
         {
           "rno": 1,
@@ -94,60 +94,11 @@
     {
       "name": "平和島",
       "jcd": "04",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "10:55"
-        },
-        {
-          "rno": 2,
-          "time": "11:24"
-        },
-        {
-          "rno": 3,
-          "time": "11:53"
-        },
-        {
-          "rno": 4,
-          "time": "12:22"
-        },
-        {
-          "rno": 5,
-          "time": "12:52"
-        },
-        {
-          "rno": 6,
-          "time": "13:22"
-        },
-        {
-          "rno": 7,
-          "time": "13:53"
-        },
-        {
-          "rno": 8,
-          "time": "14:24"
-        },
-        {
-          "rno": 9,
-          "time": "14:56"
-        },
-        {
-          "rno": 10,
-          "time": "15:29"
-        },
-        {
-          "rno": 11,
-          "time": "16:03"
-        },
-        {
-          "rno": 12,
-          "time": "16:38"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "多摩川",
@@ -161,19 +112,68 @@
     {
       "name": "浜名湖",
       "jcd": "06",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T11:32:00+09:00",
+      "next_display": "1R 11:32",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "11:32"
+        },
+        {
+          "rno": 2,
+          "time": "11:57"
+        },
+        {
+          "rno": 3,
+          "time": "12:22"
+        },
+        {
+          "rno": 4,
+          "time": "12:51"
+        },
+        {
+          "rno": 5,
+          "time": "13:22"
+        },
+        {
+          "rno": 6,
+          "time": "13:55"
+        },
+        {
+          "rno": 7,
+          "time": "14:23"
+        },
+        {
+          "rno": 8,
+          "time": "14:58"
+        },
+        {
+          "rno": 9,
+          "time": "15:35"
+        },
+        {
+          "rno": 10,
+          "time": "16:10"
+        },
+        {
+          "rno": 11,
+          "time": "16:39"
+        },
+        {
+          "rno": 12,
+          "time": "17:08"
+        }
+      ]
     },
     {
       "name": "蒲郡",
       "jcd": "07",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T15:23:00+09:00",
+      "next_display": "1R 15:23",
       "cutoffs": [
         {
           "rno": 1,
@@ -185,39 +185,39 @@
         },
         {
           "rno": 3,
-          "time": "16:13"
+          "time": "16:16"
         },
         {
           "rno": 4,
-          "time": "16:36"
+          "time": "16:42"
         },
         {
           "rno": 5,
-          "time": "17:02"
+          "time": "17:10"
         },
         {
           "rno": 6,
-          "time": "17:29"
+          "time": "17:37"
         },
         {
           "rno": 7,
-          "time": "17:58"
+          "time": "18:04"
         },
         {
           "rno": 8,
-          "time": "18:27"
+          "time": "18:33"
         },
         {
           "rno": 9,
-          "time": "18:56"
+          "time": "19:04"
         },
         {
           "rno": 10,
-          "time": "19:25"
+          "time": "19:36"
         },
         {
           "rno": 11,
-          "time": "19:59"
+          "time": "20:07"
         },
         {
           "rno": 12,
@@ -229,9 +229,9 @@
       "name": "常滑",
       "jcd": "08",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T10:18:00+09:00",
+      "next_display": "1R 10:18",
       "cutoffs": [
         {
           "rno": 1,
@@ -239,23 +239,23 @@
         },
         {
           "rno": 2,
-          "time": "10:46"
+          "time": "10:45"
         },
         {
           "rno": 3,
-          "time": "11:15"
+          "time": "11:14"
         },
         {
           "rno": 4,
-          "time": "11:42"
+          "time": "11:41"
         },
         {
           "rno": 5,
-          "time": "12:10"
+          "time": "12:09"
         },
         {
           "rno": 6,
-          "time": "12:37"
+          "time": "12:36"
         },
         {
           "rno": 7,
@@ -263,19 +263,19 @@
         },
         {
           "rno": 8,
-          "time": "13:39"
+          "time": "13:40"
         },
         {
           "rno": 9,
-          "time": "14:10"
+          "time": "14:09"
         },
         {
           "rno": 10,
-          "time": "14:45"
+          "time": "14:44"
         },
         {
           "rno": 11,
-          "time": "15:14"
+          "time": "15:17"
         },
         {
           "rno": 12,
@@ -296,9 +296,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T08:32:00+09:00",
+      "next_display": "1R 8:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -330,7 +330,7 @@
         },
         {
           "rno": 8,
-          "time": "11:50"
+          "time": "11:51"
         },
         {
           "rno": 9,
@@ -346,7 +346,7 @@
         },
         {
           "rno": 12,
-          "time": "14:12"
+          "time": "14:11"
         }
       ]
     },
@@ -354,9 +354,9 @@
       "name": "びわこ",
       "jcd": "11",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T10:41:00+09:00",
+      "next_display": "1R 10:41",
       "cutoffs": [
         {
           "rno": 1,
@@ -380,15 +380,15 @@
         },
         {
           "rno": 6,
-          "time": "13:01"
+          "time": "13:02"
         },
         {
           "rno": 7,
-          "time": "13:29"
+          "time": "13:30"
         },
         {
           "rno": 8,
-          "time": "13:59"
+          "time": "14:00"
         },
         {
           "rno": 9,
@@ -396,75 +396,26 @@
         },
         {
           "rno": 10,
-          "time": "15:09"
+          "time": "15:08"
         },
         {
           "rno": 11,
-          "time": "15:50"
+          "time": "15:46"
         },
         {
           "rno": 12,
-          "time": "16:24"
+          "time": "16:27"
         }
       ]
     },
     {
       "name": "住之江",
       "jcd": "12",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "15:16"
-        },
-        {
-          "rno": 2,
-          "time": "15:43"
-        },
-        {
-          "rno": 3,
-          "time": "16:11"
-        },
-        {
-          "rno": 4,
-          "time": "16:40"
-        },
-        {
-          "rno": 5,
-          "time": "17:09"
-        },
-        {
-          "rno": 6,
-          "time": "17:38"
-        },
-        {
-          "rno": 7,
-          "time": "18:07"
-        },
-        {
-          "rno": 8,
-          "time": "18:36"
-        },
-        {
-          "rno": 9,
-          "time": "19:05"
-        },
-        {
-          "rno": 10,
-          "time": "19:35"
-        },
-        {
-          "rno": 11,
-          "time": "20:09"
-        },
-        {
-          "rno": 12,
-          "time": "20:45"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "尼崎",
@@ -487,47 +438,96 @@
     {
       "name": "丸亀",
       "jcd": "15",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T15:25:00+09:00",
+      "next_display": "1R 15:25",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "15:25"
+        },
+        {
+          "rno": 2,
+          "time": "15:53"
+        },
+        {
+          "rno": 3,
+          "time": "16:22"
+        },
+        {
+          "rno": 4,
+          "time": "16:52"
+        },
+        {
+          "rno": 5,
+          "time": "17:19"
+        },
+        {
+          "rno": 6,
+          "time": "17:46"
+        },
+        {
+          "rno": 7,
+          "time": "18:13"
+        },
+        {
+          "rno": 8,
+          "time": "18:43"
+        },
+        {
+          "rno": 9,
+          "time": "19:14"
+        },
+        {
+          "rno": 10,
+          "time": "19:47"
+        },
+        {
+          "rno": 11,
+          "time": "20:16"
+        },
+        {
+          "rno": 12,
+          "time": "20:45"
+        }
+      ]
     },
     {
       "name": "児島",
       "jcd": "16",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T10:57:00+09:00",
+      "next_display": "1R 10:57",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "11:01"
+          "time": "10:57"
         },
         {
           "rno": 2,
-          "time": "11:31"
+          "time": "11:28"
         },
         {
           "rno": 3,
-          "time": "12:00"
+          "time": "12:02"
         },
         {
           "rno": 4,
-          "time": "12:29"
+          "time": "12:30"
         },
         {
           "rno": 5,
-          "time": "13:06"
+          "time": "13:09"
         },
         {
           "rno": 6,
-          "time": "13:32"
+          "time": "13:38"
         },
         {
           "rno": 7,
-          "time": "14:05"
+          "time": "14:06"
         },
         {
           "rno": 8,
@@ -535,15 +535,15 @@
         },
         {
           "rno": 9,
-          "time": "15:07"
+          "time": "15:06"
         },
         {
           "rno": 10,
-          "time": "15:41"
+          "time": "15:40"
         },
         {
           "rno": 11,
-          "time": "16:19"
+          "time": "16:14"
         },
         {
           "rno": 12,
@@ -609,9 +609,9 @@
       "name": "唐津",
       "jcd": "23",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T08:44:00+09:00",
+      "next_display": "1R 8:44",
       "cutoffs": [
         {
           "rno": 1,
@@ -623,11 +623,11 @@
         },
         {
           "rno": 3,
-          "time": "9:38"
+          "time": "9:36"
         },
         {
           "rno": 4,
-          "time": "10:04"
+          "time": "10:02"
         },
         {
           "rno": 5,
@@ -667,17 +667,17 @@
       "name": "大村",
       "jcd": "24",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-04-09T15:19:00+09:00",
+      "next_display": "1R 15:19",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "15:17"
+          "time": "15:19"
         },
         {
           "rno": 2,
-          "time": "15:39"
+          "time": "15:42"
         },
         {
           "rno": 3,
@@ -685,35 +685,35 @@
         },
         {
           "rno": 4,
-          "time": "16:28"
+          "time": "16:36"
         },
         {
           "rno": 5,
-          "time": "16:55"
+          "time": "17:01"
         },
         {
           "rno": 6,
-          "time": "17:20"
+          "time": "17:28"
         },
         {
           "rno": 7,
-          "time": "17:48"
+          "time": "17:55"
         },
         {
           "rno": 8,
-          "time": "18:17"
+          "time": "18:23"
         },
         {
           "rno": 9,
-          "time": "18:46"
+          "time": "18:54"
         },
         {
           "rno": 10,
-          "time": "19:15"
+          "time": "19:25"
         },
         {
           "rno": 11,
-          "time": "19:51"
+          "time": "19:58"
         },
         {
           "rno": 12,
