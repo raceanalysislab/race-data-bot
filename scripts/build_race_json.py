@@ -14,6 +14,8 @@
 #   その日以降の履歴だけを現世代として扱う
 # - reset当日は強制で is_new_motor = true にする
 # - meet_perf は会場ごとに1回だけ読む（レースごと再読込しない）
+# - 枠傾向UIの別コース参照用に、各艇へ 1〜6 コース分の
+#   waku_recent / waku_recent_local を by_course 形式で積む
 
 import json
 import os
@@ -599,18 +601,22 @@ def _build_recent_course_bundle(
     records_by_course: Dict[str, List[Dict[str, Any]]] = {}
     avg_st_by_course: Dict[str, Any] = {}
 
+    target_jcd = str(jcd or "").zfill(2)
+
     for course_no in range(1, 7):
         course_key = str(course_no)
 
         if is_local:
-            key = f"{reg_key}_{course_key}_{str(jcd or '').zfill(2)}"
+            key = f"{reg_key}_{course_key}_{target_jcd}"
         else:
             key = f"{reg_key}_{course_key}"
 
         row = recent_map.get(key)
         if isinstance(row, dict):
-            records_by_course[course_key] = row.get("records", [])
-            avg_st_by_course[course_key] = row.get("avg_st")
+            records = row.get("records", [])
+            avg_st = row.get("avg_st")
+            records_by_course[course_key] = records if isinstance(records, list) else []
+            avg_st_by_course[course_key] = avg_st
         else:
             records_by_course[course_key] = []
             avg_st_by_course[course_key] = None
@@ -630,23 +636,29 @@ def _merge_boat_stats(
     reg_key = _to_reg_key(out.get("regno"))
 
     if not reg_key:
+        out["waku_recent_by_course"] = {str(i): [] for i in range(1, 7)}
+        out["waku_recent_avg_st_by_course"] = {str(i): None for i in range(1, 7)}
+        out["waku_recent_local_by_course"] = {str(i): [] for i in range(1, 7)}
+        out["waku_recent_local_avg_st_by_course"] = {str(i): None for i in range(1, 7)}
+        out["waku_recent"] = []
+        out["waku_recent_avg_st"] = None
+        out["waku_recent_local"] = []
+        out["waku_recent_local_avg_st"] = None
         return out
 
     mp = merged_players.get(reg_key)
-    if not isinstance(mp, dict):
-        return out
+    mp = mp if isinstance(mp, dict) else {}
 
     master_name = str(mp.get("name") or "").strip()
     if master_name:
         out["name"] = master_name
 
-    players_1y = player_course_stats_1y
-    p = players_1y.get(reg_key, {}) if isinstance(players_1y, dict) else {}
-    st_count = mp.get("st_count")
-    player_avg_st = None
+    players_1y = player_course_stats_1y if isinstance(player_course_stats_1y, dict) else {}
+    p = players_1y.get(reg_key, {})
+    p = p if isinstance(p, dict) else {}
 
-    if isinstance(p, dict):
-        player_avg_st = p.get("avg_st")
+    st_count = mp.get("st_count")
+    player_avg_st = p.get("avg_st")
 
     if player_avg_st is None:
         player_avg_st = mp.get("avg_st")
@@ -662,14 +674,17 @@ def _merge_boat_stats(
 
     course_key = str(int(out.get("waku"))) if out.get("waku") else ""
     courses = p.get("courses", {}) if isinstance(p, dict) else {}
+    courses = courses if isinstance(courses, dict) else {}
 
     course = (
         courses.get(course_key)
         or courses.get(str(out.get("waku")))
         or {}
-    ) if isinstance(courses, dict) else {}
+    )
+    course = course if isinstance(course, dict) else {}
 
     kimarite = course.get("kimarite", {}) if isinstance(course, dict) else {}
+    kimarite = kimarite if isinstance(kimarite, dict) else {}
 
     out["course_starts"] = course.get("starts")
     out["course_win"] = course.get("win_rate")
@@ -703,7 +718,8 @@ def _merge_boat_stats(
     key = f"{reg_key}_{waku}"
     wr = waku_recent_map.get(key)
     if isinstance(wr, dict):
-        out["waku_recent"] = wr.get("records", [])
+        records = wr.get("records", [])
+        out["waku_recent"] = records if isinstance(records, list) else []
         out["waku_recent_avg_st"] = wr.get("avg_st")
     else:
         out["waku_recent"] = []
@@ -712,7 +728,8 @@ def _merge_boat_stats(
     local_key = f"{reg_key}_{waku}_{str(jcd or '').zfill(2)}"
     wr_local = waku_recent_local_map.get(local_key)
     if isinstance(wr_local, dict):
-        out["waku_recent_local"] = wr_local.get("records", [])
+        records = wr_local.get("records", [])
+        out["waku_recent_local"] = records if isinstance(records, list) else []
         out["waku_recent_local_avg_st"] = wr_local.get("avg_st")
     else:
         out["waku_recent_local"] = []
