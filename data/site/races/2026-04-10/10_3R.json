@@ -1,0 +1,747 @@
+{
+  "date": "2026-04-10",
+  "venue": "三国",
+  "jcd": "10",
+  "day": 6,
+  "total_days": null,
+  "day_label": "6日目",
+  "event_title": "けーぶるちゃん。杯",
+  "grade_label": "一般",
+  "race": {
+    "rno": 3,
+    "name": "みくにあさズ",
+    "shinin": "",
+    "distance_m": 1800,
+    "cutoff": "09:24",
+    "boats": [
+      {
+        "waku": 1,
+        "regno": 5012,
+        "name": "加倉侑征",
+        "age": 28,
+        "branch": "福岡",
+        "weight": 53,
+        "grade": "A2",
+        "nat_win": 5.3,
+        "nat_2": 30.77,
+        "loc_win": 5.31,
+        "loc_2": 34.62,
+        "motor_no": 54,
+        "motor_2": 23.08,
+        "boat_no": 61,
+        "boat_2": 42.86,
+        "note": "2121223 16 11",
+        "avg_st": 0.137,
+        "st_count": 687,
+        "course_starts": 43,
+        "course_win": 48.8,
+        "course_2ren": 72.1,
+        "course_3ren": 81.4,
+        "course_avg_st": 0.11,
+        "course_sashi": 0,
+        "course_makuri": 0,
+        "course_makurisashi": 0,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 54,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      },
+      {
+        "waku": 2,
+        "regno": 3647,
+        "name": "伊藤雄二",
+        "age": 53,
+        "branch": "埼玉",
+        "weight": 51,
+        "grade": "B1",
+        "nat_win": 3.84,
+        "nat_2": 13.79,
+        "loc_win": 3.11,
+        "loc_2": 5.41,
+        "motor_no": 29,
+        "motor_2": 31.25,
+        "boat_no": 11,
+        "boat_2": 33.33,
+        "note": "636 5 365 7",
+        "avg_st": 0.168,
+        "st_count": 611,
+        "course_starts": 35,
+        "course_win": 0.0,
+        "course_2ren": 8.6,
+        "course_3ren": 45.7,
+        "course_avg_st": 0.18,
+        "course_sashi": 0,
+        "course_makuri": 0,
+        "course_makurisashi": 0,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 29,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      },
+      {
+        "waku": 3,
+        "regno": 4962,
+        "name": "畑竜生",
+        "age": 29,
+        "branch": "三重",
+        "weight": 53,
+        "grade": "A2",
+        "nat_win": 5.87,
+        "nat_2": 33.33,
+        "loc_win": 4.84,
+        "loc_2": 34.38,
+        "motor_no": 18,
+        "motor_2": 35.29,
+        "boat_no": 50,
+        "boat_2": 29.41,
+        "note": "66564 1 15 9",
+        "avg_st": 0.164,
+        "st_count": 680,
+        "course_starts": 35,
+        "course_win": 8.6,
+        "course_2ren": 31.4,
+        "course_3ren": 57.1,
+        "course_avg_st": 0.17,
+        "course_sashi": 0,
+        "course_makuri": 1,
+        "course_makurisashi": 1,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 18,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      },
+      {
+        "waku": 4,
+        "regno": 5309,
+        "name": "森雄利",
+        "age": 21,
+        "branch": "長崎",
+        "weight": 53,
+        "grade": "B2",
+        "nat_win": 3.35,
+        "nat_2": 16.67,
+        "loc_win": 0.0,
+        "loc_2": 0.0,
+        "motor_no": 52,
+        "motor_2": 57.89,
+        "boat_no": 48,
+        "boat_2": 37.5,
+        "note": "5 51565 3 7",
+        "avg_st": 0.167,
+        "st_count": 424,
+        "course_starts": 43,
+        "course_win": 2.3,
+        "course_2ren": 2.3,
+        "course_3ren": 4.7,
+        "course_avg_st": 0.16,
+        "course_sashi": 0,
+        "course_makuri": 0,
+        "course_makurisashi": 0,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 52,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      },
+      {
+        "waku": 5,
+        "regno": 4431,
+        "name": "石塚裕介",
+        "age": 40,
+        "branch": "三重",
+        "weight": 52,
+        "grade": "B1",
+        "nat_win": 5.05,
+        "nat_2": 29.03,
+        "loc_win": 4.0,
+        "loc_2": 15.79,
+        "motor_no": 20,
+        "motor_2": 35.71,
+        "boat_no": 19,
+        "boat_2": 33.33,
+        "note": "25S 6 1 23 8",
+        "avg_st": 0.158,
+        "st_count": 572,
+        "course_starts": 23,
+        "course_win": 4.3,
+        "course_2ren": 21.7,
+        "course_3ren": 47.8,
+        "course_avg_st": 0.18,
+        "course_sashi": 0,
+        "course_makuri": 0,
+        "course_makurisashi": 1,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 20,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      },
+      {
+        "waku": 6,
+        "regno": 4766,
+        "name": "石井孝之",
+        "age": 35,
+        "branch": "群馬",
+        "weight": 56,
+        "grade": "B1",
+        "nat_win": 5.0,
+        "nat_2": 33.82,
+        "loc_win": 3.8,
+        "loc_2": 14.63,
+        "motor_no": 11,
+        "motor_2": 27.78,
+        "boat_no": 13,
+        "boat_2": 30.77,
+        "note": "F35 5 6 4",
+        "avg_st": 0.138,
+        "st_count": 547,
+        "course_starts": 28,
+        "course_win": 0.0,
+        "course_2ren": 7.1,
+        "course_3ren": 14.3,
+        "course_avg_st": 0.15,
+        "course_sashi": 0,
+        "course_makuri": 0,
+        "course_makurisashi": 0,
+        "waku_recent_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent_local_by_course": {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": []
+        },
+        "waku_recent_local_avg_st_by_course": {
+          "1": null,
+          "2": null,
+          "3": null,
+          "4": null,
+          "5": null,
+          "6": null
+        },
+        "waku_recent": [],
+        "waku_recent_avg_st": null,
+        "waku_recent_local": [],
+        "waku_recent_local_avg_st": null,
+        "F": 0,
+        "L": 0,
+        "motor_prev": {
+          "motor_no": 11,
+          "prev_date": "",
+          "prev_rider": "",
+          "prev_rider_name": "",
+          "prev_rider_regno": "",
+          "prev_rider_branch": "",
+          "prev_rider_age": null,
+          "records": [],
+          "days": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "day_labels": [
+            "1日目",
+            "2日目",
+            "3日目",
+            "4日目",
+            "5日目",
+            "6日目",
+            "7日目"
+          ],
+          "avg_st": null,
+          "win_rate": null,
+          "is_new_motor": false,
+          "reset_date": ""
+        },
+        "is_new_motor": false,
+        "meet_perf": []
+      }
+    ],
+    "tags": []
+  },
+  "meet_day_no": 0
+}
