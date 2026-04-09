@@ -13,6 +13,7 @@
 #   race_date が会場ごとの reset_date 以降なら、
 #   その日以降の履歴だけを現世代として扱う
 # - reset当日は強制で is_new_motor = true にする
+# - meet_perf は会場ごとに1回だけ読む（レースごと再読込しない）
 
 import json
 import os
@@ -950,6 +951,8 @@ def build_one(
 
         venue_cards.append(_build_venue_card(v, top_date))
 
+        meet_perf_json = _load_meet_perf(date, jcd) if jcd != "00" else {}
+
         for race in races:
             rno = race.get("rno")
             try:
@@ -957,8 +960,6 @@ def build_one(
             except Exception:
                 skipped += 1
                 continue
-
-            meet_perf_json = _load_meet_perf(date, jcd) if jcd != "00" else {}
 
             merged_race = _merge_race_stats(
                 race,
