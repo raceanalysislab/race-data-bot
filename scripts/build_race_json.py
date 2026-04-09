@@ -590,6 +590,34 @@ def _build_motor_prev(
     }
 
 
+def _build_recent_course_bundle(
+    reg_key: str,
+    jcd: str,
+    recent_map: Dict[str, Any],
+    is_local: bool = False,
+) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, Any]]:
+    records_by_course: Dict[str, List[Dict[str, Any]]] = {}
+    avg_st_by_course: Dict[str, Any] = {}
+
+    for course_no in range(1, 7):
+        course_key = str(course_no)
+
+        if is_local:
+            key = f"{reg_key}_{course_key}_{str(jcd or '').zfill(2)}"
+        else:
+            key = f"{reg_key}_{course_key}"
+
+        row = recent_map.get(key)
+        if isinstance(row, dict):
+            records_by_course[course_key] = row.get("records", [])
+            avg_st_by_course[course_key] = row.get("avg_st")
+        else:
+            records_by_course[course_key] = []
+            avg_st_by_course[course_key] = None
+
+    return records_by_course, avg_st_by_course
+
+
 def _merge_boat_stats(
     boat: Dict[str, Any],
     merged_players: Dict[str, Any],
@@ -654,17 +682,41 @@ def _merge_boat_stats(
 
     waku = str(out.get("waku") or "").strip()
 
+    wr_by_course, wr_avg_by_course = _build_recent_course_bundle(
+        reg_key,
+        jcd,
+        waku_recent_map,
+        is_local=False,
+    )
+    out["waku_recent_by_course"] = wr_by_course
+    out["waku_recent_avg_st_by_course"] = wr_avg_by_course
+
+    wr_local_by_course, wr_local_avg_by_course = _build_recent_course_bundle(
+        reg_key,
+        jcd,
+        waku_recent_local_map,
+        is_local=True,
+    )
+    out["waku_recent_local_by_course"] = wr_local_by_course
+    out["waku_recent_local_avg_st_by_course"] = wr_local_avg_by_course
+
     key = f"{reg_key}_{waku}"
     wr = waku_recent_map.get(key)
     if isinstance(wr, dict):
         out["waku_recent"] = wr.get("records", [])
         out["waku_recent_avg_st"] = wr.get("avg_st")
+    else:
+        out["waku_recent"] = []
+        out["waku_recent_avg_st"] = None
 
     local_key = f"{reg_key}_{waku}_{str(jcd or '').zfill(2)}"
     wr_local = waku_recent_local_map.get(local_key)
     if isinstance(wr_local, dict):
         out["waku_recent_local"] = wr_local.get("records", [])
         out["waku_recent_local_avg_st"] = wr_local.get("avg_st")
+    else:
+        out["waku_recent_local"] = []
+        out["waku_recent_local_avg_st"] = None
 
     return out
 
