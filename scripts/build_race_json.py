@@ -291,6 +291,42 @@ def _normalize_st_for_output(v: Any) -> str:
         return s
 
 
+def _normalize_finish_for_output(finish: Any = None, finish_raw: Any = None, status: Any = None) -> Any:
+    raw = str(finish_raw or "").strip().upper()
+    st = str(status or "").strip().upper()
+
+    if raw == "F" or st == "F":
+        return "F"
+    if raw == "L" or (raw.startswith("L") and raw[1:].isdigit()) or st == "L":
+        return "L"
+    if raw == "失" or raw == "失格" or raw.startswith("S") or st == "失" or st == "失格":
+        return "失"
+    if raw == "欠" or raw == "K" or (raw.startswith("K") and raw[1:].isdigit()) or st == "欠":
+        return "欠"
+
+    if finish is None or finish == "":
+        return None
+
+    if isinstance(finish, int):
+        return finish
+
+    s = str(finish).strip().upper()
+
+    if s == "F":
+        return "F"
+    if s == "L" or (s.startswith("L") and s[1:].isdigit()):
+        return "L"
+    if s == "失" or s == "失格" or s.startswith("S"):
+        return "失"
+    if s == "欠" or s == "K" or (s.startswith("K") and s[1:].isdigit()):
+        return "欠"
+
+    try:
+        return int(s)
+    except Exception:
+        return s
+
+
 def _to_motor_key(v: Any) -> str:
     s = str(v or "").strip()
     if not s:
@@ -358,20 +394,20 @@ def _build_recent_player_map(src_files: List[str]) -> Dict[str, Dict[str, Any]]:
                 if not isinstance(boats, list):
                     continue
 
-                for boat in boats:
-                    if not isinstance(boat, dict):
-                        continue
+                    for boat in boats:
+                        if not isinstance(boat, dict):
+                            continue
 
-                    reg_key = _to_reg_key(boat.get("regno"))
-                    if not reg_key or reg_key in recent_map:
-                        continue
+                        reg_key = _to_reg_key(boat.get("regno"))
+                        if not reg_key or reg_key in recent_map:
+                            continue
 
-                    recent_map[reg_key] = {
-                        "regno": reg_key,
-                        "name": str(boat.get("name") or "").strip(),
-                        "branch": str(boat.get("branch") or "").strip(),
-                        "age": boat.get("age"),
-                    }
+                        recent_map[reg_key] = {
+                            "regno": reg_key,
+                            "name": str(boat.get("name") or "").strip(),
+                            "branch": str(boat.get("branch") or "").strip(),
+                            "age": boat.get("age"),
+                        }
 
     return recent_map
 
@@ -532,7 +568,11 @@ def _build_motor_prev(
         if row_date not in date_to_day_index:
             continue
 
-        finish = r.get("finish")
+        finish = _normalize_finish_for_output(
+            r.get("finish"),
+            r.get("finish_raw"),
+            r.get("status"),
+        )
         st_raw = r.get("st_raw", r.get("st", ""))
         waku = r.get("boat")
         course = r.get("course", r.get("boat"))
@@ -544,6 +584,8 @@ def _build_motor_prev(
             "st": _normalize_st_for_output(st_raw),
             "course": course,
             "rank": finish,
+            "finish_raw": str(r.get("finish_raw") or "").strip(),
+            "status": str(r.get("status") or "").strip(),
         }
 
         day_grouped[row_date].append(slot)
@@ -1152,3 +1194,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+これでいい？
