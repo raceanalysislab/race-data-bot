@@ -291,7 +291,11 @@ def _normalize_st_for_output(v: Any) -> str:
         return s
 
 
-def _normalize_finish_for_output(finish: Any = None, finish_raw: Any = None, status: Any = None) -> Any:
+def _normalize_finish_for_output(
+    finish: Any = None,
+    finish_raw: Any = None,
+    status: Any = None,
+) -> Any:
     raw = str(finish_raw or "").strip().upper()
     st = str(status or "").strip().upper()
 
@@ -394,20 +398,20 @@ def _build_recent_player_map(src_files: List[str]) -> Dict[str, Dict[str, Any]]:
                 if not isinstance(boats, list):
                     continue
 
-                    for boat in boats:
-                        if not isinstance(boat, dict):
-                            continue
+                for boat in boats:
+                    if not isinstance(boat, dict):
+                        continue
 
-                        reg_key = _to_reg_key(boat.get("regno"))
-                        if not reg_key or reg_key in recent_map:
-                            continue
+                    reg_key = _to_reg_key(boat.get("regno"))
+                    if not reg_key or reg_key in recent_map:
+                        continue
 
-                        recent_map[reg_key] = {
-                            "regno": reg_key,
-                            "name": str(boat.get("name") or "").strip(),
-                            "branch": str(boat.get("branch") or "").strip(),
-                            "age": boat.get("age"),
-                        }
+                    recent_map[reg_key] = {
+                        "regno": reg_key,
+                        "name": str(boat.get("name") or "").strip(),
+                        "branch": str(boat.get("branch") or "").strip(),
+                        "age": boat.get("age"),
+                    }
 
     return recent_map
 
