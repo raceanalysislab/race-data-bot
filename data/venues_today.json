@@ -1,6 +1,6 @@
 {
   "date": "2026-04-27",
-  "checked_at": "2026-04-27T10:49:07.914607+09:00",
+  "checked_at": "2026-04-27T13:56:45.189408+09:00",
   "blocked": false,
   "held_places": [
     "多摩川",
@@ -49,9 +49,9 @@
       "name": "多摩川",
       "jcd": "05",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-04-27T12:02:00+09:00",
-      "next_display": "1R 12:02",
+      "next_race": 5,
+      "next_cutoff": "2026-04-27T14:03:00+09:00",
+      "next_display": "5R 14:03",
       "cutoffs": [
         {
           "rno": 1,
@@ -183,9 +183,9 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": 2,
-      "next_cutoff": "2026-04-27T10:56:00+09:00",
-      "next_display": "2R 10:56",
+      "next_race": 8,
+      "next_cutoff": "2026-04-27T14:10:00+09:00",
+      "next_display": "8R 14:10",
       "cutoffs": [
         {
           "rno": 1,
@@ -217,23 +217,23 @@
         },
         {
           "rno": 8,
-          "time": "13:57"
+          "time": "14:10"
         },
         {
           "rno": 9,
-          "time": "14:28"
+          "time": "14:41"
         },
         {
           "rno": 10,
-          "time": "15:01"
+          "time": "15:14"
         },
         {
           "rno": 11,
-          "time": "15:36"
+          "time": "15:49"
         },
         {
           "rno": 12,
-          "time": "16:15"
+          "time": "16:28"
         }
       ]
     },
