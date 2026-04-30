@@ -1,11 +1,13 @@
 {
   "date": "2026-05-01",
-  "checked_at": "2026-05-01T03:05:06.449876+09:00",
+  "checked_at": "2026-05-01T04:50:11.549135+09:00",
   "blocked": false,
   "held_places": [
     "多摩川",
+    "津",
     "下関",
     "福岡",
+    "唐津",
     "大村"
   ],
   "venues": [
@@ -133,11 +135,60 @@
     {
       "name": "津",
       "jcd": "09",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-05-01T10:28:00+09:00",
+      "next_display": "1R 10:28",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:28"
+        },
+        {
+          "rno": 2,
+          "time": "10:57"
+        },
+        {
+          "rno": 3,
+          "time": "11:25"
+        },
+        {
+          "rno": 4,
+          "time": "11:53"
+        },
+        {
+          "rno": 5,
+          "time": "12:21"
+        },
+        {
+          "rno": 6,
+          "time": "12:49"
+        },
+        {
+          "rno": 7,
+          "time": "13:20"
+        },
+        {
+          "rno": 8,
+          "time": "13:53"
+        },
+        {
+          "rno": 9,
+          "time": "14:25"
+        },
+        {
+          "rno": 10,
+          "time": "15:01"
+        },
+        {
+          "rno": 11,
+          "time": "15:37"
+        },
+        {
+          "rno": 12,
+          "time": "16:15"
+        }
+      ]
     },
     {
       "name": "三国",
@@ -357,11 +408,60 @@
     {
       "name": "唐津",
       "jcd": "23",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-05-01T08:32:00+09:00",
+      "next_display": "1R 8:32",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "8:32"
+        },
+        {
+          "rno": 2,
+          "time": "8:58"
+        },
+        {
+          "rno": 3,
+          "time": "9:24"
+        },
+        {
+          "rno": 4,
+          "time": "9:50"
+        },
+        {
+          "rno": 5,
+          "time": "10:20"
+        },
+        {
+          "rno": 6,
+          "time": "10:50"
+        },
+        {
+          "rno": 7,
+          "time": "11:21"
+        },
+        {
+          "rno": 8,
+          "time": "11:51"
+        },
+        {
+          "rno": 9,
+          "time": "12:25"
+        },
+        {
+          "rno": 10,
+          "time": "12:59"
+        },
+        {
+          "rno": 11,
+          "time": "13:37"
+        },
+        {
+          "rno": 12,
+          "time": "14:14"
+        }
+      ]
     },
     {
       "name": "大村",
