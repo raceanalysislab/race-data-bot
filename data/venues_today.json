@@ -1,6 +1,6 @@
 {
   "date": "2026-05-01",
-  "checked_at": "2026-05-01T14:27:07.634007+09:00",
+  "checked_at": "2026-05-01T16:51:47.851309+09:00",
   "blocked": false,
   "held_places": [
     "多摩川",
@@ -51,9 +51,9 @@
       "name": "多摩川",
       "jcd": "05",
       "held": true,
-      "next_race": 6,
-      "next_cutoff": "2026-05-01T14:36:00+09:00",
-      "next_display": "6R 14:36",
+      "next_race": 11,
+      "next_cutoff": "2026-05-01T17:13:00+09:00",
+      "next_display": "11R 17:13",
       "cutoffs": [
         {
           "rno": 1,
@@ -136,9 +136,9 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-05-01T14:45:00+09:00",
-      "next_display": "9R 14:45",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -174,19 +174,19 @@
         },
         {
           "rno": 9,
-          "time": "14:45"
+          "time": "14:53"
         },
         {
           "rno": 10,
-          "time": "15:21"
+          "time": "15:01"
         },
         {
           "rno": 11,
-          "time": "15:57"
+          "time": "15:07"
         },
         {
           "rno": 12,
-          "time": "16:35"
+          "time": "15:18"
         }
       ]
     },
@@ -275,9 +275,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-01T15:20:00+09:00",
-      "next_display": "1R 15:20",
+      "next_race": 5,
+      "next_cutoff": "2026-05-01T17:06:00+09:00",
+      "next_display": "5R 17:06",
       "cutoffs": [
         {
           "rno": 1,
@@ -351,9 +351,9 @@
       "name": "福岡",
       "jcd": "22",
       "held": true,
-      "next_race": 6,
-      "next_cutoff": "2026-05-01T14:55:00+09:00",
-      "next_display": "6R 14:55",
+      "next_race": 10,
+      "next_cutoff": "2026-05-01T16:59:00+09:00",
+      "next_display": "10R 16:59",
       "cutoffs": [
         {
           "rno": 1,
