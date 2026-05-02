@@ -1,66 +1,66 @@
 {
   "slot": "today",
-  "date": "2026-04-29",
+  "date": "2026-05-03",
   "name": "住之江",
   "jcd": "12",
-  "next_race": null,
-  "next_display": null,
-  "day": 7,
+  "next_race": 1,
+  "next_display": "1R 15:25",
+  "day": 1,
   "total_days": null,
-  "day_label": "最終日",
+  "day_label": "初日",
   "grade_label": "一般",
-  "event_title": "スポニチ杯争奪なにわ賞",
-  "first_race_time": "15:19",
+  "event_title": "2026ラピートカップ",
+  "first_race_time": "15:25",
   "card_band": "evening",
   "card_tone": "evening",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "15:19"
+      "cutoff": "15:25"
     },
     {
       "rno": 2,
-      "cutoff": "15:46"
+      "cutoff": "15:50"
     },
     {
       "rno": 3,
-      "cutoff": "16:10"
+      "cutoff": "16:26"
     },
     {
       "rno": 4,
-      "cutoff": "16:42"
+      "cutoff": "16:58"
     },
     {
       "rno": 5,
-      "cutoff": "17:09"
+      "cutoff": "17:22"
     },
     {
       "rno": 6,
-      "cutoff": "17:34"
+      "cutoff": "17:47"
     },
     {
       "rno": 7,
-      "cutoff": "18:02"
+      "cutoff": "18:16"
     },
     {
       "rno": 8,
-      "cutoff": "18:41"
+      "cutoff": "18:46"
     },
     {
       "rno": 9,
-      "cutoff": "19:10"
+      "cutoff": "19:16"
     },
     {
       "rno": 10,
-      "cutoff": "19:39"
+      "cutoff": "19:49"
     },
     {
       "rno": 11,
-      "cutoff": "20:10"
+      "cutoff": "20:17"
     },
     {
       "rno": 12,
-      "cutoff": "20:38"
+      "cutoff": "20:45"
     }
   ]
 }
