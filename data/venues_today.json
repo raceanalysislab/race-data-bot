@@ -1,6 +1,6 @@
 {
   "date": "2026-05-03",
-  "checked_at": "2026-05-03T13:04:01.333452+09:00",
+  "checked_at": "2026-05-03T15:36:14.131482+09:00",
   "blocked": false,
   "held_places": [
     "津",
@@ -86,9 +86,9 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": 7,
-      "next_cutoff": "2026-05-03T13:20:00+09:00",
-      "next_display": "7R 13:20",
+      "next_race": 11,
+      "next_cutoff": "2026-05-03T15:37:00+09:00",
+      "next_display": "11R 15:37",
       "cutoffs": [
         {
           "rno": 1,
@@ -144,9 +144,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": 10,
-      "next_cutoff": "2026-05-03T13:30:00+09:00",
-      "next_display": "10R 13:30",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -186,15 +186,15 @@
         },
         {
           "rno": 10,
-          "time": "13:30"
+          "time": "13:31"
         },
         {
           "rno": 11,
-          "time": "14:04"
+          "time": "13:55"
         },
         {
           "rno": 12,
-          "time": "14:44"
+          "time": "14:20"
         }
       ]
     },
@@ -274,9 +274,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-03T15:21:00+09:00",
-      "next_display": "1R 15:21",
+      "next_race": 2,
+      "next_cutoff": "2026-05-03T15:47:00+09:00",
+      "next_display": "2R 15:47",
       "cutoffs": [
         {
           "rno": 1,
@@ -350,9 +350,9 @@
       "name": "福岡",
       "jcd": "22",
       "held": true,
-      "next_race": 3,
-      "next_cutoff": "2026-05-03T13:26:00+09:00",
-      "next_display": "3R 13:26",
+      "next_race": 8,
+      "next_cutoff": "2026-05-03T15:53:00+09:00",
+      "next_display": "8R 15:53",
       "cutoffs": [
         {
           "rno": 1,
@@ -408,9 +408,9 @@
       "name": "唐津",
       "jcd": "23",
       "held": true,
-      "next_race": 11,
-      "next_cutoff": "2026-05-03T13:35:00+09:00",
-      "next_display": "11R 13:35",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
