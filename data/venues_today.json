@@ -1,6 +1,6 @@
 {
   "date": "2026-05-04",
-  "checked_at": "2026-05-04T09:00:23.166426+09:00",
+  "checked_at": "2026-05-04T13:02:14.394494+09:00",
   "blocked": false,
   "held_places": [
     "津",
@@ -86,57 +86,57 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-04T10:28:00+09:00",
-      "next_display": "1R 10:28",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
-          "time": "10:28"
+          "time": "9:30"
         },
         {
           "rno": 2,
-          "time": "10:57"
+          "time": "9:36"
         },
         {
           "rno": 3,
-          "time": "11:25"
+          "time": "9:42"
         },
         {
           "rno": 4,
-          "time": "11:53"
+          "time": "9:48"
         },
         {
           "rno": 5,
-          "time": "12:21"
+          "time": "9:54"
         },
         {
           "rno": 6,
-          "time": "12:49"
+          "time": "10:00"
         },
         {
           "rno": 7,
-          "time": "13:20"
+          "time": "10:06"
         },
         {
           "rno": 8,
-          "time": "13:53"
+          "time": "10:12"
         },
         {
           "rno": 9,
-          "time": "14:25"
+          "time": "10:18"
         },
         {
           "rno": 10,
-          "time": "15:01"
+          "time": "10:24"
         },
         {
           "rno": 11,
-          "time": "15:37"
+          "time": "10:30"
         },
         {
           "rno": 12,
-          "time": "16:15"
+          "time": "10:41"
         }
       ]
     },
@@ -144,9 +144,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": 2,
-      "next_cutoff": "2026-05-04T09:06:00+09:00",
-      "next_display": "2R 9:06",
+      "next_race": 10,
+      "next_cutoff": "2026-05-04T13:05:00+09:00",
+      "next_display": "10R 13:05",
       "cutoffs": [
         {
           "rno": 1,
@@ -350,9 +350,9 @@
       "name": "福岡",
       "jcd": "22",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-04T12:33:00+09:00",
-      "next_display": "1R 12:33",
+      "next_race": 3,
+      "next_cutoff": "2026-05-04T13:31:00+09:00",
+      "next_display": "3R 13:31",
       "cutoffs": [
         {
           "rno": 1,
@@ -408,9 +408,9 @@
       "name": "唐津",
       "jcd": "23",
       "held": true,
-      "next_race": 3,
-      "next_cutoff": "2026-05-04T09:26:00+09:00",
-      "next_display": "3R 9:26",
+      "next_race": 11,
+      "next_cutoff": "2026-05-04T13:35:00+09:00",
+      "next_display": "11R 13:35",
       "cutoffs": [
         {
           "rno": 1,
