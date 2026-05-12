@@ -1,6 +1,6 @@
 {
-  "date": "2026-05-12",
-  "checked_at": "2026-05-12T23:50:51.722613+09:00",
+  "date": "2026-05-13",
+  "checked_at": "2026-05-13T02:00:21.899733+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -31,9 +31,9 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-13T10:54:00+09:00",
+      "next_display": "1R 10:54",
       "cutoffs": [
         {
           "rno": 1,
@@ -53,15 +53,15 @@
         },
         {
           "rno": 5,
-          "time": "12:46"
+          "time": "12:43"
         },
         {
           "rno": 6,
-          "time": "13:14"
+          "time": "13:12"
         },
         {
           "rno": 7,
-          "time": "13:43"
+          "time": "13:42"
         },
         {
           "rno": 8,
@@ -134,9 +134,9 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-13T10:39:00+09:00",
+      "next_display": "1R 10:39",
       "cutoffs": [
         {
           "rno": 1,
@@ -300,9 +300,9 @@
       "name": "福岡",
       "jcd": "22",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-13T12:34:00+09:00",
+      "next_display": "1R 12:34",
       "cutoffs": [
         {
           "rno": 1,
@@ -314,7 +314,7 @@
         },
         {
           "rno": 3,
-          "time": "13:31"
+          "time": "13:29"
         },
         {
           "rno": 4,
@@ -358,9 +358,9 @@
       "name": "唐津",
       "jcd": "23",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-13T08:32:00+09:00",
+      "next_display": "1R 8:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -404,7 +404,7 @@
         },
         {
           "rno": 11,
-          "time": "13:33"
+          "time": "13:34"
         },
         {
           "rno": 12,
