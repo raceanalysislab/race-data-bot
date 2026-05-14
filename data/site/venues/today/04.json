@@ -1,30 +1,30 @@
 {
   "slot": "today",
-  "date": "2026-05-14",
+  "date": "2026-05-15",
   "name": "平和島",
   "jcd": "04",
-  "next_race": null,
-  "next_display": null,
-  "day": 3,
+  "next_race": 1,
+  "next_display": "1R 11:54",
+  "day": 4,
   "total_days": null,
-  "day_label": "3日目",
+  "day_label": "4日目",
   "grade_label": "一般",
   "event_title": "BOATBoyカップ",
-  "first_race_time": "11:55",
+  "first_race_time": "11:54",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "11:55"
+      "cutoff": "11:54"
     },
     {
       "rno": 2,
-      "cutoff": "12:24"
+      "cutoff": "12:21"
     },
     {
       "rno": 3,
-      "cutoff": "12:54"
+      "cutoff": "12:49"
     },
     {
       "rno": 4,
@@ -44,11 +44,11 @@
     },
     {
       "rno": 8,
-      "cutoff": "15:29"
+      "cutoff": "15:33"
     },
     {
       "rno": 9,
-      "cutoff": "16:03"
+      "cutoff": "16:08"
     },
     {
       "rno": 10,
@@ -60,7 +60,7 @@
     },
     {
       "rno": 12,
-      "cutoff": "17:41"
+      "cutoff": "17:44"
     }
   ]
 }
