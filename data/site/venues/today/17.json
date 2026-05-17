@@ -1,46 +1,46 @@
 {
   "slot": "today",
-  "date": "2026-04-10",
+  "date": "2026-05-18",
   "name": "宮島",
   "jcd": "17",
-  "next_race": null,
-  "next_display": null,
-  "day": 1,
+  "next_race": 1,
+  "next_display": "1R 10:57",
+  "day": 3,
   "total_days": null,
-  "day_label": "初日",
+  "day_label": "3日目",
   "grade_label": "一般",
-  "event_title": "にっぽん未来プロジェクト競走in宮島",
-  "first_race_time": "10:59",
+  "event_title": "サントリー杯",
+  "first_race_time": "10:57",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "10:59"
+      "cutoff": "10:57"
     },
     {
       "rno": 2,
-      "cutoff": "11:28"
+      "cutoff": "11:24"
     },
     {
       "rno": 3,
-      "cutoff": "11:56"
+      "cutoff": "11:52"
     },
     {
       "rno": 4,
-      "cutoff": "12:23"
+      "cutoff": "12:21"
     },
     {
       "rno": 5,
-      "cutoff": "12:52"
+      "cutoff": "12:47"
     },
     {
       "rno": 6,
-      "cutoff": "13:22"
+      "cutoff": "13:19"
     },
     {
       "rno": 7,
-      "cutoff": "13:59"
+      "cutoff": "13:54"
     },
     {
       "rno": 8,
@@ -48,19 +48,19 @@
     },
     {
       "rno": 9,
-      "cutoff": "14:58"
+      "cutoff": "15:01"
     },
     {
       "rno": 10,
-      "cutoff": "15:33"
+      "cutoff": "15:34"
     },
     {
       "rno": 11,
-      "cutoff": "16:07"
+      "cutoff": "16:14"
     },
     {
       "rno": 12,
-      "cutoff": "16:40"
+      "cutoff": "16:53"
     }
   ]
 }
