@@ -1,6 +1,6 @@
 {
   "date": "2026-05-18",
-  "checked_at": "2026-05-18T15:02:14.665186+09:00",
+  "checked_at": "2026-05-18T19:24:20.547821+09:00",
   "blocked": false,
   "held_places": [
     "戸田",
@@ -28,9 +28,9 @@
       "name": "戸田",
       "jcd": "02",
       "held": true,
-      "next_race": 10,
-      "next_cutoff": "2026-05-18T15:21:00+09:00",
-      "next_display": "10R 15:21",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -113,9 +113,9 @@
       "name": "浜名湖",
       "jcd": "06",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-05-18T15:24:00+09:00",
-      "next_display": "9R 15:24",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -341,9 +341,9 @@
       "name": "丸亀",
       "jcd": "15",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-18T15:30:00+09:00",
-      "next_display": "1R 15:30",
+      "next_race": 10,
+      "next_cutoff": "2026-05-18T19:50:00+09:00",
+      "next_display": "10R 19:50",
       "cutoffs": [
         {
           "rno": 1,
@@ -408,9 +408,9 @@
       "name": "宮島",
       "jcd": "17",
       "held": true,
-      "next_race": 10,
-      "next_cutoff": "2026-05-18T15:34:00+09:00",
-      "next_display": "10R 15:34",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -524,9 +524,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-18T15:23:00+09:00",
-      "next_display": "1R 15:23",
+      "next_race": 10,
+      "next_cutoff": "2026-05-18T19:40:00+09:00",
+      "next_display": "10R 19:40",
       "cutoffs": [
         {
           "rno": 1,
@@ -554,11 +554,11 @@
         },
         {
           "rno": 7,
-          "time": "18:18"
+          "time": "18:23"
         },
         {
           "rno": 8,
-          "time": "18:44"
+          "time": "18:46"
         },
         {
           "rno": 9,
@@ -582,9 +582,9 @@
       "name": "若松",
       "jcd": "20",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-05-18T17:41:00+09:00",
-      "next_display": "1R 17:41",
+      "next_race": 5,
+      "next_cutoff": "2026-05-18T19:30:00+09:00",
+      "next_display": "5R 19:30",
       "cutoffs": [
         {
           "rno": 1,
@@ -640,9 +640,9 @@
       "name": "芦屋",
       "jcd": "21",
       "held": true,
-      "next_race": 10,
-      "next_cutoff": "2026-05-18T15:26:00+09:00",
-      "next_display": "10R 15:26",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
