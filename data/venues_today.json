@@ -1,6 +1,6 @@
 {
   "date": "2026-05-21",
-  "checked_at": "2026-05-21T18:59:51.828761+09:00",
+  "checked_at": "2026-05-21T21:52:46.603765+09:00",
   "blocked": false,
   "held_places": [
     "桐生",
@@ -20,9 +20,9 @@
       "name": "桐生",
       "jcd": "01",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-05-21T19:13:00+09:00",
-      "next_display": "9R 19:13",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -440,9 +440,9 @@
       "name": "丸亀",
       "jcd": "15",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-05-21T19:23:00+09:00",
-      "next_display": "9R 19:23",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -672,9 +672,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": 4,
-      "next_cutoff": "2026-05-21T19:03:00+09:00",
-      "next_display": "4R 19:03",
+      "next_race": 11,
+      "next_cutoff": "2026-05-21T22:07:00+09:00",
+      "next_display": "11R 22:07",
       "cutoffs": [
         {
           "rno": 1,
@@ -714,11 +714,11 @@
         },
         {
           "rno": 10,
-          "time": "21:42"
+          "time": "21:44"
         },
         {
           "rno": 11,
-          "time": "22:05"
+          "time": "22:07"
         },
         {
           "rno": 12,
