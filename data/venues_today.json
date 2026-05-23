@@ -1,6 +1,6 @@
 {
-  "date": "2026-05-23",
-  "checked_at": "2026-05-23T23:04:18.697713+09:00",
+  "date": "2026-05-24",
+  "checked_at": "2026-05-24T00:16:26.388101+09:00",
   "blocked": false,
   "held_places": [
     "三国",
@@ -93,9 +93,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-24T08:39:00+09:00",
+      "next_display": "1R 8:39",
       "cutoffs": [
         {
           "rno": 1,
@@ -119,7 +119,7 @@
         },
         {
           "rno": 6,
-          "time": "10:52"
+          "time": "10:51"
         },
         {
           "rno": 7,
@@ -127,19 +127,19 @@
         },
         {
           "rno": 8,
-          "time": "11:53"
+          "time": "11:55"
         },
         {
           "rno": 9,
-          "time": "12:22"
+          "time": "12:25"
         },
         {
           "rno": 10,
-          "time": "12:54"
+          "time": "12:55"
         },
         {
           "rno": 11,
-          "time": "13:27"
+          "time": "13:28"
         },
         {
           "rno": 12,
@@ -217,64 +217,15 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "8:46"
-        },
-        {
-          "rno": 2,
-          "time": "9:12"
-        },
-        {
-          "rno": 3,
-          "time": "9:38"
-        },
-        {
-          "rno": 4,
-          "time": "10:04"
-        },
-        {
-          "rno": 5,
-          "time": "10:30"
-        },
-        {
-          "rno": 6,
-          "time": "11:00"
-        },
-        {
-          "rno": 7,
-          "time": "11:31"
-        },
-        {
-          "rno": 8,
-          "time": "12:02"
-        },
-        {
-          "rno": 9,
-          "time": "12:34"
-        },
-        {
-          "rno": 10,
-          "time": "13:06"
-        },
-        {
-          "rno": 11,
-          "time": "13:39"
-        },
-        {
-          "rno": 12,
-          "time": "14:15"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-05-24T17:41:00+09:00",
+      "next_display": "1R 17:41",
       "cutoffs": [
         {
           "rno": 1,
