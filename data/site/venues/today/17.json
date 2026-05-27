@@ -1,66 +1,66 @@
 {
   "slot": "today",
-  "date": "2026-05-27",
+  "date": "2026-04-10",
   "name": "宮島",
   "jcd": "17",
-  "next_race": null,
-  "next_display": null,
-  "day": 3,
+  "next_race": 1,
+  "next_display": "1R 10:59",
+  "day": 1,
   "total_days": null,
-  "day_label": "3日目",
+  "day_label": "初日",
   "grade_label": "一般",
-  "event_title": "日本トーター賞BTS安芸高田開設7周年記念",
-  "first_race_time": "10:52",
+  "event_title": "にっぽん未来プロジェクト競走in宮島",
+  "first_race_time": "10:59",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "10:52"
+      "cutoff": "10:59"
     },
     {
       "rno": 2,
-      "cutoff": "11:17"
+      "cutoff": "11:28"
     },
     {
       "rno": 3,
-      "cutoff": "11:46"
+      "cutoff": "11:56"
     },
     {
       "rno": 4,
-      "cutoff": "12:15"
+      "cutoff": "12:23"
     },
     {
       "rno": 5,
-      "cutoff": "12:44"
+      "cutoff": "12:52"
     },
     {
       "rno": 6,
-      "cutoff": "13:19"
+      "cutoff": "13:22"
     },
     {
       "rno": 7,
-      "cutoff": "13:47"
+      "cutoff": "13:59"
     },
     {
       "rno": 8,
-      "cutoff": "14:22"
+      "cutoff": "14:26"
     },
     {
       "rno": 9,
-      "cutoff": "15:01"
+      "cutoff": "14:58"
     },
     {
       "rno": 10,
-      "cutoff": "15:38"
+      "cutoff": "15:33"
     },
     {
       "rno": 11,
-      "cutoff": "16:05"
+      "cutoff": "16:07"
     },
     {
       "rno": 12,
-      "cutoff": "16:53"
+      "cutoff": "16:40"
     }
   ]
 }
