@@ -1,6 +1,6 @@
 {
   "date": "2026-06-04",
-  "checked_at": "2026-06-04T12:34:53.478321+09:00",
+  "checked_at": "2026-06-04T17:09:26.867961+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -33,9 +33,9 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": 4,
-      "next_cutoff": "2026-06-04T12:35:00+09:00",
-      "next_display": "4R 12:35",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -55,23 +55,23 @@
         },
         {
           "rno": 5,
-          "time": "13:02"
+          "time": "13:07"
         },
         {
           "rno": 6,
-          "time": "13:29"
+          "time": "13:33"
         },
         {
           "rno": 7,
-          "time": "13:56"
+          "time": "13:59"
         },
         {
           "rno": 8,
-          "time": "14:24"
+          "time": "14:26"
         },
         {
           "rno": 9,
-          "time": "14:52"
+          "time": "14:53"
         },
         {
           "rno": 10,
@@ -118,9 +118,9 @@
       "name": "蒲郡",
       "jcd": "07",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-04T15:30:00+09:00",
-      "next_display": "1R 15:30",
+      "next_race": 4,
+      "next_cutoff": "2026-06-04T17:13:00+09:00",
+      "next_display": "4R 17:13",
       "cutoffs": [
         {
           "rno": 1,
@@ -185,9 +185,9 @@
       "name": "津",
       "jcd": "09",
       "held": true,
-      "next_race": 6,
-      "next_cutoff": "2026-06-04T13:05:00+09:00",
-      "next_display": "6R 13:05",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -306,9 +306,9 @@
       "name": "宮島",
       "jcd": "17",
       "held": true,
-      "next_race": 5,
-      "next_cutoff": "2026-06-04T12:45:00+09:00",
-      "next_display": "5R 12:45",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -382,9 +382,9 @@
       "name": "若松",
       "jcd": "20",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-04T15:21:00+09:00",
-      "next_display": "1R 15:21",
+      "next_race": 5,
+      "next_cutoff": "2026-06-04T17:24:00+09:00",
+      "next_display": "5R 17:24",
       "cutoffs": [
         {
           "rno": 1,
