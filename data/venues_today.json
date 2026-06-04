@@ -1,14 +1,13 @@
 {
   "date": "2026-06-05",
-  "checked_at": "2026-06-05T02:27:38.426984+09:00",
+  "checked_at": "2026-06-05T04:39:46.628674+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
     "蒲郡",
     "津",
     "宮島",
-    "若松",
-    "大村"
+    "若松"
   ],
   "venues": [
     {
@@ -417,7 +416,7 @@
     {
       "name": "大村",
       "jcd": "24",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
