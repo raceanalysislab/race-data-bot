@@ -1,6 +1,6 @@
 {
   "date": "2026-06-05",
-  "checked_at": "2026-06-05T13:42:36.958882+09:00",
+  "checked_at": "2026-06-05T17:35:15.793567+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -32,9 +32,9 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": 7,
-      "next_cutoff": "2026-06-05T14:01:00+09:00",
-      "next_display": "7R 14:01",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -66,23 +66,23 @@
         },
         {
           "rno": 8,
-          "time": "14:29"
+          "time": "14:27"
         },
         {
           "rno": 9,
-          "time": "14:57"
+          "time": "14:53"
         },
         {
           "rno": 10,
-          "time": "15:27"
+          "time": "15:22"
         },
         {
           "rno": 11,
-          "time": "15:58"
+          "time": "15:54"
         },
         {
           "rno": 12,
-          "time": "16:30"
+          "time": "16:25"
         }
       ]
     },
@@ -117,9 +117,9 @@
       "name": "蒲郡",
       "jcd": "07",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-05T15:30:00+09:00",
-      "next_display": "1R 15:30",
+      "next_race": 5,
+      "next_cutoff": "2026-06-05T17:43:00+09:00",
+      "next_display": "5R 17:43",
       "cutoffs": [
         {
           "rno": 1,
@@ -256,9 +256,9 @@
       "name": "宮島",
       "jcd": "17",
       "held": true,
-      "next_race": 7,
-      "next_cutoff": "2026-06-05T13:50:00+09:00",
-      "next_display": "7R 13:50",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -332,9 +332,9 @@
       "name": "若松",
       "jcd": "20",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-05T15:21:00+09:00",
-      "next_display": "1R 15:21",
+      "next_race": 6,
+      "next_cutoff": "2026-06-05T17:49:00+09:00",
+      "next_display": "6R 17:49",
       "cutoffs": [
         {
           "rno": 1,
