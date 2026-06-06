@@ -1,26 +1,26 @@
 {
   "slot": "today",
-  "date": "2026-04-10",
+  "date": "2026-06-06",
   "name": "浜名湖",
   "jcd": "06",
-  "next_race": 9,
-  "next_display": "9R 15:37",
-  "day": 2,
+  "next_race": null,
+  "next_display": null,
+  "day": 1,
   "total_days": null,
-  "day_label": "2日目",
+  "day_label": "初日",
   "grade_label": "一般",
-  "event_title": "ルーキーシリーズ第8戦 スカパー！・JLC杯",
-  "first_race_time": "11:32",
+  "event_title": "テレしずサマーカップ",
+  "first_race_time": "11:34",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "11:32"
+      "cutoff": "11:34"
     },
     {
       "rno": 2,
-      "cutoff": "11:58"
+      "cutoff": "11:59"
     },
     {
       "rno": 3,
@@ -28,39 +28,39 @@
     },
     {
       "rno": 4,
-      "cutoff": "12:54"
+      "cutoff": "12:58"
     },
     {
       "rno": 5,
-      "cutoff": "13:25"
+      "cutoff": "13:34"
     },
     {
       "rno": 6,
-      "cutoff": "13:54"
+      "cutoff": "14:08"
     },
     {
       "rno": 7,
-      "cutoff": "14:34"
+      "cutoff": "14:37"
     },
     {
       "rno": 8,
-      "cutoff": "15:02"
+      "cutoff": "15:07"
     },
     {
       "rno": 9,
-      "cutoff": "15:37"
+      "cutoff": "15:45"
     },
     {
       "rno": 10,
-      "cutoff": "16:09"
+      "cutoff": "16:12"
     },
     {
       "rno": 11,
-      "cutoff": "16:37"
+      "cutoff": "16:39"
     },
     {
       "rno": 12,
-      "cutoff": "17:08"
+      "cutoff": "17:10"
     }
   ]
 }
