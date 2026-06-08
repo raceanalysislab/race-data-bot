@@ -1,12 +1,15 @@
 {
   "date": "2026-06-09",
-  "checked_at": "2026-06-09T02:28:21.840482+09:00",
+  "checked_at": "2026-06-09T04:42:25.704575+09:00",
   "blocked": false,
   "held_places": [
     "多摩川",
+    "蒲郡",
     "津",
+    "びわこ",
     "尼崎",
     "宮島",
+    "唐津",
     "大村"
   ],
   "venues": [
@@ -116,11 +119,60 @@
     {
       "name": "蒲郡",
       "jcd": "07",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-06-09T15:26:00+09:00",
+      "next_display": "1R 15:26",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "15:26"
+        },
+        {
+          "rno": 2,
+          "time": "16:10"
+        },
+        {
+          "rno": 3,
+          "time": "16:41"
+        },
+        {
+          "rno": 4,
+          "time": "17:13"
+        },
+        {
+          "rno": 5,
+          "time": "17:37"
+        },
+        {
+          "rno": 6,
+          "time": "18:04"
+        },
+        {
+          "rno": 7,
+          "time": "18:28"
+        },
+        {
+          "rno": 8,
+          "time": "18:54"
+        },
+        {
+          "rno": 9,
+          "time": "19:23"
+        },
+        {
+          "rno": 10,
+          "time": "19:50"
+        },
+        {
+          "rno": 11,
+          "time": "20:16"
+        },
+        {
+          "rno": 12,
+          "time": "20:45"
+        }
+      ]
     },
     {
       "name": "常滑",
@@ -201,11 +253,60 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-06-09T10:31:00+09:00",
+      "next_display": "1R 10:31",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:31"
+        },
+        {
+          "rno": 2,
+          "time": "10:57"
+        },
+        {
+          "rno": 3,
+          "time": "11:23"
+        },
+        {
+          "rno": 4,
+          "time": "11:56"
+        },
+        {
+          "rno": 5,
+          "time": "12:24"
+        },
+        {
+          "rno": 6,
+          "time": "12:57"
+        },
+        {
+          "rno": 7,
+          "time": "13:23"
+        },
+        {
+          "rno": 8,
+          "time": "13:52"
+        },
+        {
+          "rno": 9,
+          "time": "14:28"
+        },
+        {
+          "rno": 10,
+          "time": "15:04"
+        },
+        {
+          "rno": 11,
+          "time": "15:45"
+        },
+        {
+          "rno": 12,
+          "time": "16:21"
+        }
+      ]
     },
     {
       "name": "住之江",
@@ -407,11 +508,60 @@
     {
       "name": "唐津",
       "jcd": "23",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-06-09T08:32:00+09:00",
+      "next_display": "1R 8:32",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "8:32"
+        },
+        {
+          "rno": 2,
+          "time": "8:58"
+        },
+        {
+          "rno": 3,
+          "time": "9:24"
+        },
+        {
+          "rno": 4,
+          "time": "9:50"
+        },
+        {
+          "rno": 5,
+          "time": "10:18"
+        },
+        {
+          "rno": 6,
+          "time": "10:48"
+        },
+        {
+          "rno": 7,
+          "time": "11:18"
+        },
+        {
+          "rno": 8,
+          "time": "11:49"
+        },
+        {
+          "rno": 9,
+          "time": "12:21"
+        },
+        {
+          "rno": 10,
+          "time": "12:54"
+        },
+        {
+          "rno": 11,
+          "time": "13:28"
+        },
+        {
+          "rno": 12,
+          "time": "14:02"
+        }
+      ]
     },
     {
       "name": "大村",
