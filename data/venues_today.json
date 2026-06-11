@@ -1,15 +1,16 @@
 {
   "date": "2026-06-12",
-  "checked_at": "2026-06-12T02:30:34.537027+09:00",
+  "checked_at": "2026-06-12T05:01:12.292238+09:00",
   "blocked": false,
   "held_places": [
-    "多摩川",
     "蒲郡",
     "津",
     "びわこ",
     "尼崎",
     "鳴門",
+    "下関",
     "若松",
+    "福岡",
     "唐津"
   ],
   "venues": [
@@ -52,7 +53,7 @@
     {
       "name": "多摩川",
       "jcd": "05",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -423,11 +424,60 @@
     {
       "name": "下関",
       "jcd": "19",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-06-12T17:41:00+09:00",
+      "next_display": "1R 17:41",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "17:41"
+        },
+        {
+          "rno": 2,
+          "time": "18:08"
+        },
+        {
+          "rno": 3,
+          "time": "18:34"
+        },
+        {
+          "rno": 4,
+          "time": "19:03"
+        },
+        {
+          "rno": 5,
+          "time": "19:30"
+        },
+        {
+          "rno": 6,
+          "time": "19:56"
+        },
+        {
+          "rno": 7,
+          "time": "20:25"
+        },
+        {
+          "rno": 8,
+          "time": "20:56"
+        },
+        {
+          "rno": 9,
+          "time": "21:19"
+        },
+        {
+          "rno": 10,
+          "time": "21:42"
+        },
+        {
+          "rno": 11,
+          "time": "22:05"
+        },
+        {
+          "rno": 12,
+          "time": "22:30"
+        }
+      ]
     },
     {
       "name": "若松",
@@ -499,11 +549,60 @@
     {
       "name": "福岡",
       "jcd": "22",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-06-12T12:33:00+09:00",
+      "next_display": "1R 12:33",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "12:33"
+        },
+        {
+          "rno": 2,
+          "time": "13:01"
+        },
+        {
+          "rno": 3,
+          "time": "13:29"
+        },
+        {
+          "rno": 4,
+          "time": "13:57"
+        },
+        {
+          "rno": 5,
+          "time": "14:25"
+        },
+        {
+          "rno": 6,
+          "time": "14:53"
+        },
+        {
+          "rno": 7,
+          "time": "15:21"
+        },
+        {
+          "rno": 8,
+          "time": "15:51"
+        },
+        {
+          "rno": 9,
+          "time": "16:21"
+        },
+        {
+          "rno": 10,
+          "time": "16:53"
+        },
+        {
+          "rno": 11,
+          "time": "17:25"
+        },
+        {
+          "rno": 12,
+          "time": "18:00"
+        }
+      ]
     },
     {
       "name": "唐津",
