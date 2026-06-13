@@ -1,13 +1,10 @@
 {
   "date": "2026-06-14",
-  "checked_at": "2026-06-14T03:02:08.037039+09:00",
+  "checked_at": "2026-06-14T04:50:22.374008+09:00",
   "blocked": false,
   "held_places": [
-    "蒲郡",
     "津",
     "びわこ",
-    "尼崎",
-    "鳴門",
     "下関",
     "若松",
     "福岡",
@@ -71,7 +68,7 @@
     {
       "name": "蒲郡",
       "jcd": "07",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -174,7 +171,7 @@
     {
       "name": "尼崎",
       "jcd": "13",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -183,7 +180,7 @@
     {
       "name": "鳴門",
       "jcd": "14",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
