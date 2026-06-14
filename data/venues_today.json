@@ -1,14 +1,11 @@
 {
   "date": "2026-06-15",
-  "checked_at": "2026-06-15T02:50:07.735214+09:00",
+  "checked_at": "2026-06-15T04:02:57.154054+09:00",
   "blocked": false,
   "held_places": [
-    "津",
-    "びわこ",
     "下関",
     "若松",
-    "福岡",
-    "唐津"
+    "福岡"
   ],
   "venues": [
     {
@@ -86,7 +83,7 @@
     {
       "name": "津",
       "jcd": "09",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -104,7 +101,7 @@
     {
       "name": "びわこ",
       "jcd": "11",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
@@ -359,7 +356,7 @@
     {
       "name": "唐津",
       "jcd": "23",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
