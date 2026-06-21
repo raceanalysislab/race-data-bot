@@ -1,12 +1,11 @@
 {
   "date": "2026-06-22",
-  "checked_at": "2026-06-22T03:51:41.963102+09:00",
+  "checked_at": "2026-06-22T05:20:57.809224+09:00",
   "blocked": false,
   "held_places": [
     "戸田",
     "浜名湖",
-    "下関",
-    "若松"
+    "下関"
   ],
   "venues": [
     {
@@ -330,7 +329,7 @@
     {
       "name": "若松",
       "jcd": "20",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
