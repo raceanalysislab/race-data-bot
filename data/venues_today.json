@@ -1,6 +1,6 @@
 {
   "date": "2026-06-24",
-  "checked_at": "2026-06-24T14:48:16.270864+09:00",
+  "checked_at": "2026-06-24T17:47:55.645440+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -31,9 +31,9 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-06-24T14:53:00+09:00",
-      "next_display": "9R 14:53",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -73,15 +73,15 @@
         },
         {
           "rno": 10,
-          "time": "15:23"
+          "time": "15:22"
         },
         {
           "rno": 11,
-          "time": "15:54"
+          "time": "15:53"
         },
         {
           "rno": 12,
-          "time": "16:26"
+          "time": "16:25"
         }
       ]
     },
@@ -107,9 +107,9 @@
       "name": "浜名湖",
       "jcd": "06",
       "held": true,
-      "next_race": 8,
-      "next_cutoff": "2026-06-24T14:58:00+09:00",
-      "next_display": "8R 14:58",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
@@ -165,9 +165,9 @@
       "name": "蒲郡",
       "jcd": "07",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-24T15:30:00+09:00",
-      "next_display": "1R 15:30",
+      "next_race": 6,
+      "next_cutoff": "2026-06-24T18:08:00+09:00",
+      "next_display": "6R 18:08",
       "cutoffs": [
         {
           "rno": 1,
@@ -322,9 +322,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-24T15:26:00+09:00",
-      "next_display": "1R 15:26",
+      "next_race": 6,
+      "next_cutoff": "2026-06-24T18:02:00+09:00",
+      "next_display": "6R 18:02",
       "cutoffs": [
         {
           "rno": 1,
