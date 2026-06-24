@@ -1,6 +1,6 @@
 {
-  "date": "2026-06-24",
-  "checked_at": "2026-06-24T22:54:16.435256+09:00",
+  "date": "2026-06-25",
+  "checked_at": "2026-06-25T01:14:06.977642+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -31,45 +31,45 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-06-25T11:14:00+09:00",
+      "next_display": "1R 11:14",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "11:19"
+          "time": "11:14"
         },
         {
           "rno": 2,
-          "time": "11:45"
+          "time": "11:41"
         },
         {
           "rno": 3,
-          "time": "12:12"
+          "time": "12:08"
         },
         {
           "rno": 4,
-          "time": "12:41"
+          "time": "12:35"
         },
         {
           "rno": 5,
-          "time": "13:07"
+          "time": "13:02"
         },
         {
           "rno": 6,
-          "time": "13:33"
+          "time": "13:29"
         },
         {
           "rno": 7,
-          "time": "13:59"
+          "time": "13:56"
         },
         {
           "rno": 8,
-          "time": "14:26"
+          "time": "14:24"
         },
         {
           "rno": 9,
-          "time": "14:53"
+          "time": "14:52"
         },
         {
           "rno": 10,
@@ -107,9 +107,9 @@
       "name": "浜名湖",
       "jcd": "06",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-06-25T11:32:00+09:00",
+      "next_display": "1R 11:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -117,19 +117,19 @@
         },
         {
           "rno": 2,
-          "time": "11:57"
+          "time": "11:58"
         },
         {
           "rno": 3,
-          "time": "12:22"
+          "time": "12:25"
         },
         {
           "rno": 4,
-          "time": "12:48"
+          "time": "12:52"
         },
         {
           "rno": 5,
-          "time": "13:19"
+          "time": "13:20"
         },
         {
           "rno": 6,
@@ -145,19 +145,19 @@
         },
         {
           "rno": 9,
-          "time": "15:29"
+          "time": "15:26"
         },
         {
           "rno": 10,
-          "time": "16:00"
+          "time": "15:59"
         },
         {
           "rno": 11,
-          "time": "16:29"
+          "time": "16:31"
         },
         {
           "rno": 12,
-          "time": "16:57"
+          "time": "17:04"
         }
       ]
     },
@@ -165,17 +165,17 @@
       "name": "蒲郡",
       "jcd": "07",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-06-25T15:29:00+09:00",
+      "next_display": "1R 15:29",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "15:30"
+          "time": "15:29"
         },
         {
           "rno": 2,
-          "time": "16:11"
+          "time": "16:10"
         },
         {
           "rno": 3,
@@ -325,56 +325,7 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "15:26"
-        },
-        {
-          "rno": 2,
-          "time": "16:04"
-        },
-        {
-          "rno": 3,
-          "time": "16:39"
-        },
-        {
-          "rno": 4,
-          "time": "17:12"
-        },
-        {
-          "rno": 5,
-          "time": "17:37"
-        },
-        {
-          "rno": 6,
-          "time": "18:02"
-        },
-        {
-          "rno": 7,
-          "time": "18:27"
-        },
-        {
-          "rno": 8,
-          "time": "18:52"
-        },
-        {
-          "rno": 9,
-          "time": "19:18"
-        },
-        {
-          "rno": 10,
-          "time": "19:44"
-        },
-        {
-          "rno": 11,
-          "time": "20:11"
-        },
-        {
-          "rno": 12,
-          "time": "20:41"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "若松",
