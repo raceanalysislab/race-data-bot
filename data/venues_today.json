@@ -1,6 +1,6 @@
 {
   "date": "2026-06-26",
-  "checked_at": "2026-06-26T10:39:35.357463+09:00",
+  "checked_at": "2026-06-26T14:57:11.641894+09:00",
   "blocked": false,
   "held_places": [
     "江戸川",
@@ -31,9 +31,9 @@
       "name": "江戸川",
       "jcd": "03",
       "held": true,
-      "next_race": 1,
-      "next_cutoff": "2026-06-26T11:14:00+09:00",
-      "next_display": "1R 11:14",
+      "next_race": 10,
+      "next_cutoff": "2026-06-26T15:22:00+09:00",
+      "next_display": "10R 15:22",
       "cutoffs": [
         {
           "rno": 1,
@@ -45,7 +45,7 @@
         },
         {
           "rno": 3,
-          "time": "12:08"
+          "time": "12:09"
         },
         {
           "rno": 4,
@@ -219,9 +219,9 @@
       "name": "尼崎",
       "jcd": "13",
       "held": true,
-      "next_race": 2,
-      "next_cutoff": "2026-06-26T11:04:00+09:00",
-      "next_display": "2R 11:04",
+      "next_race": 10,
+      "next_cutoff": "2026-06-26T15:06:00+09:00",
+      "next_display": "10R 15:06",
       "cutoffs": [
         {
           "rno": 1,
@@ -340,9 +340,9 @@
       "name": "芦屋",
       "jcd": "21",
       "held": true,
-      "next_race": 6,
-      "next_cutoff": "2026-06-26T10:45:00+09:00",
-      "next_display": "6R 10:45",
+      "next_race": null,
+      "next_cutoff": null,
+      "next_display": null,
       "cutoffs": [
         {
           "rno": 1,
