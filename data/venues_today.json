@@ -1,6 +1,6 @@
 {
-  "date": "2026-06-30",
-  "checked_at": "2026-06-30T21:24:51.004232+09:00",
+  "date": "2026-07-01",
+  "checked_at": "2026-07-01T00:10:07.014738+09:00",
   "blocked": false,
   "held_places": [
     "浜名湖",
@@ -58,9 +58,9 @@
       "name": "浜名湖",
       "jcd": "06",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-01T11:36:00+09:00",
+      "next_display": "1R 11:36",
       "cutoffs": [
         {
           "rno": 1,
@@ -68,43 +68,43 @@
         },
         {
           "rno": 2,
-          "time": "12:03"
+          "time": "12:08"
         },
         {
           "rno": 3,
-          "time": "12:28"
+          "time": "12:39"
         },
         {
           "rno": 4,
-          "time": "13:01"
+          "time": "13:10"
         },
         {
           "rno": 5,
-          "time": "13:31"
+          "time": "13:36"
         },
         {
           "rno": 6,
-          "time": "14:08"
+          "time": "14:02"
         },
         {
           "rno": 7,
-          "time": "14:41"
+          "time": "14:32"
         },
         {
           "rno": 8,
-          "time": "15:12"
+          "time": "15:03"
         },
         {
           "rno": 9,
-          "time": "15:39"
+          "time": "15:30"
         },
         {
           "rno": 10,
-          "time": "16:07"
+          "time": "15:57"
         },
         {
           "rno": 11,
-          "time": "16:37"
+          "time": "16:25"
         },
         {
           "rno": 12,
@@ -143,9 +143,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-01T08:32:00+09:00",
+      "next_display": "1R 8:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -173,15 +173,15 @@
         },
         {
           "rno": 7,
-          "time": "11:14"
+          "time": "11:13"
         },
         {
           "rno": 8,
-          "time": "11:48"
+          "time": "11:43"
         },
         {
           "rno": 9,
-          "time": "12:18"
+          "time": "12:17"
         },
         {
           "rno": 10,
@@ -189,7 +189,7 @@
         },
         {
           "rno": 11,
-          "time": "13:24"
+          "time": "13:23"
         },
         {
           "rno": 12,
@@ -222,56 +222,7 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "10:34"
-        },
-        {
-          "rno": 2,
-          "time": "10:57"
-        },
-        {
-          "rno": 3,
-          "time": "11:26"
-        },
-        {
-          "rno": 4,
-          "time": "11:57"
-        },
-        {
-          "rno": 5,
-          "time": "12:26"
-        },
-        {
-          "rno": 6,
-          "time": "12:58"
-        },
-        {
-          "rno": 7,
-          "time": "13:36"
-        },
-        {
-          "rno": 8,
-          "time": "14:11"
-        },
-        {
-          "rno": 9,
-          "time": "14:45"
-        },
-        {
-          "rno": 10,
-          "time": "15:19"
-        },
-        {
-          "rno": 11,
-          "time": "15:48"
-        },
-        {
-          "rno": 12,
-          "time": "16:25"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "鳴門",
@@ -331,9 +282,9 @@
       "name": "若松",
       "jcd": "20",
       "held": true,
-      "next_race": 9,
-      "next_cutoff": "2026-06-30T21:28:00+09:00",
-      "next_display": "9R 21:28",
+      "next_race": 1,
+      "next_cutoff": "2026-07-01T17:41:00+09:00",
+      "next_display": "1R 17:41",
       "cutoffs": [
         {
           "rno": 1,
