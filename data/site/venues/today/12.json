@@ -1,66 +1,66 @@
 {
   "slot": "today",
-  "date": "2026-06-29",
+  "date": "2026-07-03",
   "name": "住之江",
   "jcd": "12",
-  "next_race": null,
-  "next_display": null,
-  "day": 6,
+  "next_race": 1,
+  "next_display": "1R 15:24",
+  "day": 1,
   "total_days": null,
-  "day_label": "最終日",
+  "day_label": "初日",
   "grade_label": "一般",
-  "event_title": "VS第7戦大スポ賞アクアクイーンカップ",
-  "first_race_time": "15:19",
+  "event_title": "日刊盾争奪ニッカン・コム杯しぶき杯競走",
+  "first_race_time": "15:24",
   "card_band": "evening",
   "card_tone": "evening",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "15:19"
+      "cutoff": "15:24"
     },
     {
       "rno": 2,
-      "cutoff": "15:57"
+      "cutoff": "15:56"
     },
     {
       "rno": 3,
-      "cutoff": "16:40"
+      "cutoff": "16:32"
     },
     {
       "rno": 4,
-      "cutoff": "17:06"
+      "cutoff": "17:00"
     },
     {
       "rno": 5,
-      "cutoff": "17:30"
+      "cutoff": "17:25"
     },
     {
       "rno": 6,
-      "cutoff": "17:57"
+      "cutoff": "17:50"
     },
     {
       "rno": 7,
-      "cutoff": "18:21"
+      "cutoff": "18:14"
     },
     {
       "rno": 8,
-      "cutoff": "18:47"
+      "cutoff": "18:40"
     },
     {
       "rno": 9,
-      "cutoff": "19:16"
+      "cutoff": "19:09"
     },
     {
       "rno": 10,
-      "cutoff": "19:43"
+      "cutoff": "19:36"
     },
     {
       "rno": 11,
-      "cutoff": "20:09"
+      "cutoff": "20:02"
     },
     {
       "rno": 12,
-      "cutoff": "20:38"
+      "cutoff": "20:31"
     }
   ]
 }
