@@ -1,21 +1,70 @@
 {
   "date": "2026-07-04",
-  "checked_at": "2026-07-04T03:21:55.534265+09:00",
+  "checked_at": "2026-07-04T04:56:41.423489+09:00",
   "blocked": false,
   "held_places": [
+    "桐生",
     "平和島",
-    "浜名湖",
-    "若松"
+    "浜名湖"
   ],
   "venues": [
     {
       "name": "桐生",
       "jcd": "01",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-07-04T15:28:00+09:00",
+      "next_display": "1R 15:28",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "15:28"
+        },
+        {
+          "rno": 2,
+          "time": "16:03"
+        },
+        {
+          "rno": 3,
+          "time": "16:35"
+        },
+        {
+          "rno": 4,
+          "time": "17:12"
+        },
+        {
+          "rno": 5,
+          "time": "17:37"
+        },
+        {
+          "rno": 6,
+          "time": "18:02"
+        },
+        {
+          "rno": 7,
+          "time": "18:27"
+        },
+        {
+          "rno": 8,
+          "time": "18:52"
+        },
+        {
+          "rno": 9,
+          "time": "19:18"
+        },
+        {
+          "rno": 10,
+          "time": "19:44"
+        },
+        {
+          "rno": 11,
+          "time": "20:11"
+        },
+        {
+          "rno": 12,
+          "time": "20:41"
+        }
+      ]
     },
     {
       "name": "戸田",
@@ -280,7 +329,7 @@
     {
       "name": "若松",
       "jcd": "20",
-      "held": true,
+      "held": false,
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
