@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-07",
-  "checked_at": "2026-07-07T22:53:46.584814+09:00",
+  "date": "2026-07-08",
+  "checked_at": "2026-07-08T01:22:56.482840+09:00",
   "blocked": false,
   "held_places": [
     "桐生",
@@ -14,9 +14,9 @@
       "name": "桐生",
       "jcd": "01",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-08T15:23:00+09:00",
+      "next_display": "1R 15:23",
       "cutoffs": [
         {
           "rno": 1,
@@ -28,7 +28,7 @@
         },
         {
           "rno": 3,
-          "time": "16:34"
+          "time": "16:36"
         },
         {
           "rno": 4,
@@ -93,56 +93,7 @@
       "next_race": null,
       "next_cutoff": null,
       "next_display": null,
-      "cutoffs": [
-        {
-          "rno": 1,
-          "time": "11:55"
-        },
-        {
-          "rno": 2,
-          "time": "12:24"
-        },
-        {
-          "rno": 3,
-          "time": "12:54"
-        },
-        {
-          "rno": 4,
-          "time": "13:25"
-        },
-        {
-          "rno": 5,
-          "time": "13:55"
-        },
-        {
-          "rno": 6,
-          "time": "14:28"
-        },
-        {
-          "rno": 7,
-          "time": "15:00"
-        },
-        {
-          "rno": 8,
-          "time": "15:32"
-        },
-        {
-          "rno": 9,
-          "time": "16:05"
-        },
-        {
-          "rno": 10,
-          "time": "16:37"
-        },
-        {
-          "rno": 11,
-          "time": "17:08"
-        },
-        {
-          "rno": 12,
-          "time": "17:42"
-        }
-      ]
+      "cutoffs": null
     },
     {
       "name": "多摩川",
@@ -193,9 +144,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-08T08:32:00+09:00",
+      "next_display": "1R 8:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -219,11 +170,11 @@
         },
         {
           "rno": 6,
-          "time": "10:47"
+          "time": "10:45"
         },
         {
           "rno": 7,
-          "time": "11:16"
+          "time": "11:14"
         },
         {
           "rno": 8,
@@ -235,11 +186,11 @@
         },
         {
           "rno": 10,
-          "time": "12:52"
+          "time": "12:50"
         },
         {
           "rno": 11,
-          "time": "13:22"
+          "time": "13:23"
         },
         {
           "rno": 12,
@@ -251,45 +202,45 @@
       "name": "びわこ",
       "jcd": "11",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-08T10:38:00+09:00",
+      "next_display": "1R 10:38",
       "cutoffs": [
         {
           "rno": 1,
-          "time": "10:33"
+          "time": "10:38"
         },
         {
           "rno": 2,
-          "time": "11:02"
+          "time": "11:10"
         },
         {
           "rno": 3,
-          "time": "11:37"
+          "time": "11:38"
         },
         {
           "rno": 4,
-          "time": "12:15"
+          "time": "12:10"
         },
         {
           "rno": 5,
-          "time": "12:49"
+          "time": "12:43"
         },
         {
           "rno": 6,
-          "time": "13:19"
+          "time": "13:17"
         },
         {
           "rno": 7,
-          "time": "13:50"
+          "time": "13:48"
         },
         {
           "rno": 8,
-          "time": "14:21"
+          "time": "14:20"
         },
         {
           "rno": 9,
-          "time": "14:53"
+          "time": "14:52"
         },
         {
           "rno": 10,
@@ -297,7 +248,7 @@
         },
         {
           "rno": 11,
-          "time": "16:03"
+          "time": "16:02"
         },
         {
           "rno": 12,
@@ -417,9 +368,9 @@
       "name": "大村",
       "jcd": "24",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-08T17:41:00+09:00",
+      "next_display": "1R 17:41",
       "cutoffs": [
         {
           "rno": 1,
