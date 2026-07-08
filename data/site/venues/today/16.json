@@ -1,66 +1,66 @@
 {
   "slot": "today",
-  "date": "2026-07-05",
+  "date": "2026-07-09",
   "name": "児島",
   "jcd": "16",
-  "next_race": null,
-  "next_display": null,
-  "day": 6,
+  "next_race": 1,
+  "next_display": "1R 11:51",
+  "day": 1,
   "total_days": null,
-  "day_label": "最終日",
-  "grade_label": "G2",
-  "event_title": "モーターボート大賞 全国地区代表戦",
-  "first_race_time": "10:43",
+  "day_label": "初日",
+  "grade_label": "一般",
+  "event_title": "BTS岡山わけ開設5周年記念競走",
+  "first_race_time": "11:51",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "10:43"
+      "cutoff": "11:51"
     },
     {
       "rno": 2,
-      "cutoff": "11:13"
+      "cutoff": "12:22"
     },
     {
       "rno": 3,
-      "cutoff": "11:44"
+      "cutoff": "12:54"
     },
     {
       "rno": 4,
-      "cutoff": "12:17"
+      "cutoff": "13:26"
     },
     {
       "rno": 5,
-      "cutoff": "12:50"
+      "cutoff": "13:56"
     },
     {
       "rno": 6,
-      "cutoff": "13:21"
+      "cutoff": "14:28"
     },
     {
       "rno": 7,
-      "cutoff": "13:52"
+      "cutoff": "15:03"
     },
     {
       "rno": 8,
-      "cutoff": "14:24"
+      "cutoff": "15:40"
     },
     {
       "rno": 9,
-      "cutoff": "14:57"
+      "cutoff": "16:13"
     },
     {
       "rno": 10,
-      "cutoff": "15:31"
+      "cutoff": "16:49"
     },
     {
       "rno": 11,
-      "cutoff": "16:11"
+      "cutoff": "17:18"
     },
     {
       "rno": 12,
-      "cutoff": "16:50"
+      "cutoff": "17:50"
     }
   ]
 }
