@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-11",
-  "checked_at": "2026-07-11T23:43:23.444193+09:00",
+  "date": "2026-07-12",
+  "checked_at": "2026-07-12T06:33:39.796855+09:00",
   "blocked": false,
   "held_places": [
     "平和島",
@@ -40,9 +40,9 @@
       "name": "平和島",
       "jcd": "04",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-12T11:55:00+09:00",
+      "next_display": "1R 11:55",
       "cutoffs": [
         {
           "rno": 1,
@@ -143,9 +143,9 @@
       "name": "三国",
       "jcd": "10",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-12T08:32:00+09:00",
+      "next_display": "1R 8:32",
       "cutoffs": [
         {
           "rno": 1,
@@ -193,7 +193,7 @@
         },
         {
           "rno": 12,
-          "time": "13:59"
+          "time": "14:00"
         }
       ]
     },
@@ -201,9 +201,9 @@
       "name": "びわこ",
       "jcd": "11",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-12T10:38:00+09:00",
+      "next_display": "1R 10:38",
       "cutoffs": [
         {
           "rno": 1,
@@ -247,7 +247,7 @@
         },
         {
           "rno": 11,
-          "time": "16:03"
+          "time": "16:01"
         },
         {
           "rno": 12,
@@ -322,9 +322,9 @@
       "name": "下関",
       "jcd": "19",
       "held": true,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
+      "next_race": 1,
+      "next_cutoff": "2026-07-12T17:41:00+09:00",
+      "next_display": "1R 17:41",
       "cutoffs": [
         {
           "rno": 1,
