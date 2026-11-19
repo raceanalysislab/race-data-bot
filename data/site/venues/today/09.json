@@ -1,66 +1,66 @@
 {
   "slot": "today",
-  "date": "2026-11-19",
+  "date": "2026-11-20",
   "name": "津",
   "jcd": "09",
-  "next_race": null,
-  "next_display": null,
+  "next_race": 1,
+  "next_display": "1R 10:32",
   "day": 1,
   "total_days": null,
   "day_label": "初日",
   "grade_label": "一般",
   "event_title": "津市合併20周年記念カップ",
-  "first_race_time": "10:28",
+  "first_race_time": "10:32",
   "card_band": "day",
   "card_tone": "day",
   "race_times": [
     {
       "rno": 1,
-      "cutoff": "10:28"
+      "cutoff": "10:32"
     },
     {
       "rno": 2,
-      "cutoff": "10:55"
+      "cutoff": "11:00"
     },
     {
       "rno": 3,
-      "cutoff": "11:23"
+      "cutoff": "11:27"
     },
     {
       "rno": 4,
-      "cutoff": "11:49"
+      "cutoff": "11:56"
     },
     {
       "rno": 5,
-      "cutoff": "12:20"
+      "cutoff": "12:27"
     },
     {
       "rno": 6,
-      "cutoff": "12:48"
+      "cutoff": "12:57"
     },
     {
       "rno": 7,
-      "cutoff": "13:18"
+      "cutoff": "13:25"
     },
     {
       "rno": 8,
-      "cutoff": "13:47"
+      "cutoff": "14:00"
     },
     {
       "rno": 9,
-      "cutoff": "14:18"
+      "cutoff": "14:35"
     },
     {
       "rno": 10,
-      "cutoff": "14:50"
+      "cutoff": "15:06"
     },
     {
       "rno": 11,
-      "cutoff": "15:28"
+      "cutoff": "15:37"
     },
     {
       "rno": 12,
-      "cutoff": "16:04"
+      "cutoff": "16:10"
     }
   ]
 }
