@@ -1,26 +1,128 @@
 {
   "date": "2026-11-28",
-  "checked_at": "2026-11-28T01:40:01.595364+09:00",
+  "checked_at": "2026-11-28T09:17:54.959250+09:00",
   "blocked": false,
-  "held_places": [],
+  "held_places": [
+    "桐生",
+    "戸田",
+    "浜名湖"
+  ],
   "venues": [
     {
       "name": "桐生",
       "jcd": "01",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-11-28T15:25:00+09:00",
+      "next_display": "1R 15:25",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "15:25"
+        },
+        {
+          "rno": 2,
+          "time": "15:54"
+        },
+        {
+          "rno": 3,
+          "time": "16:19"
+        },
+        {
+          "rno": 4,
+          "time": "16:45"
+        },
+        {
+          "rno": 5,
+          "time": "17:11"
+        },
+        {
+          "rno": 6,
+          "time": "17:37"
+        },
+        {
+          "rno": 7,
+          "time": "18:04"
+        },
+        {
+          "rno": 8,
+          "time": "18:34"
+        },
+        {
+          "rno": 9,
+          "time": "19:04"
+        },
+        {
+          "rno": 10,
+          "time": "19:35"
+        },
+        {
+          "rno": 11,
+          "time": "20:07"
+        },
+        {
+          "rno": 12,
+          "time": "20:38"
+        }
+      ]
     },
     {
       "name": "戸田",
       "jcd": "02",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-11-28T10:45:00+09:00",
+      "next_display": "1R 10:45",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:45"
+        },
+        {
+          "rno": 2,
+          "time": "11:12"
+        },
+        {
+          "rno": 3,
+          "time": "11:39"
+        },
+        {
+          "rno": 4,
+          "time": "12:06"
+        },
+        {
+          "rno": 5,
+          "time": "12:33"
+        },
+        {
+          "rno": 6,
+          "time": "13:00"
+        },
+        {
+          "rno": 7,
+          "time": "13:27"
+        },
+        {
+          "rno": 8,
+          "time": "13:55"
+        },
+        {
+          "rno": 9,
+          "time": "14:22"
+        },
+        {
+          "rno": 10,
+          "time": "14:50"
+        },
+        {
+          "rno": 11,
+          "time": "15:22"
+        },
+        {
+          "rno": 12,
+          "time": "15:55"
+        }
+      ]
     },
     {
       "name": "江戸川",
@@ -52,11 +154,60 @@
     {
       "name": "浜名湖",
       "jcd": "06",
-      "held": false,
-      "next_race": null,
-      "next_cutoff": null,
-      "next_display": null,
-      "cutoffs": null
+      "held": true,
+      "next_race": 1,
+      "next_cutoff": "2026-11-28T10:29:00+09:00",
+      "next_display": "1R 10:29",
+      "cutoffs": [
+        {
+          "rno": 1,
+          "time": "10:29"
+        },
+        {
+          "rno": 2,
+          "time": "10:57"
+        },
+        {
+          "rno": 3,
+          "time": "11:27"
+        },
+        {
+          "rno": 4,
+          "time": "11:53"
+        },
+        {
+          "rno": 5,
+          "time": "12:21"
+        },
+        {
+          "rno": 6,
+          "time": "12:49"
+        },
+        {
+          "rno": 7,
+          "time": "13:19"
+        },
+        {
+          "rno": 8,
+          "time": "13:48"
+        },
+        {
+          "rno": 9,
+          "time": "14:19"
+        },
+        {
+          "rno": 10,
+          "time": "14:47"
+        },
+        {
+          "rno": 11,
+          "time": "15:15"
+        },
+        {
+          "rno": 12,
+          "time": "15:50"
+        }
+      ]
     },
     {
       "name": "蒲郡",
